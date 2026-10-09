@@ -2,104 +2,99 @@
   <div class="migration-page">
     <section class="hero">
       <div>
-        <p class="eyebrow">Full Edition</p>
-        <h1>{{ tr('Kafka ¿¿¿¿', 'Kafka Smooth Migration') }}</h1>
-        <p>{{ tr('¿¿¿¿¿¿¿ Topic ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Kafka ¿¿¿¿¿¿', 'Throttle and batch topic metadata and messages to reduce impact on source and target Kafka.') }}</p>
+        <p class="eyebrow">{{ tr('æ•°æ®è¿ç§»', 'Migration') }}</p>
+        <h1>{{ tr('Kafka å¹³æ»‘è¿ç§»', 'Kafka Smooth Migration') }}</h1>
+        <p>{{ tr('é™é€Ÿã€åˆ†æ‰¹è¿ç§» Topic å…ƒæ•°æ®å’Œæ¶ˆæ¯ï¼Œé™ä½å¯¹æºç«¯ä¸ç›®æ ‡ç«¯ Kafka çš„æ€§èƒ½å½±å“ã€‚', 'Throttle and batch topic metadata and messages to reduce impact on source and target Kafka.') }}</p>
       </div>
       <div class="hero-actions">
-        <button :class="['ghost', { selected: pageMode === 'config' }]" @click="openConfigPage">{{ tr('¿¿¿¿', 'Config') }}</button>
-        <button :class="['ghost', { selected: pageMode === 'progress' }]" @click="openProgressPage">{{ tr('¿¿¿¿', 'Progress') }}</button>
-        <button v-if="pageMode === 'progress'" class="ghost" :disabled="refreshing" @click="refreshJobs">{{ refreshing ? tr('¿¿¿...', 'Refreshing...') : tr('¿¿¿¿', 'Refresh') }}</button>
+        <button :class="['ghost', { selected: pageMode === 'config' }]" @click="openConfigPage">{{ tr('è¿ç§»é…ç½®', 'Config') }}</button>
+        <button :class="['ghost', { selected: pageMode === 'progress' }]" @click="openProgressPage">{{ tr('è¿ç§»è¿›åº¦', 'Progress') }}</button>
+        <button v-if="pageMode === 'progress'" class="ghost" :disabled="refreshing" @click="refreshJobs">{{ refreshing ? tr('åˆ·æ–°ä¸­...', 'Refreshing...') : tr('åˆ·æ–°è¿›åº¦', 'Refresh') }}</button>
       </div>
     </section>
 
-    <section v-if="!license.enterprise" class="panel locked">
-      <h2>{{ tr('¿¿¿¿¿¿', 'Full Edition Only') }}</h2>
-      <p>{{ tr('Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Kafka smooth migration is a Full Edition capability. Activate a Full Edition license first.') }}</p>
-    </section>
-
-    <section v-else-if="pageMode === 'config'" class="config-page">
+    <section v-if="pageMode === 'config'" class="config-page">
       <form class="panel setup" @submit.prevent="startMigration">
-        <div class="panel-title"><h2>{{ tr('¿¿¿¿', 'Migration Config') }}</h2><span>{{ tr('¿¿¿¿¿¿¿', 'Safe defaults') }}</span></div>
+        <div class="panel-title"><h2>{{ tr('è¿ç§»é…ç½®', 'Migration Config') }}</h2><span>{{ tr('ç®€æ´å®‰å…¨é»˜è®¤å€¼', 'Safe defaults') }}</span></div>
         <div class="two">
-          <label>{{ tr('¿ Kafka', 'Source Kafka') }}<select v-model="form.source_cluster_id"><option value="">{{ tr('¿¿¿', 'Select') }}</option><option v-for="c in clusters" :key="c.id" :value="c.id">{{ c.name }}</option></select></label>
-          <label>{{ tr('¿¿ Kafka', 'Target Kafka') }}<select v-model="form.target_cluster_id"><option value="">{{ tr('¿¿¿', 'Select') }}</option><option v-for="c in clusters" :key="c.id" :value="c.id">{{ c.name }}</option></select></label>
+          <label>{{ tr('æº Kafka', 'Source Kafka') }}<select v-model="form.source_cluster_id"><option value="">{{ tr('è¯·é€‰æ‹©', 'Select') }}</option><option v-for="c in clusters" :key="c.id" :value="c.id">{{ c.name }}</option></select></label>
+          <label>{{ tr('ç›®æ ‡ Kafka', 'Target Kafka') }}<select v-model="form.target_cluster_id"><option value="">{{ tr('è¯·é€‰æ‹©', 'Select') }}</option><option v-for="c in clusters" :key="c.id" :value="c.id">{{ c.name }}</option></select></label>
         </div>
-        <label>{{ tr('¿¿ Topic¿¿¿¿', 'Topics Optional') }}<textarea v-model="topicsText" :placeholder="tr('¿¿¿¿ Topic¿¿¿¿¿¿¿¿¿¿¿¿ Topic', 'One topic per line; leave empty to migrate all non-internal topics')"></textarea></label>
-        <div class="option-row"><label><input v-model="form.create_topics" type="checkbox" /> {{ tr('¿¿¿¿ Topic', 'Create topics') }}</label><label><input v-model="form.copy_topic_configs" type="checkbox" /> {{ tr('¿¿¿¿ Topic ¿¿', 'Copy common configs') }}</label><label><input v-model="form.copy_data" type="checkbox" /> {{ tr('¿¿¿¿¿¿', 'Copy messages') }}</label><label><input v-model="form.incremental_sync" :disabled="!form.copy_data" type="checkbox" /> {{ tr('¿¿¿¿¿¿¿¿', 'Enable realtime incremental sync') }}</label><label><input v-model="form.overwrite_existing_topics" :disabled="!form.create_topics" type="checkbox" /> {{ tr('¿¿¿¿¿¿¿ Topic', 'Overwrite existing target topics') }}</label></div>
-        <p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿/¿¿ Kafka ¿¿¿¿¿¿¿¿ Topic¿', 'A safety check dialog opens automatically when starting migration to verify source/target Kafka and duplicate target topics.') }}</p>
+        <label>{{ tr('æŒ‡å®š Topicï¼ˆå¯é€‰ï¼‰', 'Topics Optional') }}<textarea v-model="topicsText" :placeholder="tr('æ¯è¡Œä¸€ä¸ª Topicï¼›ç•™ç©ºè¡¨ç¤ºè¿ç§»å…¨éƒ¨éå†…éƒ¨ Topic', 'One topic per line; leave empty to migrate all non-internal topics')"></textarea></label>
+        <div class="option-row"><label><input v-model="form.create_topics" type="checkbox" /> {{ tr('è‡ªåŠ¨åˆ›å»º Topic', 'Create topics') }}</label><label><input v-model="form.copy_topic_configs" type="checkbox" /> {{ tr('å¤åˆ¶å¸¸ç”¨ Topic é…ç½®', 'Copy common configs') }}</label><label><input v-model="form.copy_data" type="checkbox" /> {{ tr('å¤åˆ¶æ¶ˆæ¯æ•°æ®', 'Copy messages') }}</label><label><input v-model="form.incremental_sync" :disabled="!form.copy_data" type="checkbox" /> {{ tr('å¼€å¯å®æ—¶å¢é‡åŒæ­¥', 'Enable realtime incremental sync') }}</label><label><input v-model="form.overwrite_existing_topics" :disabled="!form.create_topics" type="checkbox" /> {{ tr('è¦†ç›–ç›®æ ‡ç«¯å·²æœ‰ Topic', 'Overwrite existing target topics') }}</label></div>
+        <p class="hint">{{ tr('ç‚¹å‡»å¯åŠ¨è¿ç§»åä¼šè‡ªåŠ¨å¼¹å‡ºæ£€æµ‹çª—å£ï¼Œæ£€æŸ¥æº/ç›®æ ‡ Kafka è¿æ¥å’Œç›®æ ‡ç«¯åŒå Topicã€‚', 'A safety check dialog opens automatically when starting migration to verify source/target Kafka and duplicate target topics.') }}</p>
         <div class="three">
-          <label>{{ tr('¿¿¿', 'Batch Size') }}<input v-model.number="form.batch_size" type="number" min="1" max="500" /></label>
-          <label>{{ tr('¿¿¿ ms', 'Throttle ms') }}<input v-model.number="form.throttle_ms" type="number" min="500" /></label>
-          <label>{{ tr('¿ Topic ¿¿¿¿', 'Max messages/topic') }}<input v-model.number="form.max_messages_per_topic" type="number" min="0" /></label>
+          <label>{{ tr('æ‰¹å¤§å°', 'Batch Size') }}<input v-model.number="form.batch_size" type="number" min="1" max="500" /></label>
+          <label>{{ tr('æ‰¹é—´éš” ms', 'Throttle ms') }}<input v-model.number="form.throttle_ms" type="number" min="500" /></label>
+          <label>{{ tr('æ¯ Topic æœ€å¤šæ¶ˆæ¯', 'Max messages/topic') }}<input v-model.number="form.max_messages_per_topic" type="number" min="0" /></label>
         </div>
         <div class="three">
-          <label>{{ tr('¿¿¿¿¿', 'Target Partitions') }}<input v-model.number="form.target_partitions" type="number" min="0" /></label>
-          <label>{{ tr('¿¿¿¿¿', 'Replication Factor') }}<input v-model.number="form.replication_factor" type="number" min="1" /></label>
-          <label>{{ tr('¿¿¿¿¿¿ ms', 'Incremental poll ms') }}<input v-model.number="form.incremental_poll_ms" :disabled="!form.incremental_sync" type="number" min="30000" /></label>
+          <label>{{ tr('ç›®æ ‡åˆ†åŒºæ•°', 'Target Partitions') }}<input v-model.number="form.target_partitions" type="number" min="0" /></label>
+          <label>{{ tr('ç›®æ ‡å‰¯æœ¬æ•°', 'Replication Factor') }}<input v-model.number="form.replication_factor" type="number" min="1" /></label>
+          <label>{{ tr('å¢é‡è½®è¯¢é—´éš” ms', 'Incremental poll ms') }}<input v-model.number="form.incremental_poll_ms" :disabled="!form.incremental_sync" type="number" min="30000" /></label>
         </div>
-        <p class="hint">{{ tr('¿¿¿¿¿¿ 0 ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ 1 ¿¿ 1 ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Target partitions 0 means strategy default. Cluster to standalone is forced to 1 partition and 1 replica; other scenarios prefer these values.') }}</p>
-        <p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Topic¿¿¿¿¿¿¿¿¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ 30 ¿¿¿¿¿¿¿¿¿ Kafka¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Validate with a small batch first. Higher throttle reduces Kafka pressure further. When realtime incremental sync is enabled, the backend caps batch size, raises throttling, and polls source Kafka no more frequently than every 30 seconds to protect source performance and stability.') }}</p>
-        <button class="primary" :disabled="starting || !canStart">{{ starting ? tr('¿¿¿...', 'Starting...') : tr('¿¿¿¿', 'Start Migration') }}</button>
+        <p class="hint">{{ tr('ç›®æ ‡åˆ†åŒºæ•°å¡« 0 è¡¨ç¤ºæŒ‰ç­–ç•¥é»˜è®¤ã€‚é›†ç¾¤åˆ°å•æœºä¼šå¼ºåˆ¶è¦†ç›–ä¸º 1 åˆ†åŒº 1 å‰¯æœ¬ï¼›å…¶ä»–åœºæ™¯ä¼šä¼˜å…ˆä½¿ç”¨è¿™é‡Œçš„é…ç½®ã€‚', 'Target partitions 0 means strategy default. Cluster to standalone is forced to 1 partition and 1 replica; other scenarios prefer these values.') }}</p>
+        <p class="hint">{{ tr('å»ºè®®å…ˆå°æ‰¹é‡éªŒè¯ï¼Œå†è¿ç§»å…¨éƒ¨ Topicã€‚è¾ƒé«˜æ‰¹é—´éš”å¯ä»¥è¿›ä¸€æ­¥é™ä½ Kafka å‹åŠ›ã€‚å¼€å¯å®æ—¶å¢é‡åŒæ­¥åï¼Œåç«¯ä¼šè‡ªåŠ¨é™åˆ¶æ‰¹å¤§å°ã€æé«˜æ‰¹é—´éš”ï¼Œå¹¶ä»¥ä¸ä½äº 30 ç§’çš„ä½é¢‘è½®è¯¢è¯»å–æº Kafkaï¼Œé¿å…å½±å“æºç«¯æ€§èƒ½å’Œç¨³å®šæ€§ã€‚', 'Validate with a small batch first. Higher throttle reduces Kafka pressure further. When realtime incremental sync is enabled, the backend caps batch size, raises throttling, and polls source Kafka no more frequently than every 30 seconds to protect source performance and stability.') }}</p>
+        <button class="primary" :disabled="starting || !canStart">{{ starting ? tr('å¯åŠ¨ä¸­...', 'Starting...') : tr('å¯åŠ¨è¿ç§»', 'Start Migration') }}</button>
       </form>
 
       <div class="panel safety-panel">
-        <h2>{{ tr('¿¿¿¿', 'Migration Strategy') }}</h2>
+        <h2>{{ tr('è¿ç§»ç­–ç•¥', 'Migration Strategy') }}</h2>
         <div class="strategy-list">
-          <span>{{ tr('¿¿¿¿¿¿¿¿¿ Kafka¿', 'Batch throttling avoids Kafka pressure.') }}</span>
-          <span>{{ tr('¿¿ Topic¿¿¿¿¿¿¿¿¿¿', 'Create topics first, then configs and messages.') }}</span>
-          <span>{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Cluster to cluster: preserves source partitions and replicas by default.') }}</span>
-          <span>{{ tr('¿¿¿¿¿¿¿¿¿¿¿ 1 ¿¿¿1 ¿¿¿', 'Cluster to standalone: target is fixed to 1 partition and 1 replica.') }}</span>
-          <span>{{ tr('¿¿¿¿¿¿¿¿ 3 ¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Standalone to cluster: defaults to 3 replicas; partitions and replicas are configurable.') }}</span>
+          <span>{{ tr('æ‰¹é‡é™é€Ÿï¼Œé¿å…å‹å® Kafkaã€‚', 'Batch throttling avoids Kafka pressure.') }}</span>
+          <span>{{ tr('å…ˆå»º Topicï¼Œå†å¤åˆ¶é…ç½®å’Œæ¶ˆæ¯ã€‚', 'Create topics first, then configs and messages.') }}</span>
+          <span>{{ tr('é›†ç¾¤åˆ°é›†ç¾¤ï¼šé»˜è®¤åŸåˆ†åŒºã€åŸå‰¯æœ¬è¿ç§»ã€‚', 'Cluster to cluster: preserves source partitions and replicas by default.') }}</span>
+          <span>{{ tr('é›†ç¾¤åˆ°å•æœºï¼šç›®æ ‡å›ºå®šä¸º 1 åˆ†åŒºã€1 å‰¯æœ¬ã€‚', 'Cluster to standalone: target is fixed to 1 partition and 1 replica.') }}</span>
+          <span>{{ tr('å•æœºåˆ°é›†ç¾¤ï¼šé»˜è®¤ 3 å‰¯æœ¬ï¼Œåˆ†åŒºæ•°å’Œå‰¯æœ¬æ•°å¯é…ç½®ã€‚', 'Standalone to cluster: defaults to 3 replicas; partitions and replicas are configurable.') }}</span>
         </div>
       </div>
     </section>
 
     <section v-else class="progress-page">
       <div class="panel jobs">
-        <div class="panel-title"><h2>{{ tr('¿¿¿¿', 'Progress') }}</h2><span>{{ jobs.length }} jobs</span></div>
-        <div v-if="!jobs.length" class="empty">{{ tr('¿¿¿¿¿¿', 'No migration jobs yet') }}</div>
+        <div class="panel-title"><h2>{{ tr('è¿ç§»è¿›åº¦', 'Progress') }}</h2><span>{{ jobs.length }} jobs</span></div>
+        <div v-if="!jobs.length" class="empty">{{ tr('æš‚æ— è¿ç§»ä»»åŠ¡', 'No migration jobs yet') }}</div>
         <article v-for="job in jobs" :key="job.id" class="job-card" :class="job.status" @click="toggleJobDetail(job.id)">
-          <div class="job-head"><strong>{{ job.source_cluster }} ¿ {{ job.target_cluster }}</strong><span>{{ statusLabel(job.status) }}</span></div>
+          <div class="job-head"><strong>{{ job.source_cluster }} â†’ {{ job.target_cluster }}</strong><span>{{ statusLabel(job.status) }}</span></div>
           <div class="progress"><i :style="{ width: `${job.progress || 0}%` }"></i></div>
-          <div class="job-meta"><span>{{ job.progress || 0 }}%</span><span>{{ tr('Topic', 'Topics') }} {{ job.done_topics || 0 }}/{{ job.total_topics || 0 }}</span><span>{{ tr('¿¿', 'Messages') }} {{ job.copied_messages || 0 }}</span><span>{{ tr('¿¿', 'Elapsed') }} {{ elapsedTime(job) }}</span></div>
+          <div class="job-meta"><span>{{ job.progress || 0 }}%</span><span>{{ tr('Topic', 'Topics') }} {{ job.done_topics || 0 }}/{{ job.total_topics || 0 }}</span><span>{{ tr('æ¶ˆæ¯', 'Messages') }} {{ job.copied_messages || 0 }}</span><span>{{ tr('è€—æ—¶', 'Elapsed') }} {{ elapsedTime(job) }}</span></div>
           <div class="live-topic">
-            <span>{{ tr('¿¿ Topic', 'Current Topic') }}</span>
-            <strong>{{ job.current_topic || tr('¿¿¿¿', 'Waiting') }}</strong>
+            <span>{{ tr('å½“å‰ Topic', 'Current Topic') }}</span>
+            <strong>{{ job.current_topic || tr('ç­‰å¾…å¼€å§‹', 'Waiting') }}</strong>
           </div>
           <div class="job-stage">
             <span>{{ migrationStageMessage(job) }}</span>
-            <small>{{ tr('¿¿¿¿', 'Updated') }} {{ formatDateTime(job.updated_at) }}</small>
+            <small>{{ tr('æœ€åæ›´æ–°', 'Updated') }} {{ formatDateTime(job.updated_at) }}</small>
           </div>
           <div v-if="canStopJob(job)" class="job-actions" @click.stop>
-            <button class="danger small" :disabled="stoppingJobId === job.id" @click="stopMigrationJob(job)">{{ stoppingJobId === job.id ? tr('¿¿¿...', 'Stopping...') : tr('¿¿¿¿', 'Stop Sync') }}</button>
+            <button class="danger small" :disabled="stoppingJobId === job.id" @click="stopMigrationJob(job)">{{ stoppingJobId === job.id ? tr('å–æ¶ˆä¸­...', 'Stopping...') : tr('å–æ¶ˆåŒæ­¥', 'Stop Sync') }}</button>
           </div>
           <div v-if="job.current_total || job.current_copied" class="current-message-progress">
-            <span>{{ tr('¿¿ Topic ¿¿', 'Current topic messages') }} {{ job.current_copied || 0 }}/{{ job.current_total || '-' }}</span>
+            <span>{{ tr('å½“å‰ Topic æ¶ˆæ¯', 'Current topic messages') }} {{ job.current_copied || 0 }}/{{ job.current_total || '-' }}</span>
             <div class="mini-progress"><i :style="{ width: `${currentTopicProgress(job)}%` }"></i></div>
           </div>
           <div v-if="expandedJobId === job.id" class="job-detail" @click.stop>
-            <div><span>{{ tr('¿¿ ID', 'Job ID') }}</span><strong>{{ job.id }}</strong></div>
-            <div><span>{{ tr('¿ Kafka', 'Source Kafka') }}</span><strong>{{ job.source_cluster }}</strong></div>
-            <div><span>{{ tr('¿¿ Kafka', 'Target Kafka') }}</span><strong>{{ job.target_cluster }}</strong></div>
-            <div><span>{{ tr('¿¿ Topic', 'Current Topic') }}</span><strong>{{ job.current_topic || '-' }}</strong></div>
-            <div><span>{{ tr('¿¿ Topic ¿¿', 'Current topic messages') }}</span><strong>{{ currentTopicMessageLabel(job) }}</strong></div>
-            <div><span>{{ tr('¿¿¿ Topic', 'Finished Topics') }}</span><strong>{{ job.done_topics || 0 }}/{{ job.total_topics || 0 }}</strong></div>
-            <div><span>{{ tr('¿¿¿¿¿¿', 'Copied messages') }}</span><strong>{{ job.copied_messages || 0 }}</strong></div>
-            <div class="job-detail-topics"><span>{{ tr('¿¿ Topic', 'Topics') }}</span><div class="topic-detail-list"><em v-if="!(job.topics || []).length">-</em><strong v-for="(topic, index) in job.topics || []" :key="topic" :class="migrationTopicStatus(job, topic, index).className"><small>#{{ index + 1 }}</small>{{ topic }}<b>{{ migrationTopicStatus(job, topic, index).label }}</b></strong></div></div>
-            <div><span>{{ tr('¿¿¿¿ Topic', 'Create topics') }}</span><strong>{{ enabledLabel(job.options?.create_topics) }}</strong></div>
-            <div><span>{{ tr('¿¿ Topic ¿¿', 'Copy configs') }}</span><strong>{{ enabledLabel(job.options?.copy_topic_configs) }}</strong></div>
-            <div><span>{{ tr('¿¿¿¿¿¿', 'Copy data') }}</span><strong>{{ enabledLabel(job.options?.copy_data) }}</strong></div>
-            <div><span>{{ tr('¿¿¿¿¿¿', 'Realtime incremental sync') }}</span><strong>{{ enabledLabel(job.options?.incremental_sync) }}</strong></div>
-            <div><span>{{ tr('¿¿¿¿ Topic', 'Overwrite target topics') }}</span><strong>{{ enabledLabel(job.options?.overwrite_existing_topics) }}</strong></div>
-            <div><span>{{ tr('¿¿¿', 'Batch size') }}</span><strong>{{ job.options?.batch_size || '-' }}</strong></div>
-            <div><span>{{ tr('¿¿¿', 'Throttle') }}</span><strong>{{ job.options?.throttle_ms || 0 }} ms</strong></div>
-            <div><span>{{ tr('¿¿¿¿¿¿', 'Incremental poll') }}</span><strong>{{ job.options?.incremental_poll_ms || '-' }} ms</strong></div>
-            <div><span>{{ tr('¿¿¿¿¿', 'Target partitions') }}</span><strong>{{ job.options?.target_partitions || '-' }}</strong></div>
-            <div><span>{{ tr('¿¿¿¿¿', 'Replication factor') }}</span><strong>{{ job.options?.replication_factor || '-' }}</strong></div>
-            <div><span>{{ tr('¿ Topic ¿¿¿¿', 'Max messages/topic') }}</span><strong>{{ job.options?.max_messages_per_topic || tr('¿¿', 'Unlimited') }}</strong></div>
-            <div><span>{{ tr('¿¿¿¿', 'Started at') }}</span><strong>{{ formatDateTime(job.created_at) }}</strong></div>
-            <div><span>{{ tr('¿¿¿¿', 'Completed at') }}</span><strong>{{ formatDateTime(job.completed_at) }}</strong></div>
+            <div><span>{{ tr('ä»»åŠ¡ ID', 'Job ID') }}</span><strong>{{ job.id }}</strong></div>
+            <div><span>{{ tr('æº Kafka', 'Source Kafka') }}</span><strong>{{ job.source_cluster }}</strong></div>
+            <div><span>{{ tr('ç›®æ ‡ Kafka', 'Target Kafka') }}</span><strong>{{ job.target_cluster }}</strong></div>
+            <div><span>{{ tr('å½“å‰ Topic', 'Current Topic') }}</span><strong>{{ job.current_topic || '-' }}</strong></div>
+            <div><span>{{ tr('å½“å‰ Topic æ¶ˆæ¯', 'Current topic messages') }}</span><strong>{{ currentTopicMessageLabel(job) }}</strong></div>
+            <div><span>{{ tr('å·²å®Œæˆ Topic', 'Finished Topics') }}</span><strong>{{ job.done_topics || 0 }}/{{ job.total_topics || 0 }}</strong></div>
+            <div><span>{{ tr('ç´¯è®¡å¤åˆ¶æ¶ˆæ¯', 'Copied messages') }}</span><strong>{{ job.copied_messages || 0 }}</strong></div>
+            <div class="job-detail-topics"><span>{{ tr('è¿ç§» Topic', 'Topics') }}</span><div class="topic-detail-list"><em v-if="!(job.topics || []).length">-</em><strong v-for="(topic, index) in job.topics || []" :key="topic" :class="migrationTopicStatus(job, topic, index).className"><small>#{{ index + 1 }}</small>{{ topic }}<b>{{ migrationTopicStatus(job, topic, index).label }}</b></strong></div></div>
+            <div><span>{{ tr('è‡ªåŠ¨åˆ›å»º Topic', 'Create topics') }}</span><strong>{{ enabledLabel(job.options?.create_topics) }}</strong></div>
+            <div><span>{{ tr('å¤åˆ¶ Topic é…ç½®', 'Copy configs') }}</span><strong>{{ enabledLabel(job.options?.copy_topic_configs) }}</strong></div>
+            <div><span>{{ tr('å¤åˆ¶æ¶ˆæ¯æ•°æ®', 'Copy data') }}</span><strong>{{ enabledLabel(job.options?.copy_data) }}</strong></div>
+            <div><span>{{ tr('å®æ—¶å¢é‡åŒæ­¥', 'Realtime incremental sync') }}</span><strong>{{ enabledLabel(job.options?.incremental_sync) }}</strong></div>
+            <div><span>{{ tr('è¦†ç›–ç›®æ ‡ Topic', 'Overwrite target topics') }}</span><strong>{{ enabledLabel(job.options?.overwrite_existing_topics) }}</strong></div>
+            <div><span>{{ tr('æ‰¹å¤§å°', 'Batch size') }}</span><strong>{{ job.options?.batch_size || '-' }}</strong></div>
+            <div><span>{{ tr('æ‰¹é—´éš”', 'Throttle') }}</span><strong>{{ job.options?.throttle_ms || 0 }} ms</strong></div>
+            <div><span>{{ tr('å¢é‡è½®è¯¢é—´éš”', 'Incremental poll') }}</span><strong>{{ job.options?.incremental_poll_ms || '-' }} ms</strong></div>
+            <div><span>{{ tr('ç›®æ ‡åˆ†åŒºæ•°', 'Target partitions') }}</span><strong>{{ job.options?.target_partitions || '-' }}</strong></div>
+            <div><span>{{ tr('ç›®æ ‡å‰¯æœ¬æ•°', 'Replication factor') }}</span><strong>{{ job.options?.replication_factor || '-' }}</strong></div>
+            <div><span>{{ tr('æ¯ Topic æœ€å¤§æ¶ˆæ¯', 'Max messages/topic') }}</span><strong>{{ job.options?.max_messages_per_topic || tr('ä¸é™', 'Unlimited') }}</strong></div>
+            <div><span>{{ tr('å¼€å§‹æ—¶é—´', 'Started at') }}</span><strong>{{ formatDateTime(job.created_at) }}</strong></div>
+            <div><span>{{ tr('å®Œæˆæ—¶é—´', 'Completed at') }}</span><strong>{{ formatDateTime(job.completed_at) }}</strong></div>
           </div>
         </article>
       </div>
@@ -110,9 +105,9 @@
         <div class="dialog-head">
           <div>
             <p class="eyebrow">Preflight Check</p>
-            <h2>{{ tr('¿¿¿¿¿¿¿', 'Migration Safety Check') }}</h2>
+            <h2>{{ tr('è¿ç§»å‰å®‰å…¨æ£€æµ‹', 'Migration Safety Check') }}</h2>
           </div>
-          <button class="ghost small" type="button" @click="closePreflightDialog">{{ checking ? tr('¿¿¿¿', 'Cancel Check') : tr('¿¿', 'Close') }}</button>
+          <button class="ghost small" type="button" @click="closePreflightDialog">{{ checking ? tr('å–æ¶ˆæ£€æµ‹', 'Cancel Check') : tr('å…³é—­', 'Close') }}</button>
         </div>
         <p class="dialog-desc">{{ preflightDialogMessage }}</p>
         <div class="check-progress"><i :style="{ width: `${preflightProgress}%` }"></i></div>
@@ -123,33 +118,33 @@
             <div><strong>{{ step.title }}</strong><small>{{ step.desc }}</small></div>
           </div>
         </div>
-        <button class="ghost small detail-toggle" type="button" @click="preflightDetailOpen = !preflightDetailOpen">{{ preflightDetailOpen ? tr('¿¿¿¿', 'Hide Details') : tr('¿¿¿¿', 'Show Details') }}</button>
+        <button class="ghost small detail-toggle" type="button" @click="preflightDetailOpen = !preflightDetailOpen">{{ preflightDetailOpen ? tr('æ”¶èµ·è¯¦æƒ…', 'Hide Details') : tr('å±•å¼€è¯¦æƒ…', 'Show Details') }}</button>
         <div v-if="preflightDetailOpen" class="check-detail">
-          <div><span>{{ tr('¿¿¿¿', 'Current phase') }}</span><strong>{{ preflightPhaseLabel }}</strong></div>
-          <div><span>{{ tr('¿¿ Topic ¿', 'Checked topics') }}</span><strong>{{ preflightTopicCount }}</strong></div>
-          <div><span>{{ tr('¿¿¿¿', 'Compare mode') }}</span><strong>{{ tr('¿/¿¿ Topic ¿¿¿¿¿¿', 'Batch compare source/target topic sets') }}</strong></div>
+          <div><span>{{ tr('å½“å‰é˜¶æ®µ', 'Current phase') }}</span><strong>{{ preflightPhaseLabel }}</strong></div>
+          <div><span>{{ tr('æ£€æµ‹ Topic æ•°', 'Checked topics') }}</span><strong>{{ preflightTopicCount }}</strong></div>
+          <div><span>{{ tr('æ¯”å¯¹æ–¹å¼', 'Compare mode') }}</span><strong>{{ tr('æº/ç›®æ ‡ Topic é›†åˆæ‰¹é‡æ¯”å¯¹', 'Batch compare source/target topic sets') }}</strong></div>
           <div class="check-detail-topics">
-            <span>{{ tr('¿¿¿¿ / ¿¿¿ Topic', 'Comparing / checked topics') }}</span>
-            <div class="topic-chips neutral"><span v-for="topic in preflightDetailTopics" :key="topic">{{ topic }}</span><em v-if="!preflightDetailTopics.length">{{ tr('¿¿¿¿¿¿¿¿¿¿¿ Topic¿¿¿¿¿¿¿¿¿¿', 'Empty means all non-internal topics. Results appear after the check completes.') }}</em></div>
+            <span>{{ tr('æ­£åœ¨æ¯”å¯¹ / å·²æ¯”å¯¹ Topic', 'Comparing / checked topics') }}</span>
+            <div class="topic-chips neutral"><span v-for="topic in preflightDetailTopics" :key="topic">{{ topic }}</span><em v-if="!preflightDetailTopics.length">{{ tr('ç•™ç©ºè¡¨ç¤ºæ£€æµ‹å…¨éƒ¨éå†…éƒ¨ Topicï¼Œæ£€æµ‹å®Œæˆåå±•ç¤ºç»“æœ', 'Empty means all non-internal topics. Results appear after the check completes.') }}</em></div>
           </div>
         </div>
         <div v-if="preflight?.existing_topics?.length" class="dialog-conflicts">
-          <div class="conflict-head"><strong>{{ tr('¿¿¿¿¿¿¿¿¿¿ Topic', 'Existing target topics found') }}¿{{ preflight.existing_topics.length }}</strong><button class="ghost small" type="button" @click="conflictListOpen = !conflictListOpen">{{ conflictListOpen ? tr('¿¿', 'Collapse') : tr('¿¿', 'Expand') }}</button></div>
+          <div class="conflict-head"><strong>{{ tr('æ£€æµ‹åˆ°ç›®æ ‡ç«¯å·²æœ‰åŒå Topic', 'Existing target topics found') }}ï¼š{{ preflight.existing_topics.length }}</strong><button class="ghost small" type="button" @click="conflictListOpen = !conflictListOpen">{{ conflictListOpen ? tr('æ”¶èµ·', 'Collapse') : tr('å±•å¼€', 'Expand') }}</button></div>
           <div v-if="conflictListOpen" class="topic-conflict-list"><span v-for="(topic, index) in preflight.existing_topics" :key="topic"><small>#{{ index + 1 }}</small>{{ topic }}</span></div>
-          <p>{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Topic¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Topic¿¿¿¿¿¿¿¿¿¿', 'To continue, close this dialog, enable "Overwrite existing target topics", then start again. Existing target topics will be deleted first, then recreated and migrated.') }}</p>
+          <p>{{ tr('å¦‚éœ€ç»§ç»­è¿ç§»ï¼Œè¯·å…ˆå…³é—­å¼¹çª—ï¼Œå‹¾é€‰â€œè¦†ç›–ç›®æ ‡ç«¯å·²æœ‰ Topicâ€é€‰é¡¹ï¼Œç„¶åå†æ¬¡ç‚¹å‡»å¯åŠ¨è¿ç§»ã€‚å¯åŠ¨åä¼šå…ˆåˆ é™¤ç›®æ ‡ç«¯åŒå Topicï¼Œå†é‡æ–°åˆ›å»ºå¹¶è¿ç§»ã€‚', 'To continue, close this dialog, enable "Overwrite existing target topics", then start again. Existing target topics will be deleted first, then recreated and migrated.') }}</p>
         </div>
         <div v-if="overwriteConfirmOpen" class="overwrite-confirm">
-          <strong>{{ tr('¿¿¿¿¿¿¿¿¿ Topic¿', 'Confirm overwriting target topics?') }}</strong>
-          <p>{{ tr('¿¿ Topic ¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'These topics will be deleted from the target Kafka first, then recreated and filled according to the migration plan. This cannot be rolled back automatically.') }}</p>
-          <div class="dialog-actions"><button class="ghost" type="button" :disabled="startingJob" @click="overwriteConfirmOpen = false">{{ tr('¿¿¿¿¿¿', 'Back') }}</button><button class="danger" type="button" :disabled="startingJob" @click="startMigrationJob">{{ startingJob ? tr('¿¿¿¿¿...', 'Creating job...') : tr('¿¿¿¿¿¿¿¿¿', 'Overwrite and Start') }}</button></div>
+          <strong>{{ tr('ç¡®è®¤è¦†ç›–ç›®æ ‡ç«¯å·²æœ‰ Topicï¼Ÿ', 'Confirm overwriting target topics?') }}</strong>
+          <p>{{ tr('è¿™äº› Topic ä¼šå…ˆä»ç›®æ ‡ Kafka åˆ é™¤ï¼Œå†æŒ‰è¿ç§»è®¡åˆ’é‡æ–°åˆ›å»ºå¹¶å†™å…¥æ•°æ®ã€‚è¯¥æ“ä½œä¸å¯è‡ªåŠ¨å›æ»šã€‚', 'These topics will be deleted from the target Kafka first, then recreated and filled according to the migration plan. This cannot be rolled back automatically.') }}</p>
+          <div class="dialog-actions"><button class="ghost" type="button" :disabled="startingJob" @click="overwriteConfirmOpen = false">{{ tr('è¿”å›æ£€æŸ¥ç»“æœ', 'Back') }}</button><button class="danger" type="button" :disabled="startingJob" @click="startMigrationJob">{{ startingJob ? tr('åˆ›å»ºä»»åŠ¡ä¸­...', 'Creating job...') : tr('ç¡®è®¤è¦†ç›–å¹¶å¼€å§‹è¿ç§»', 'Overwrite and Start') }}</button></div>
         </div>
         <div v-if="preflightPhase === 'error'" class="dialog-conflicts error-box">
-          <strong>{{ tr('¿¿¿¿', 'Check failed') }}</strong>
+          <strong>{{ tr('æ£€æµ‹å¤±è´¥', 'Check failed') }}</strong>
           <p>{{ preflightError }}</p>
         </div>
         <div class="dialog-actions">
-          <button class="ghost" type="button" @click="closePreflightDialog">{{ checking ? tr('¿¿¿¿', 'Cancel Check') : preflightCanProceed ? tr('¿¿¿¿', 'Later') : tr('¿¿', 'Close') }}</button>
-          <button v-if="preflightCanProceed" class="primary" type="button" :disabled="startingJob" @click="confirmStartMigration">{{ startingJob ? tr('¿¿¿¿¿...', 'Creating job...') : tr('¿¿¿¿¿¿¿¿', 'Next, Start Migration') }}</button>
+          <button class="ghost" type="button" @click="closePreflightDialog">{{ checking ? tr('å–æ¶ˆæ£€æµ‹', 'Cancel Check') : preflightCanProceed ? tr('ç¨åè¿ç§»', 'Later') : tr('å…³é—­', 'Close') }}</button>
+          <button v-if="preflightCanProceed" class="primary" type="button" :disabled="startingJob" @click="confirmStartMigration">{{ startingJob ? tr('åˆ›å»ºä»»åŠ¡ä¸­...', 'Creating job...') : tr('ä¸‹ä¸€æ­¥ï¼Œå¼€å§‹è¿ç§»', 'Next, Start Migration') }}</button>
         </div>
       </div>
     </div>
@@ -159,10 +154,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { checkKafkaMigration, createKafkaMigration, getAppStatus, getKafkaMigration, listKafkaClusters, listKafkaMigrations, stopKafkaMigration } from '../api'
+import { checkKafkaMigration, createKafkaMigration, getKafkaMigration, listKafkaClusters, listKafkaMigrations, stopKafkaMigration } from '../api'
 import { tr } from '../i18n'
 
-const license = ref<any>({ enterprise: true })
 const route = useRoute()
 const router = useRouter()
 const clusters = ref<any[]>([])
@@ -189,48 +183,48 @@ let preflightAbortController: AbortController | null = null
 
 const canStart = computed(() => form.value.source_cluster_id && form.value.target_cluster_id && form.value.source_cluster_id !== form.value.target_cluster_id && (form.value.create_topics || form.value.copy_topic_configs || form.value.copy_data))
 const pageMode = computed(() => route.name === 'migrationProgress' ? 'progress' : 'config')
-const statusLabel = (status: string) => status === 'completed' ? tr('¿¿¿', 'Completed') : status === 'failed' ? tr('¿¿', 'Failed') : status === 'running' ? tr('¿¿¿', 'Running') : status === 'incremental' ? tr('¿¿¿¿¿', 'Incremental Syncing') : status === 'stopping' ? tr('¿¿¿', 'Stopping') : status === 'stopped' ? tr('¿¿¿', 'Stopped') : tr('¿¿¿', 'Queued')
+const statusLabel = (status: string) => status === 'completed' ? tr('å·²å®Œæˆ', 'Completed') : status === 'failed' ? tr('å¤±è´¥', 'Failed') : status === 'running' ? tr('è¿è¡Œä¸­', 'Running') : status === 'incremental' ? tr('å¢é‡åŒæ­¥ä¸­', 'Incremental Syncing') : status === 'stopping' ? tr('åœæ­¢ä¸­', 'Stopping') : status === 'stopped' ? tr('å·²åœæ­¢', 'Stopped') : tr('æ’é˜Ÿä¸­', 'Queued')
 const migrationStageMessage = (job: any) => {
   const text = String(job.error || job.message || '')
   if (!text) return '-'
-  const copyMatch = text.match(/^¿¿¿¿¿¿¿¿¿¿¿ Topic (\d+)\/(\d+) ¿¿$/)
+  const copyMatch = text.match(/^æ­£åœ¨é™é€Ÿå¤åˆ¶æ¶ˆæ¯ï¼ˆå½“å‰ Topic (\d+)\/(\d+) æ¡ï¼‰$/)
   if (copyMatch) return tr(text, `Copying messages with throttling (current topic ${copyMatch[1]}/${copyMatch[2]} messages)`)
-  const incrementalMatch = text.match(/^¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Topic ¿¿ (\d+)¿offset (\d+)\/(\d+)¿$/)
+  const incrementalMatch = text.match(/^æ­£åœ¨å®‰å…¨ä½é¢‘å®æ—¶å¢é‡åŒæ­¥ï¼ˆå½“å‰ Topic åˆ†åŒº (\d+)ï¼Œoffset (\d+)\/(\d+)ï¼‰$/)
   if (incrementalMatch) return tr(text, `Running safe low-frequency incremental sync (partition ${incrementalMatch[1]}, offset ${incrementalMatch[2]}/${incrementalMatch[3]})`)
   const messages: Record<string, string> = {
-    '¿¿¿¿¿¿¿¿': 'Generating migration plan',
-    '¿¿¿¿¿¿¿': 'Migration plan generated',
-    '¿¿¿¿ Topic ¿¿¿': 'Migrating topic metadata',
-    '¿¿¿¿¿¿¿¿¿ Topic': 'Overwriting existing target topic',
-    '¿¿¿¿¿¿¿¿': 'Copying messages with throttling',
-    'Topic ¿¿¿¿': 'Topic migration completed',
-    '¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿': 'Full migration completed, running safe low-frequency incremental sync',
-    '¿¿¿¿¿¿¿¿¿¿¿¿': 'Running safe low-frequency incremental sync',
-    '¿¿¿¿¿¿¿¿': 'Stopping migration job',
-    '¿¿¿¿¿¿¿': 'Migration job stopped',
-    '¿¿¿¿': 'Migration failed',
-    '¿¿¿¿': 'Migration completed',
+    'æ­£åœ¨ç”Ÿæˆè¿ç§»è®¡åˆ’': 'Generating migration plan',
+    'è¿ç§»è®¡åˆ’å·²ç”Ÿæˆ': 'Migration plan generated',
+    'æ­£åœ¨è¿ç§» Topic å…ƒæ•°æ®': 'Migrating topic metadata',
+    'æ­£åœ¨è¦†ç›–ç›®æ ‡ç«¯å·²æœ‰ Topic': 'Overwriting existing target topic',
+    'æ­£åœ¨é™é€Ÿå¤åˆ¶æ¶ˆæ¯': 'Copying messages with throttling',
+    'Topic è¿ç§»å®Œæˆ': 'Topic migration completed',
+    'å…¨é‡è¿ç§»å®Œæˆï¼Œæ­£åœ¨å®‰å…¨ä½é¢‘å®æ—¶å¢é‡åŒæ­¥': 'Full migration completed, running safe low-frequency incremental sync',
+    'æ­£åœ¨å®‰å…¨ä½é¢‘å®æ—¶å¢é‡åŒæ­¥': 'Running safe low-frequency incremental sync',
+    'æ­£åœ¨åœæ­¢è¿ç§»ä»»åŠ¡': 'Stopping migration job',
+    'è¿ç§»ä»»åŠ¡å·²åœæ­¢': 'Migration job stopped',
+    'è¿ç§»å¤±è´¥': 'Migration failed',
+    'è¿ç§»å®Œæˆ': 'Migration completed',
   }
   return messages[text] ? tr(text, messages[text]) : text
 }
 const preflightProgress = computed(() => preflightPhase.value === 'source' ? 28 : preflightPhase.value === 'target' ? 58 : preflightPhase.value === 'topics' ? 82 : preflightPhase.value === 'done' ? 100 : preflightPhase.value === 'error' ? 100 : 8)
 const preflightCanProceed = computed(() => preflightPhase.value === 'done' && preflight.value && (!preflight.value.existing_topics?.length || form.value.overwrite_existing_topics))
 const preflightDialogMessage = computed(() => {
-  if (preflightPhase.value === 'source') return tr('¿¿¿¿¿ Kafka¿¿¿¿¿¿¿¿¿¿¿', 'Connecting to source Kafka to verify the migration source.')
-  if (preflightPhase.value === 'target') return tr('¿¿¿¿¿¿ Kafka¿¿¿¿¿¿¿¿¿¿¿¿', 'Connecting to target Kafka to verify the destination instance.')
-  if (preflightPhase.value === 'topics') return tr('¿¿¿¿¿¿¿¿¿¿¿¿¿ Topic¿', 'Checking whether target topics already exist.')
-  if (preflightPhase.value === 'error') return preflightError.value || tr('¿¿¿¿¿¿¿¿ Kafka ¿¿¿¿¿', 'Check failed. Please verify Kafka instance settings.')
-  if (preflight.value?.existing_topics?.length) return tr('¿¿¿¿¿¿¿¿¿¿¿¿¿ Topic¿¿¿¿¿¿¿¿¿¿', 'Check completed, but target topics already exist. Confirm overwrite strategy.')
-  if (preflightPhase.value === 'done') return tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Check passed. You can start the migration safely.')
-  return tr('¿¿¿¿¿¿¿¿¿¿¿¿', 'Preparing migration safety checks.')
+  if (preflightPhase.value === 'source') return tr('æ­£åœ¨è¿æ¥æº Kafkaï¼Œç¡®è®¤è¿ç§»æ¥æºå¯è®¿é—®ã€‚', 'Connecting to source Kafka to verify the migration source.')
+  if (preflightPhase.value === 'target') return tr('æ­£åœ¨è¿æ¥ç›®æ ‡ Kafkaï¼Œç¡®è®¤ç›®æ ‡å®ä¾‹çŠ¶æ€æ­£å¸¸ã€‚', 'Connecting to target Kafka to verify the destination instance.')
+  if (preflightPhase.value === 'topics') return tr('æ­£åœ¨æ£€æŸ¥ç›®æ ‡ç«¯æ˜¯å¦å·²æœ‰åŒå Topicã€‚', 'Checking whether target topics already exist.')
+  if (preflightPhase.value === 'error') return preflightError.value || tr('æ£€æµ‹å¤±è´¥ï¼Œè¯·æ£€æŸ¥ Kafka å®ä¾‹é…ç½®ã€‚', 'Check failed. Please verify Kafka instance settings.')
+  if (preflight.value?.existing_topics?.length) return tr('æ£€æµ‹å®Œæˆï¼Œä½†ç›®æ ‡ç«¯å·²æœ‰åŒå Topicï¼Œéœ€è¦ç¡®è®¤è¦†ç›–ç­–ç•¥ã€‚', 'Check completed, but target topics already exist. Confirm overwrite strategy.')
+  if (preflightPhase.value === 'done') return tr('æ£€æµ‹é€šè¿‡ï¼Œå¯ä»¥å®‰å…¨å¯åŠ¨è¿ç§»ã€‚', 'Check passed. You can start the migration safely.')
+  return tr('å‡†å¤‡æ‰§è¡Œè¿ç§»å‰å®‰å…¨æ£€æµ‹ã€‚', 'Preparing migration safety checks.')
 })
-const preflightPhaseLabel = computed(() => preflightPhase.value === 'source' ? tr('¿¿¿ Kafka', 'Connecting source Kafka') : preflightPhase.value === 'target' ? tr('¿¿¿¿ Kafka', 'Connecting target Kafka') : preflightPhase.value === 'topics' ? tr('¿¿¿¿¿ Topic', 'Comparing target topics') : preflightPhase.value === 'done' ? tr('¿¿¿¿', 'Check completed') : preflightPhase.value === 'error' ? tr('¿¿¿¿', 'Check failed') : tr('¿¿¿¿', 'Preparing'))
+const preflightPhaseLabel = computed(() => preflightPhase.value === 'source' ? tr('è¿æ¥æº Kafka', 'Connecting source Kafka') : preflightPhase.value === 'target' ? tr('è¿æ¥ç›®æ ‡ Kafka', 'Connecting target Kafka') : preflightPhase.value === 'topics' ? tr('æ¯”å¯¹ç›®æ ‡ç«¯ Topic', 'Comparing target topics') : preflightPhase.value === 'done' ? tr('æ£€æµ‹å®Œæˆ', 'Check completed') : preflightPhase.value === 'error' ? tr('æ£€æµ‹å¤±è´¥', 'Check failed') : tr('å‡†å¤‡æ£€æµ‹', 'Preparing'))
 const requestedTopics = computed(() => topicsText.value.split('\n').map(item => item.trim()).filter(Boolean))
 const preflightDetailTopics = computed(() => {
   const topics = preflight.value?.topics?.length ? preflight.value.topics : requestedTopics.value
   return topics.slice(0, 80)
 })
-const preflightTopicCount = computed(() => preflight.value?.topics?.length || requestedTopics.value.length || tr('¿¿ Topic', 'All topics'))
+const preflightTopicCount = computed(() => preflight.value?.topics?.length || requestedTopics.value.length || tr('å…¨éƒ¨ Topic', 'All topics'))
 const preflightSteps = computed(() => {
   const statusFor = (step: 'source' | 'target' | 'topics') => {
     if (preflightPhase.value === 'error') return 'error'
@@ -243,9 +237,9 @@ const preflightSteps = computed(() => {
     return 'pending'
   }
   return [
-    { key: 'source', status: statusFor('source'), title: tr('¿ Kafka ¿¿¿¿', 'Source Kafka connection'), desc: preflight.value?.source_ok ? tr('¿¿¿¿', 'Connected') : tr('¿¿¿¿¿¿¿¿', 'Verify source is reachable') },
-    { key: 'target', status: statusFor('target'), title: tr('¿¿ Kafka ¿¿¿¿', 'Target Kafka connection'), desc: preflight.value?.target_ok ? tr('¿¿¿¿', 'Connected') : tr('¿¿¿¿¿¿¿¿¿', 'Verify target is reachable') },
-    { key: 'topics', status: statusFor('topics'), title: tr('¿¿ Topic ¿¿', 'Duplicate topic check'), desc: preflight.value?.existing_topics?.length ? tr(`¿¿ ${preflight.value.existing_topics.length} ¿¿¿ Topic`, `${preflight.value.existing_topics.length} conflicting topics found`) : tr('¿¿¿¿¿ Topic ¿¿', 'Check target topic list') },
+    { key: 'source', status: statusFor('source'), title: tr('æº Kafka è¿æ¥æ£€æµ‹', 'Source Kafka connection'), desc: preflight.value?.source_ok ? tr('è¿æ¥æ­£å¸¸', 'Connected') : tr('ç¡®è®¤æºå®ä¾‹å¯è®¿é—®', 'Verify source is reachable') },
+    { key: 'target', status: statusFor('target'), title: tr('ç›®æ ‡ Kafka è¿æ¥æ£€æµ‹', 'Target Kafka connection'), desc: preflight.value?.target_ok ? tr('è¿æ¥æ­£å¸¸', 'Connected') : tr('ç¡®è®¤ç›®æ ‡å®ä¾‹å¯è®¿é—®', 'Verify target is reachable') },
+    { key: 'topics', status: statusFor('topics'), title: tr('åŒå Topic æ£€æŸ¥', 'Duplicate topic check'), desc: preflight.value?.existing_topics?.length ? tr(`å‘ç° ${preflight.value.existing_topics.length} ä¸ªå†²çª Topic`, `${preflight.value.existing_topics.length} conflicting topics found`) : tr('æ£€æŸ¥ç›®æ ‡ç«¯ Topic åˆ—è¡¨', 'Check target topic list') },
   ]
 })
 
@@ -253,7 +247,7 @@ const openConfigPage = () => router.push({ name: 'migration' })
 const openProgressPage = () => router.push({ name: 'migrationProgress' })
 const toggleJobDetail = (jobId: string) => { expandedJobId.value = expandedJobId.value === jobId ? '' : jobId }
 const canStopJob = (job: any) => ['queued', 'running', 'incremental'].includes(job.status)
-const enabledLabel = (value: any) => value ? tr('¿¿', 'Enabled') : tr('¿¿', 'Disabled')
+const enabledLabel = (value: any) => value ? tr('å¯ç”¨', 'Enabled') : tr('å…³é—­', 'Disabled')
 const formatDateTime = (value?: string) => value ? new Date(value).toLocaleString() : '-'
 const currentTopicProgress = (job: any) => {
   const total = Number(job.current_total || 0)
@@ -262,14 +256,14 @@ const currentTopicProgress = (job: any) => {
 }
 const currentTopicMessageLabel = (job: any) => {
   if (job.current_total || job.current_copied) return `${job.current_copied || 0}/${job.current_total || '-'}`
-  return tr('¿¿¿¿¿¿¿¿¿¿¿¿ Topic ¿¿¿¿', 'Current job does not expose per-topic message progress')
+  return tr('å½“å‰ç‰ˆæœ¬è¿ç§»ä»»åŠ¡æœªè¿”å›å• Topic æ¶ˆæ¯è¿›åº¦', 'Current job does not expose per-topic message progress')
 }
 const migrationTopicStatus = (job: any, topic: string, index: number) => {
   const doneTopics = Number(job.done_topics || 0)
-  if (job.current_topic === topic && ['queued', 'running', 'incremental', 'stopping'].includes(job.status)) return { className: 'syncing', label: tr('¿¿¿', 'Syncing') }
-  if (job.status === 'failed' && job.current_topic === topic) return { className: 'failed', label: tr('¿¿', 'Failed') }
-  if (index < doneTopics) return { className: 'synced', label: tr('¿¿¿', 'Synced') }
-  return { className: 'pending', label: tr('¿¿¿', 'Pending') }
+  if (job.current_topic === topic && ['queued', 'running', 'incremental', 'stopping'].includes(job.status)) return { className: 'syncing', label: tr('åŒæ­¥ä¸­', 'Syncing') }
+  if (job.status === 'failed' && job.current_topic === topic) return { className: 'failed', label: tr('å¤±è´¥', 'Failed') }
+  if (index < doneTopics) return { className: 'synced', label: tr('å·²åŒæ­¥', 'Synced') }
+  return { className: 'pending', label: tr('å¾…åŒæ­¥', 'Pending') }
 }
 const elapsedTime = (job: any) => {
   const start = new Date(job.created_at || '').getTime()
@@ -314,7 +308,7 @@ const migrationPayload = () => {
 }
 
 const sleep = (ms: number) => new Promise(resolve => window.setTimeout(resolve, ms))
-const stepIcon = (status: string) => status === 'done' ? '¿' : status === 'warning' ? '!' : status === 'running' ? '¿' : status === 'error' ? '!' : '¿'
+const stepIcon = (status: string) => status === 'done' ? 'âœ“' : status === 'warning' ? '!' : status === 'running' ? 'â€¦' : status === 'error' ? '!' : 'â€¢'
 const closePreflightDialog = () => {
   if (checking.value) {
     preflightCancelled.value = true
@@ -374,7 +368,7 @@ const checkTargetTopics = async () => {
   } catch (error: any) {
     if (preflightCancelled.value || error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED') return null
     preflightPhase.value = 'error'
-    preflightError.value = error?.response?.data?.detail || error?.response?.data?.message || error?.message || tr('¿¿¿¿¿¿¿¿ Kafka ¿¿¿¿¿', 'Check failed. Please verify Kafka instance settings.')
+    preflightError.value = error?.response?.data?.detail || error?.response?.data?.message || error?.message || tr('æ£€æµ‹å¤±è´¥ï¼Œè¯·æ£€æŸ¥ Kafka å®ä¾‹é…ç½®ã€‚', 'Check failed. Please verify Kafka instance settings.')
     throw error
   } finally {
     checking.value = false
@@ -402,12 +396,12 @@ const startMigration = async () => {
 
 const stopMigrationJob = async (job: any) => {
   if (!canStopJob(job) || stoppingJobId.value) return
-  const ok = window.confirm(tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Stop this migration sync job? Copied data will not be rolled back automatically.'))
+  const ok = window.confirm(tr('ç¡®è®¤å–æ¶ˆè¯¥è¿ç§»åŒæ­¥ä»»åŠ¡ï¼Ÿå·²å¤åˆ¶çš„æ•°æ®ä¸ä¼šè‡ªåŠ¨å›æ»šã€‚', 'Stop this migration sync job? Copied data will not be rolled back automatically.'))
   if (!ok) return
   stoppingJobId.value = job.id
   try {
     await stopKafkaMigration(job.id)
-    const updated = await getKafkaMigration(job.id).catch(() => ({ ...job, status: 'stopping', message: tr('¿¿¿¿¿¿¿¿', 'Stopping migration job') }))
+    const updated = await getKafkaMigration(job.id).catch(() => ({ ...job, status: 'stopping', message: tr('æ­£åœ¨åœæ­¢è¿ç§»ä»»åŠ¡', 'Stopping migration job') }))
     jobs.value = jobs.value.map(item => item.id === job.id ? updated : item)
   } finally {
     stoppingJobId.value = ''
@@ -415,7 +409,6 @@ const stopMigrationJob = async (job: any) => {
 }
 
 onMounted(async () => {
-  license.value = await getAppStatus()
   clusters.value = await listKafkaClusters()
   await loadJobs()
   timer = window.setInterval(pollRunningJobs, 1500)
@@ -525,4 +518,3 @@ button { border: 0; border-radius: 9px; padding: 9px 14px; cursor: pointer; font
 .locked p { color: var(--text-secondary); }
 @media (max-width: 980px) { .config-page, .two, .three, .job-detail { grid-template-columns: 1fr; } .hero { align-items: flex-start; flex-direction: column; } .hero-actions { justify-content: flex-start; } }
 </style>
-

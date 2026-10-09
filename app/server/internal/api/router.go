@@ -46,7 +46,7 @@ func NewRouter(cfg config.Config, db *gorm.DB) *gin.Engine {
 	if cfg.CORSAllowedOrigins != "" {
 		corsConfig.AllowOrigins = strings.Split(cfg.CORSAllowedOrigins, ",")
 	} else {
-		corsConfig.AllowOrigins = []string{"http://localhost:3000", "http://127.0.0.1:3000"}
+		corsConfig.AllowOriginFunc = func(origin string) bool { return true }
 	}
 	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		return fmt.Sprintf("%s | %3d | %13v | %15s | %-7s %#v\n", param.TimeStamp.Format("2006-01-02 15:04:05"), param.StatusCode, param.Latency, param.ClientIP, param.Method, param.Path)
@@ -146,7 +146,7 @@ func (a *API) exporterMetrics(c *gin.Context) {
 	if target := c.Param("cluster"); target != "" {
 		var cluster model.KafkaCluster
 		if err := a.db.Where("is_active = ? AND (id = ? OR name = ?)", true, target, target).First(&cluster).Error; err != nil {
-			errorJSON(c, http.StatusNotFound, "Kafka ¿¿¿¿¿")
+			errorJSON(c, http.StatusNotFound, "Kafka é›†ç¾¤ä¸å­˜åœ¨")
 			return
 		}
 		clusters = []model.KafkaCluster{cluster}
@@ -182,7 +182,7 @@ func (a *API) loginRateLimit() gin.HandlerFunc {
 		}
 		if len(recent) >= 10 {
 			loginLimiter.attempts[ip] = recent
-			c.JSON(http.StatusTooManyRequests, gin.H{"code": 429, "message": "¿¿¿¿¿¿¿¿¿¿ 5 ¿¿¿¿¿"})
+			c.JSON(http.StatusTooManyRequests, gin.H{"code": 429, "message": "ç™»å½•å°è¯•è¿‡äºé¢‘ç¹ï¼Œè¯· 5 åˆ†é’Ÿåå†è¯•"})
 			c.Abort()
 			return
 		}
@@ -199,7 +199,7 @@ func (a *API) login(c *gin.Context) {
 		UseLDAP  bool   `json:"use_ldap"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è¯·æ±‚æ ¼å¼é”™è¯¯")
 		return
 	}
 	role := "user"
@@ -208,7 +208,7 @@ func (a *API) login(c *gin.Context) {
 	settings := a.authSettings()
 	if req.UseLDAP {
 		if settings.OIDC.Enabled {
-			errorJSON(c, http.StatusForbidden, "OIDC ¿¿¿¿¿¿ LDAP ¿¿")
+			errorJSON(c, http.StatusForbidden, "OIDC å¯ç”¨æ—¶ä¸æ”¯æŒ LDAP ç™»å½•")
 			return
 		}
 		ldapUser, err := a.authenticateLDAP(req.Username, req.Password)
@@ -217,7 +217,7 @@ func (a *API) login(c *gin.Context) {
 			return
 		}
 		if !ldapUser.IsActive {
-			errorJSON(c, http.StatusForbidden, "¿¿¿¿¿")
+			errorJSON(c, http.StatusForbidden, "ç”¨æˆ·å·²ç¦ç”¨")
 			return
 		}
 		role = ldapUser.Role
@@ -226,15 +226,15 @@ func (a *API) login(c *gin.Context) {
 	} else {
 		var dbUser model.AppUser
 		if err := a.db.Where("username = ?", req.Username).First(&dbUser).Error; err != nil {
-			errorJSON(c, http.StatusUnauthorized, "¿¿¿¿¿¿¿¿")
+			errorJSON(c, http.StatusUnauthorized, "ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯")
 			return
 		}
 		if !dbUser.IsActive {
-			errorJSON(c, http.StatusForbidden, "¿¿¿¿¿")
+			errorJSON(c, http.StatusForbidden, "ç”¨æˆ·å·²ç¦ç”¨")
 			return
 		}
 		if dbUser.Source != "local" || dbUser.PasswordHash == "" || !store.VerifyPassword(dbUser.PasswordHash, req.Password) {
-			errorJSON(c, http.StatusUnauthorized, "¿¿¿¿¿¿¿¿")
+			errorJSON(c, http.StatusUnauthorized, "ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯")
 			return
 		}
 		role = dbUser.Role
@@ -242,7 +242,7 @@ func (a *API) login(c *gin.Context) {
 	}
 	text, err := a.issueToken(req.Username, role)
 	if err != nil {
-		errorJSON(c, http.StatusInternalServerError, "¿¿ Token ¿¿")
+		errorJSON(c, http.StatusInternalServerError, "ç”Ÿæˆ Token å¤±è´¥")
 		return
 	}
 	a.upsertUser(req.Username, displayName, "", role, source)
@@ -319,14 +319,14 @@ func (a *API) listClusters(c *gin.Context) {
 func (a *API) createCluster(c *gin.Context) {
 	var req model.KafkaCluster
 	if err := c.ShouldBindJSON(&req); err != nil || req.Name == "" || req.BootstrapServers == "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "é›†ç¾¤åç§°å’Œåœ°å€ä¸èƒ½ä¸ºç©º")
 		return
 	}
 	if !a.enterpriseEnabled() {
 		var activeCount int64
 		a.db.Model(&model.KafkaCluster{}).Where("is_active = ?", true).Count(&activeCount)
 		if activeCount >= 10 {
-			errorJSON(c, http.StatusForbidden, "¿¿¿¿¿¿¿¿¿ 10 ¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿")
+			errorJSON(c, http.StatusForbidden, "ç¤¾åŒºç‰ˆæœ€å¤šåªèƒ½ç®¡ç† 10 ä¸ª Kafka å®ä¾‹ï¼Œå®Œæ•´ç‰ˆä¸é™åˆ¶å®ä¾‹æ•°é‡")
 			return
 		}
 	}
@@ -336,7 +336,7 @@ func (a *API) createCluster(c *gin.Context) {
 		req.SecurityProtocol = "PLAINTEXT"
 	}
 	if err := a.db.Create(&req).Error; err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "é›†ç¾¤åç§°å·²å­˜åœ¨")
 		return
 	}
 	for _, action := range model.AllActions {
@@ -353,7 +353,7 @@ func (a *API) updateCluster(c *gin.Context) {
 	}
 	var req model.KafkaCluster
 	if err := c.ShouldBindJSON(&req); err != nil || req.Name == "" || req.BootstrapServers == "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "é›†ç¾¤åç§°å’Œåœ°å€ä¸èƒ½ä¸ºç©º")
 		return
 	}
 	cluster.Name = req.Name
@@ -696,7 +696,7 @@ func (a *API) createTopic(c *gin.Context) {
 			ReplicationFactor int32  `json:"replication_factor"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil || req.Topic == "" {
-			errorJSON(c, http.StatusBadRequest, "Topic ¿¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "Topic åç§°ä¸èƒ½ä¸ºç©º")
 			return
 		}
 		if req.Partitions < 1 {
@@ -732,7 +732,7 @@ func (a *API) updateTopicPartitions(c *gin.Context) {
 			Partitions int32 `json:"partitions"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil || req.Partitions < 1 {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿ 0")
+			errorJSON(c, http.StatusBadRequest, "åˆ†åŒºæ•°å¿…é¡»å¤§äº 0")
 			return
 		}
 		if err := a.kafka.AlterTopicPartitions(cluster, c.Param("topic"), req.Partitions); err != nil {
@@ -787,7 +787,7 @@ func (a *API) sendMessage(c *gin.Context) {
 			Messages  []produceItem `json:"messages"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil || req.Topic == "" {
-			errorJSON(c, http.StatusBadRequest, "Topic ¿¿¿¿¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "Topic å’Œæ¶ˆæ¯å†…å®¹ä¸èƒ½ä¸ºç©º")
 			return
 		}
 		messages := make([]kafkasvc.ProduceMessage, 0, len(req.Messages))
@@ -798,11 +798,11 @@ func (a *API) sendMessage(c *gin.Context) {
 			messages = append(messages, kafkasvc.ProduceMessage{Partition: req.Partition, Key: req.Key, Value: req.Value})
 		}
 		if len(messages) > 1000 {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿ 1000 ¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "å•æ¬¡æœ€å¤šå†™å…¥ 1000 æ¡æ¶ˆæ¯")
 			return
 		}
 		if len(messages) > 1 && !a.enterpriseEnabled() {
-			errorJSON(c, http.StatusForbidden, "¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿")
+			errorJSON(c, http.StatusForbidden, "å®Œæ•´ç‰ˆå¯†é’¥å·²è¿‡æœŸï¼Œæ‰¹é‡å¯¼å…¥æ¶ˆæ¯ä¸å¯ç”¨")
 			return
 		}
 		data, err := a.kafka.SendMessages(cluster, req.Topic, messages)
@@ -851,7 +851,7 @@ func (a *API) updateTopicConfigs(c *gin.Context) {
 			Configs map[string]*string `json:"configs"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "è¯·æ±‚æ ¼å¼é”™è¯¯")
 			return
 		}
 		if err := a.kafka.AlterTopicConfigs(cluster, c.Param("topic"), req.Configs); err != nil {
@@ -898,16 +898,16 @@ func (a *API) createGroupPlaceholder(c *gin.Context) {
 	a.withClusterPerm(c, "group_create", func(cluster model.KafkaCluster) {
 		group := strings.TrimSpace(c.Param("group"))
 		if group == "" {
-			errorJSON(c, http.StatusBadRequest, "Group ID ¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "Group ID ä¸èƒ½ä¸ºç©º")
 			return
 		}
 		row := model.KafkaGroupPlaceholder{ClusterID: cluster.ID, GroupID: group, CreatedBy: current(c).Username}
 		if err := a.db.Where(model.KafkaGroupPlaceholder{ClusterID: cluster.ID, GroupID: group}).FirstOrCreate(&row).Error; err != nil {
-			errorJSON(c, http.StatusInternalServerError, "¿¿ Consumer Group ¿¿")
+			errorJSON(c, http.StatusInternalServerError, "ä¿å­˜ Consumer Group å¤±è´¥")
 			return
 		}
-		a.audit(current(c).Username, cluster.ID, "group_create", group, gin.H{"note": "Kafka Consumer Group ¿¿ KafkaVista ¿¿¿¿¿¿¿¿ offset ¿¿¿¿ Kafka ¿¿¿"})
-		c.JSON(http.StatusOK, gin.H{"code": 0, "message": "Consumer Group ¿¿¿"})
+		a.audit(current(c).Username, cluster.ID, "group_create", group, gin.H{"note": "Kafka Consumer Group å·²åœ¨ KafkaVista ç™»è®°ï¼›æ¶ˆè´¹è€…æäº¤ offset åä¼šå†™å…¥ Kafka å…ƒæ•°æ®"})
+		c.JSON(http.StatusOK, gin.H{"code": 0, "message": "Consumer Group å·²åˆ›å»º"})
 	})
 }
 func (a *API) deleteGroup(c *gin.Context) {
@@ -977,7 +977,7 @@ func (a *API) savePermissions(c *gin.Context) {
 			Actions     []string `json:"actions"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "è¯·æ±‚æ ¼å¼é”™è¯¯")
 			return
 		}
 		if req.SubjectType == "" {
@@ -988,7 +988,7 @@ func (a *API) savePermissions(c *gin.Context) {
 			target = req.Role
 		}
 		if target == "" {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "æˆæƒå¯¹è±¡ä¸èƒ½ä¸ºç©º")
 			return
 		}
 		if req.SubjectType == "role" {
@@ -1107,23 +1107,23 @@ func mutationAuditAction(c *gin.Context) (string, string) {
 	method := c.Request.Method
 	switch {
 	case strings.HasSuffix(path, "/api/admin/settings") && method == http.MethodPut:
-		return "settings_update", "¿¿¿¿"
+		return "settings_update", "ç³»ç»Ÿè®¾ç½®"
 	case strings.HasSuffix(path, "/api/admin/settings/notification/test"):
-		return "notification_test", "¿¿¿¿"
+		return "notification_test", "é€šçŸ¥æ¸ é“"
 	case strings.HasSuffix(path, "/api/admin/settings/alerting/test"):
-		return "alerting_test", "¿¿¿¿"
+		return "alerting_test", "ç›‘æ§å‘Šè­¦"
 	case strings.HasSuffix(path, "/api/admin/settings/ldap/test"):
 		return "ldap_test", "LDAP"
 	case strings.HasSuffix(path, "/api/admin/settings/ldap/sync-users"):
-		return "ldap_sync_users", "LDAP ¿¿"
+		return "ldap_sync_users", "LDAP ç”¨æˆ·"
 	case strings.HasSuffix(path, "/api/admin/users") && method == http.MethodPost:
-		return "user_create", "¿¿"
+		return "user_create", "ç”¨æˆ·"
 	case strings.HasSuffix(path, "/api/admin/users/:username") && method == http.MethodPut:
 		return "user_update", c.Param("username")
 	case strings.HasSuffix(path, "/api/admin/users/:username") && method == http.MethodDelete:
 		return "user_delete", c.Param("username")
 	case strings.HasSuffix(path, "/api/admin/roles") && method == http.MethodPost:
-		return "role_create", "¿¿"
+		return "role_create", "è§’è‰²"
 	case strings.HasSuffix(path, "/api/admin/roles/:role") && method == http.MethodDelete:
 		return "role_delete", c.Param("role")
 	case strings.Contains(path, "/clusters/:cluster/topics/:topic/configs/:config") && method == http.MethodDelete:
@@ -1140,7 +1140,7 @@ func (a *API) withClusterPerm(c *gin.Context, action string, fn func(model.Kafka
 		return
 	}
 	if !a.hasPermission(current(c), cluster.ID, action) {
-		errorJSON(c, http.StatusForbidden, "¿¿ Kafka ¿¿: "+action)
+		errorJSON(c, http.StatusForbidden, "ç¼ºå°‘ Kafka æƒé™: "+action)
 		return
 	}
 	fn(cluster)
@@ -1149,7 +1149,7 @@ func (a *API) withClusterPerm(c *gin.Context, action string, fn func(model.Kafka
 func (a *API) cluster(c *gin.Context) (model.KafkaCluster, bool) {
 	var cluster model.KafkaCluster
 	if err := a.db.Where("id = ? AND is_active = ?", c.Param("cluster"), true).First(&cluster).Error; err != nil {
-		errorJSON(c, http.StatusNotFound, "Kafka ¿¿¿¿¿")
+		errorJSON(c, http.StatusNotFound, "Kafka é›†ç¾¤ä¸å­˜åœ¨")
 		return cluster, false
 	}
 	return cluster, true
@@ -1288,4 +1288,3 @@ func contains(items []string, item string) bool {
 	}
 	return false
 }
-

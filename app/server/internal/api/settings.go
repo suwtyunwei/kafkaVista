@@ -137,7 +137,7 @@ func defaultAuthSettings() AuthSettings {
 	s.OIDC.UsernameClaim = "preferred_username"
 	s.OIDC.RoleClaim = "roles"
 	s.OIDC.AdminRoles = []string{"admin", "kafkavista-admin"}
-	s.OIDC.ButtonText = "¿¿ OIDC ¿¿"
+	s.OIDC.ButtonText = "ä½¿ç”¨ OIDC ç™»å½•"
 	s.Monitoring.TopicLimit = 200
 	s.Monitoring.GroupLimit = 200
 	s.Monitoring.Alerting.LagThreshold = 10000
@@ -181,7 +181,7 @@ func (a *API) appStatus(c *gin.Context) {
 
 func (a *API) generateLicenseToken(c *gin.Context) {
 	if a.cfg.LicenseAdminToken == "" {
-		errorJSON(c, http.StatusForbidden, "LICENSE_ADMIN_TOKEN ¿¿¿¿¿¿ token ¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusForbidden, "LICENSE_ADMIN_TOKEN æœªé…ç½®ï¼Œæˆæƒ token ç”Ÿæˆæ¥å£ä¸å¯ç”¨")
 		return
 	}
 	provided := c.GetHeader("X-License-Admin-Token")
@@ -189,7 +189,7 @@ func (a *API) generateLicenseToken(c *gin.Context) {
 		provided = strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	}
 	if provided != a.cfg.LicenseAdminToken {
-		errorJSON(c, http.StatusUnauthorized, "¿¿¿¿ token ¿¿")
+		errorJSON(c, http.StatusUnauthorized, "æˆæƒç®¡ç† token æ— æ•ˆ")
 		return
 	}
 
@@ -205,20 +205,20 @@ func (a *API) generateLicenseToken(c *gin.Context) {
 	if req.ExpiresAt != "" {
 		parsed, err := time.Parse(time.RFC3339, req.ExpiresAt)
 		if err != nil {
-			errorJSON(c, http.StatusBadRequest, "expires_at ¿¿¿ RFC3339 ¿¿¿¿¿ 2027-05-21T00:00:00Z")
+			errorJSON(c, http.StatusBadRequest, "expires_at å¿…é¡»æ˜¯ RFC3339 æ—¶é—´ï¼Œä¾‹å¦‚ 2027-05-21T00:00:00Z")
 			return
 		}
 		expiresAt = parsed.UTC()
 	}
 	if !expiresAt.After(time.Now()) {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è¿‡æœŸæ—¶é—´å¿…é¡»æ™šäºå½“å‰æ—¶é—´")
 		return
 	}
 
 	payload := licensePayload{Edition: "enterprise", ExpiresAt: expiresAt.Format(time.RFC3339)}
 	raw, err := json.Marshal(payload)
 	if err != nil {
-		errorJSON(c, http.StatusInternalServerError, "¿¿¿¿ token ¿¿")
+		errorJSON(c, http.StatusInternalServerError, "ç”Ÿæˆæˆæƒ token å¤±è´¥")
 		return
 	}
 	token := "KV-ENTERPRISE-" + base64.RawURLEncoding.EncodeToString(raw)
@@ -228,17 +228,17 @@ func (a *API) generateLicenseToken(c *gin.Context) {
 func (a *API) inspectLicenseToken(c *gin.Context) {
 	token := strings.TrimSpace(c.Query("token"))
 	if token == "" {
-		errorJSON(c, http.StatusBadRequest, "token ¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "token ä¸èƒ½ä¸ºç©º")
 		return
 	}
 	payload, ok := parseLicenseKey(token)
 	if !ok {
-		errorJSON(c, http.StatusBadRequest, "token ¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "token æ ¼å¼æ— æ•ˆ")
 		return
 	}
 	expiresAt, err := time.Parse(time.RFC3339, payload.ExpiresAt)
 	if err != nil {
-		errorJSON(c, http.StatusBadRequest, "token ¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "token è¿‡æœŸæ—¶é—´æ— æ•ˆ")
 		return
 	}
 	now := time.Now().UTC()
@@ -409,11 +409,11 @@ func (a *API) saveSettings(c *gin.Context) {
 	current := a.authSettings()
 	var req AuthSettings
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è¯·æ±‚æ ¼å¼é”™è¯¯")
 		return
 	}
 	if req.OIDC.Enabled && req.LDAP.Enabled {
-		errorJSON(c, http.StatusBadRequest, "OIDC ¿ LDAP ¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "OIDC å’Œ LDAP åªèƒ½å¯ç”¨ä¸€ä¸ª")
 		return
 	}
 	if req.LDAP.BindPassword == "" {
@@ -457,7 +457,7 @@ func (a *API) saveSettings(c *gin.Context) {
 		req.OIDC.UsernameClaim = "preferred_username"
 	}
 	if strings.TrimSpace(req.OIDC.ButtonText) == "" {
-		req.OIDC.ButtonText = "¿¿ OIDC ¿¿"
+		req.OIDC.ButtonText = "ä½¿ç”¨ OIDC ç™»å½•"
 	}
 	if req.Monitoring.TopicLimit <= 0 {
 		req.Monitoring.TopicLimit = 200
@@ -475,7 +475,7 @@ func (a *API) saveSettings(c *gin.Context) {
 		req.Monitoring.Alerting.Rules = defaultMonitoringAlertRules()
 	}
 	if err := a.saveAuthSettings(req); err != nil {
-		errorJSON(c, http.StatusInternalServerError, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusInternalServerError, "ä¿å­˜è®¾ç½®å¤±è´¥")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": sanitizedSettings(req)})
@@ -486,40 +486,40 @@ func (a *API) testNotification(c *gin.Context) {
 		Channel string `json:"channel"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è¯·æ±‚æ ¼å¼é”™è¯¯")
 		return
 	}
 	settings := a.authSettings()
 	if !settings.Monitoring.Alerting.Enabled {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è¯·å…ˆå¼€å¯ç›‘æ§å‘Šè­¦")
 		return
 	}
 	channel := strings.ToLower(strings.TrimSpace(req.Channel))
-	message := fmt.Sprintf("KafkaVista ¿¿¿¿¿¿¿¿\n¿¿¿%s\n¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿", time.Now().Format("2006-01-02 15:04:05"))
+	message := fmt.Sprintf("KafkaVista ç›‘æ§å‘Šè­¦æµ‹è¯•æ¶ˆæ¯\næ—¶é—´ï¼š%s\nå¦‚æœä½ æ”¶åˆ°è¿™æ¡æ¶ˆæ¯ï¼Œè¯´æ˜é€šçŸ¥æ¸ é“é…ç½®æˆåŠŸã€‚", time.Now().Format("2006-01-02 15:04:05"))
 	var webhook string
 	var payload any
 	switch channel {
 	case "dingtalk":
 		if !settings.Monitoring.Alerting.DingTalkEnabled {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "é’‰é’‰é€šçŸ¥æœªå¯ç”¨")
 			return
 		}
 		webhook = strings.TrimSpace(settings.Monitoring.Alerting.DingTalkWebhook)
 		payload = gin.H{"msgtype": "text", "text": gin.H{"content": message}}
 	case "feishu":
 		if !settings.Monitoring.Alerting.FeishuEnabled {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "é£ä¹¦é€šçŸ¥æœªå¯ç”¨")
 			return
 		}
 		webhook = strings.TrimSpace(settings.Monitoring.Alerting.FeishuWebhook)
 		payload = gin.H{"msg_type": "text", "content": gin.H{"text": message}}
 	case "email":
 		if !settings.Monitoring.Alerting.EmailSMTPEnabled {
-			errorJSON(c, http.StatusBadRequest, "¿¿ SMTP ¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "é‚®ä»¶ SMTP é€šçŸ¥æœªå¯ç”¨")
 			return
 		}
 		if emailSMTPConfigured(settings) {
-			if err := sendEmailNotification(settings, "KafkaVista ¿¿¿¿¿¿", message, ""); err != nil {
+			if err := sendEmailNotification(settings, "KafkaVista ç›‘æ§å‘Šè­¦æµ‹è¯•", message, ""); err != nil {
 				errorJSON(c, http.StatusBadGateway, err.Error())
 				return
 			}
@@ -527,13 +527,13 @@ func (a *API) testNotification(c *gin.Context) {
 			return
 		}
 		webhook = strings.TrimSpace(settings.Monitoring.Alerting.EmailWebhook)
-		payload = gin.H{"subject": "KafkaVista ¿¿¿¿¿¿", "content": message, "text": message}
+		payload = gin.H{"subject": "KafkaVista ç›‘æ§å‘Šè­¦æµ‹è¯•", "content": message, "text": message}
 	default:
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "ä¸æ”¯æŒçš„é€šçŸ¥æ¸ é“")
 		return
 	}
 	if webhook == "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿ Webhook")
+		errorJSON(c, http.StatusBadRequest, "è¯·å…ˆå¡«å†™è¯¥æ¸ é“çš„ Webhook")
 		return
 	}
 	if err := postNotificationWebhook(webhook, payload); err != nil {
@@ -561,14 +561,14 @@ func postNotificationWebhook(webhook string, payload any) error {
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("Webhook ¿¿ %d¿%s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+		return fmt.Errorf("Webhook è¿”å› %dï¼š%s", resp.StatusCode, strings.TrimSpace(string(respBody)))
 	}
 	return nil
 }
 
 func (a *API) ldapConnection(settings AuthSettings) (*ldap.Conn, error) {
 	if settings.LDAP.URL == "" {
-		return nil, errors.New("LDAP URL ¿¿¿¿")
+		return nil, errors.New("LDAP URL ä¸èƒ½ä¸ºç©º")
 	}
 	conn, err := ldap.DialURL(settings.LDAP.URL)
 	if err != nil {
@@ -642,7 +642,7 @@ func (a *API) testLDAP(c *gin.Context) {
 	}
 	conn, err := a.ldapConnection(settings)
 	if err != nil {
-		errorJSON(c, http.StatusBadGateway, "LDAP ¿¿¿¿: "+err.Error())
+		errorJSON(c, http.StatusBadGateway, "LDAP è¿æ¥å¤±è´¥: "+err.Error())
 		return
 	}
 	defer conn.Close()
@@ -653,7 +653,7 @@ func (a *API) testLDAP(c *gin.Context) {
 	probeFilter := strings.Replace(filter, "%s", "*", 1)
 	entries, err := ldapSearch(conn, settings.LDAP.BaseDN, probeFilter, []string{"dn", settings.LDAP.DisplayNameAttr, settings.LDAP.EmailAttr}, 5)
 	if err != nil {
-		errorJSON(c, http.StatusBadGateway, "LDAP ¿¿¿¿: "+err.Error())
+		errorJSON(c, http.StatusBadGateway, "LDAP æœç´¢å¤±è´¥: "+err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": gin.H{"matched": len(entries)}})
@@ -662,12 +662,12 @@ func (a *API) testLDAP(c *gin.Context) {
 func (a *API) syncLDAPUsers(c *gin.Context) {
 	settings := a.authSettings()
 	if !settings.LDAP.Enabled {
-		errorJSON(c, http.StatusBadRequest, "LDAP ¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "LDAP æœªå¯ç”¨")
 		return
 	}
 	conn, err := a.ldapConnection(settings)
 	if err != nil {
-		errorJSON(c, http.StatusBadGateway, "LDAP ¿¿¿¿: "+err.Error())
+		errorJSON(c, http.StatusBadGateway, "LDAP è¿æ¥å¤±è´¥: "+err.Error())
 		return
 	}
 	defer conn.Close()
@@ -679,7 +679,7 @@ func (a *API) syncLDAPUsers(c *gin.Context) {
 	attrs := []string{"uid", "cn", "mail", "sAMAccountName", settings.LDAP.DisplayNameAttr, settings.LDAP.EmailAttr}
 	entries, err := ldapSearch(conn, settings.LDAP.BaseDN, searchFilter, attrs, 0)
 	if err != nil {
-		errorJSON(c, http.StatusBadGateway, "LDAP ¿¿¿¿: "+err.Error())
+		errorJSON(c, http.StatusBadGateway, "LDAP æœç´¢å¤±è´¥: "+err.Error())
 		return
 	}
 	createdOrUpdated := 0
@@ -723,17 +723,17 @@ func (a *API) createUser(c *gin.Context) {
 		Password    string `json:"password"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil || strings.TrimSpace(req.Username) == "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "ç”¨æˆ·åä¸èƒ½ä¸ºç©º")
 		return
 	}
 	req.Username = strings.TrimSpace(req.Username)
 	if req.Password == "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "å¯†ç ä¸èƒ½ä¸ºç©º")
 		return
 	}
 	var exists model.AppUser
 	if err := a.db.Where("username = ?", req.Username).First(&exists).Error; err == nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "ç”¨æˆ·å·²å­˜åœ¨")
 		return
 	}
 	if req.Role == "" {
@@ -742,18 +742,18 @@ func (a *API) createUser(c *gin.Context) {
 	var roleCount int64
 	a.db.Model(&model.AppRole{}).Where("name = ?", req.Role).Count(&roleCount)
 	if req.Role != "" && roleCount == 0 {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è§’è‰²ä¸å­˜åœ¨")
 		return
 	}
 	user := model.AppUser{Username: req.Username, DisplayName: req.DisplayName, Email: req.Email, Role: req.Role, Source: "local", IsActive: true}
 	if hash, err := store.HashPassword(req.Password); err == nil {
 		user.PasswordHash = hash
 	} else {
-		errorJSON(c, http.StatusInternalServerError, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusInternalServerError, "åˆ›å»ºç”¨æˆ·å¤±è´¥")
 		return
 	}
 	if err := a.db.Create(&user).Error; err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "ç”¨æˆ·åˆ›å»ºå¤±è´¥")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": user})
@@ -771,17 +771,17 @@ func (a *API) createRole(c *gin.Context) {
 		Description string `json:"description"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil || strings.TrimSpace(req.Name) == "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è§’è‰²åç§°ä¸èƒ½ä¸ºç©º")
 		return
 	}
 	req.Name = strings.TrimSpace(req.Name)
 	if req.Name == "admin" || req.Name == "user" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "å†…ç½®è§’è‰²å·²å­˜åœ¨")
 		return
 	}
 	role := model.AppRole{Name: req.Name, Description: req.Description}
 	if err := a.db.Create(&role).Error; err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è§’è‰²å·²å­˜åœ¨")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": role})
@@ -790,7 +790,7 @@ func (a *API) createRole(c *gin.Context) {
 func (a *API) deleteRole(c *gin.Context) {
 	role := c.Param("role")
 	if role == "admin" || role == "user" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "å†…ç½®è§’è‰²ä¸èƒ½åˆ é™¤")
 		return
 	}
 	a.db.Model(&model.AppUser{}).Where("role = ?", role).Update("role", "user")
@@ -809,12 +809,12 @@ func (a *API) updateUser(c *gin.Context) {
 		Email       string `json:"email"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è¯·æ±‚æ ¼å¼é”™è¯¯")
 		return
 	}
 	var user model.AppUser
 	if err := a.db.Where("username = ?", username).First(&user).Error; err != nil {
-		errorJSON(c, http.StatusNotFound, "¿¿¿¿¿")
+		errorJSON(c, http.StatusNotFound, "ç”¨æˆ·ä¸å­˜åœ¨")
 		return
 	}
 	if req.DisplayName != "" {
@@ -828,7 +828,7 @@ func (a *API) updateUser(c *gin.Context) {
 	if req.Role != "" && roleCount > 0 {
 		user.Role = req.Role
 	} else if req.Role != "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è§’è‰²ä¸å­˜åœ¨")
 		return
 	}
 	if req.IsActive != nil {
@@ -838,7 +838,7 @@ func (a *API) updateUser(c *gin.Context) {
 		if hash, err := store.HashPassword(req.Password); err == nil {
 			user.PasswordHash = hash
 		} else {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+			errorJSON(c, http.StatusBadRequest, "å¯†ç æ›´æ–°å¤±è´¥")
 			return
 		}
 	}
@@ -849,11 +849,11 @@ func (a *API) updateUser(c *gin.Context) {
 func (a *API) deleteUser(c *gin.Context) {
 	username := c.Param("username")
 	if username == a.cfg.DefaultUser {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "é»˜è®¤ç®¡ç†å‘˜ä¸èƒ½åˆ é™¤")
 		return
 	}
 	if username == current(c).Username {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "ä¸èƒ½åˆ é™¤å½“å‰ç™»å½•ç”¨æˆ·")
 		return
 	}
 	a.db.Where("username = ?", username).Delete(&model.KafkaPermission{})
@@ -941,25 +941,25 @@ func hasAnyRole(value interface{}, wanted []string) bool {
 func (a *API) authenticateLDAP(username, password string) (model.AppUser, error) {
 	settings := a.authSettings()
 	if !settings.LDAP.Enabled {
-		return model.AppUser{}, errors.New("LDAP ¿¿¿")
+		return model.AppUser{}, errors.New("LDAP æœªå¯ç”¨")
 	}
 	if username == "" || password == "" {
-		return model.AppUser{}, errors.New("¿¿¿¿¿¿¿¿¿¿")
+		return model.AppUser{}, errors.New("ç”¨æˆ·åæˆ–å¯†ç ä¸èƒ½ä¸ºç©º")
 	}
 	conn, err := a.ldapConnection(settings)
 	if err != nil {
-		return model.AppUser{}, errors.New("LDAP ¿¿¿¿")
+		return model.AppUser{}, errors.New("LDAP è¿æ¥å¤±è´¥")
 	}
 	defer conn.Close()
 	filter := fmt.Sprintf(settings.LDAP.UserFilter, ldap.EscapeFilter(username))
 	attrs := []string{"dn", settings.LDAP.DisplayNameAttr, settings.LDAP.EmailAttr}
 	res, err := conn.Search(ldap.NewSearchRequest(settings.LDAP.BaseDN, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 1, 0, false, filter, attrs, nil))
 	if err != nil || len(res.Entries) == 0 {
-		return model.AppUser{}, errors.New("LDAP ¿¿¿¿¿")
+		return model.AppUser{}, errors.New("LDAP ç”¨æˆ·ä¸å­˜åœ¨")
 	}
 	entry := res.Entries[0]
 	if err := conn.Bind(entry.DN, password); err != nil {
-		return model.AppUser{}, errors.New("LDAP ¿¿¿¿¿¿¿¿")
+		return model.AppUser{}, errors.New("LDAP ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯")
 	}
 	role := a.roleFor(username, nil)
 	return a.upsertUser(username, entry.GetAttributeValue(settings.LDAP.DisplayNameAttr), entry.GetAttributeValue(settings.LDAP.EmailAttr), role, "ldap"), nil
@@ -968,16 +968,16 @@ func (a *API) authenticateLDAP(username, password string) (model.AppUser, error)
 func (a *API) oidcLogin(c *gin.Context) {
 	settings := a.authSettings()
 	if !a.enterpriseEnabled() {
-		errorJSON(c, http.StatusForbidden, "¿¿¿¿¿¿¿¿¿OIDC ¿¿¿")
+		errorJSON(c, http.StatusForbidden, "å®Œæ•´ç‰ˆå¯†é’¥å·²è¿‡æœŸï¼ŒOIDC ä¸å¯ç”¨")
 		return
 	}
 	if !settings.OIDC.Enabled {
-		errorJSON(c, http.StatusBadRequest, "OIDC ¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "OIDC æœªå¯ç”¨")
 		return
 	}
 	discovery, err := discoverOIDC(settings.OIDC.IssuerURL)
 	if err != nil {
-		errorJSON(c, http.StatusBadGateway, "OIDC discovery ¿¿")
+		errorJSON(c, http.StatusBadGateway, "OIDC discovery å¤±è´¥")
 		return
 	}
 	state := base64.RawURLEncoding.EncodeToString([]byte(fmt.Sprintf("%d", time.Now().UnixNano())))
@@ -993,17 +993,17 @@ func (a *API) oidcLogin(c *gin.Context) {
 func (a *API) oidcCallback(c *gin.Context) {
 	code := c.Query("code")
 	if code == "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿ OIDC code")
+		errorJSON(c, http.StatusBadRequest, "ç¼ºå°‘ OIDC code")
 		return
 	}
 	settings := a.authSettings()
 	if !a.enterpriseEnabled() {
-		errorJSON(c, http.StatusForbidden, "¿¿¿¿¿¿¿¿¿OIDC ¿¿¿")
+		errorJSON(c, http.StatusForbidden, "å®Œæ•´ç‰ˆå¯†é’¥å·²è¿‡æœŸï¼ŒOIDC ä¸å¯ç”¨")
 		return
 	}
 	discovery, err := discoverOIDC(settings.OIDC.IssuerURL)
 	if err != nil {
-		errorJSON(c, http.StatusBadGateway, "OIDC discovery ¿¿")
+		errorJSON(c, http.StatusBadGateway, "OIDC discovery å¤±è´¥")
 		return
 	}
 	form := url.Values{}
@@ -1014,7 +1014,7 @@ func (a *API) oidcCallback(c *gin.Context) {
 	form.Set("client_secret", settings.OIDC.ClientSecret)
 	tokenResp, err := http.PostForm(discovery.TokenEndpoint, form)
 	if err != nil || tokenResp.StatusCode >= 300 {
-		errorJSON(c, http.StatusBadGateway, "OIDC token ¿¿¿¿")
+		errorJSON(c, http.StatusBadGateway, "OIDC token äº¤æ¢å¤±è´¥")
 		return
 	}
 	defer tokenResp.Body.Close()
@@ -1023,12 +1023,12 @@ func (a *API) oidcCallback(c *gin.Context) {
 	accessToken, _ := tokenData["access_token"].(string)
 	userinfo, err := fetchUserInfo(discovery.UserInfoEndpoint, accessToken)
 	if err != nil {
-		errorJSON(c, http.StatusBadGateway, "OIDC userinfo ¿¿¿¿")
+		errorJSON(c, http.StatusBadGateway, "OIDC userinfo è·å–å¤±è´¥")
 		return
 	}
 	username := oidcUsername(userinfo, settings.OIDC.UsernameClaim)
 	if username == "" {
-		errorJSON(c, http.StatusBadGateway, "OIDC ¿¿¿¿¿¿¿¿¿ Claim")
+		errorJSON(c, http.StatusBadGateway, "OIDC ç”¨æˆ·ä¿¡æ¯ç¼ºå°‘ç”¨æˆ·å Claim")
 		return
 	}
 	display := claimString(userinfo, "name")
@@ -1039,12 +1039,12 @@ func (a *API) oidcCallback(c *gin.Context) {
 	role := a.roleFor(username, userinfo)
 	appUser := a.upsertUser(username, display, email, role, "oidc")
 	if !appUser.IsActive {
-		errorJSON(c, http.StatusForbidden, "¿¿¿¿¿")
+		errorJSON(c, http.StatusForbidden, "ç”¨æˆ·å·²ç¦ç”¨")
 		return
 	}
 	jwtText, err := a.issueToken(username, appUser.Role)
 	if err != nil {
-		errorJSON(c, http.StatusInternalServerError, "¿¿ Token ¿¿")
+		errorJSON(c, http.StatusInternalServerError, "ç”Ÿæˆ Token å¤±è´¥")
 		return
 	}
 	userPayload, _ := json.Marshal(gin.H{"username": appUser.Username, "display_name": appUser.DisplayName, "role": appUser.Role, "source": appUser.Source})
@@ -1104,4 +1104,3 @@ func claimString(claims map[string]interface{}, key string) string {
 	}
 	return ""
 }
-

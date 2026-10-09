@@ -1,53 +1,53 @@
 <template>
   <div class="login-page">
-    <!-- ¿¿¿¿ -->
+    <!-- èƒŒæ™¯è£…é¥° -->
     <div class="bg-grid"></div>
     <div class="bg-glow glow-1"></div>
     <div class="bg-glow glow-2"></div>
 
     <div class="login-container">
-      <!-- ¿¿¿¿¿ -->
+      <!-- å·¦ä¾§å“ç‰ŒåŒº -->
       <div class="brand-panel">
         <div class="brand-content">
           <div class="brand-icon">
             <img :src="logoUrl" :alt="platformName" />
           </div>
           <h1 class="brand-title">{{ platformName }}</h1>
-          <p class="brand-subtitle">¿¿¿ Kafka ¿¿¿¿<br>¿¿¿¿¿Topic¿¿¿¿¿¿¿¿¿¿¿¿</p>
+          <p class="brand-subtitle">ä¼ä¸šçº§ Kafka ç®¡ç†å¹³å°<br>èšç„¦é›†ç¾¤ã€Topicã€æ¶ˆæ¯ã€æ¶ˆè´¹ç»„ä¸æƒé™å®¡è®¡</p>
           <div class="brand-features">
             <div class="brand-feature">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span>¿ Kafka ¿¿¿¿¿¿</span>
+              <span>å¤š Kafka é›†ç¾¤ç»Ÿä¸€ç®¡ç†</span>
             </div>
             <div class="brand-feature">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span>Topic¿¿¿¿Consumer Group ¿¿</span>
+              <span>Topicã€æ¶ˆæ¯ã€Consumer Group è¿ç»´</span>
             </div>
             <div class="brand-feature">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span>¿¿¿¿¿¿¿¿¿</span>
+              <span>æƒé™æ§åˆ¶ä¸æ“ä½œå®¡è®¡</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ¿¿¿¿¿ -->
+      <!-- å³ä¾§ç™»å½•åŒº -->
       <div class="login-panel">
         <div class="login-form-wrapper">
           <div class="login-header">
-            <h2>¿¿¿¿</h2>
-            <p>¿¿¿¿¿ Kafka ¿¿¿¿</p>
+            <h2>æ¬¢è¿å›æ¥</h2>
+            <p>ç™»å½•åè¿›å…¥ Kafka ç®¡ç†å¹³å°</p>
           </div>
 
           <form class="login-form" @submit.prevent="handleLogin">
             <div class="form-group">
-              <label for="username">¿¿¿</label>
+              <label for="username">ç”¨æˆ·å</label>
               <div class="input-wrapper" :class="{ focused: focusedField === 'username', error: errors.username }">
                 <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -57,7 +57,7 @@
                   id="username"
                   v-model="username"
                   type="text"
-                  placeholder="¿¿¿¿¿¿"
+                  placeholder="è¯·è¾“å…¥ç”¨æˆ·å"
                   autocomplete="username"
                   @focus="focusedField = 'username'"
                   @blur="focusedField = ''"
@@ -68,7 +68,7 @@
             </div>
 
             <div class="form-group">
-              <label for="password">¿¿</label>
+              <label for="password">å¯†ç </label>
               <div class="input-wrapper" :class="{ focused: focusedField === 'password', error: errors.password }">
                 <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -78,7 +78,7 @@
                   id="password"
                   v-model="password"
                   :type="showPassword ? 'text' : 'password'"
-                  placeholder="¿¿¿¿¿"
+                  placeholder="è¯·è¾“å…¥å¯†ç "
                   autocomplete="current-password"
                   @focus="focusedField = 'password'"
                   @blur="focusedField = ''"
@@ -103,19 +103,19 @@
                 <label class="ldap-checkbox">
                   <input type="checkbox" v-model="useLdap" :disabled="ssoStatus.oidc_enabled" />
                   <span class="checkmark"></span>
-                  <span class="ldap-label">LDAP ¿¿</span>
+                  <span class="ldap-label">LDAP ç™»å½•</span>
                 </label>
               </div>
               <div class="ldap-option">
                 <label class="ldap-checkbox">
                   <input type="checkbox" v-model="rememberMe" />
                   <span class="checkmark"></span>
-                  <span class="ldap-label">¿¿¿¿</span>
+                  <span class="ldap-label">è®°ä½å¯†ç </span>
                 </label>
               </div>
             </div>
 
-            <p v-if="ssoStatus.oidc_enabled" class="login-hint">OIDC ¿¿¿¿¿LDAP ¿¿¿¿¿¿¿¿¿¿</p>
+            <p v-if="ssoStatus.oidc_enabled" class="login-hint">OIDC å·²å¯ç”¨æ—¶ï¼ŒLDAP ç™»å½•å’Œè®°ä½ç™»å½•ä¸å¯ç”¨</p>
 
             <div v-if="errorMessage" class="error-banner">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -128,9 +128,9 @@
 
             <button type="submit" class="login-btn" :disabled="loading">
               <span v-if="loading" class="spinner"></span>
-              <span v-else>¿ ¿</span>
+              <span v-else>ç™» å½•</span>
             </button>
-            <button v-if="ssoStatus.oidc_enabled" type="button" class="sso-btn" @click="handleOidcLogin">{{ ssoStatus.oidc_button_text || '¿¿ OIDC ¿¿' }}</button>
+            <button v-if="ssoStatus.oidc_enabled" type="button" class="sso-btn" @click="handleOidcLogin">{{ ssoStatus.oidc_button_text || 'ä½¿ç”¨ OIDC ç™»å½•' }}</button>
           </form>
         </div>
       </div>
@@ -164,10 +164,10 @@ const REMEMBER_CREDENTIAL_KEY = 'kafkavista_remembered_login'
 const validate = (): boolean => {
   errors.value = {}
   if (!username.value.trim()) {
-    errors.value.username = '¿¿¿¿¿¿'
+    errors.value.username = 'è¯·è¾“å…¥ç”¨æˆ·å'
   }
   if (!password.value) {
-    errors.value.password = '¿¿¿¿¿'
+    errors.value.password = 'è¯·è¾“å…¥å¯†ç '
   }
   return Object.keys(errors.value).length === 0
 }
@@ -191,7 +191,7 @@ const handleLogin = async () => {
 
     if (!resp.ok) {
       const data = await resp.json().catch(() => ({}))
-      throw new Error(data.detail || '¿¿¿¿')
+      throw new Error(data.detail || 'ç™»å½•å¤±è´¥')
     }
 
     const data = await resp.json()
@@ -207,7 +207,7 @@ const handleLogin = async () => {
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : '¿¿¿¿¿¿¿¿¿¿¿¿'
+    errorMessage.value = err instanceof Error ? err.message : 'ç™»å½•å¤±è´¥ï¼Œè¯·æ£€æŸ¥ç½‘ç»œè¿æ¥'
   } finally {
     loading.value = false
   }
@@ -241,7 +241,7 @@ onMounted(async () => {
       router.replace('/kafka')
       return
     } catch {
-      errorMessage.value = 'SSO ¿¿¿¿¿¿¿¿'
+      errorMessage.value = 'SSO ç™»å½•å›è°ƒè§£æå¤±è´¥'
     }
   }
   ssoStatus.value = await getSsoStatus()
@@ -259,7 +259,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* --- ¿¿¿¿ --- */
+/* --- é¡µé¢å¸ƒå±€ --- */
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -271,7 +271,7 @@ onMounted(async () => {
   padding: 24px;
 }
 
-/* --- ¿¿¿¿ --- */
+/* --- èƒŒæ™¯è£…é¥° --- */
 .bg-grid {
   position: absolute;
   inset: 0;
@@ -305,7 +305,7 @@ onMounted(async () => {
   left: -100px;
 }
 
-/* --- ¿¿ --- */
+/* --- å®¹å™¨ --- */
 .login-container {
   display: flex;
   width: 100%;
@@ -322,7 +322,7 @@ onMounted(async () => {
     0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-/* --- ¿¿¿¿¿ --- */
+/* --- å·¦ä¾§å“ç‰ŒåŒº --- */
 .brand-panel {
   flex: 1;
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(34, 211, 238, 0.04) 100%);
@@ -402,7 +402,7 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 
-/* --- ¿¿¿¿¿ --- */
+/* --- å³ä¾§ç™»å½•åŒº --- */
 .login-panel {
   width: 420px;
   min-width: 420px;
@@ -434,7 +434,7 @@ onMounted(async () => {
   color: var(--text-muted, #64748b);
 }
 
-/* --- ¿¿ --- */
+/* --- è¡¨å• --- */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -449,7 +449,7 @@ onMounted(async () => {
   margin-top: -8px;
 }
 
-/* --- ¿¿¿¿¿¿¿ --- */
+/* --- ç™»å½•é€‰é¡¹å¤é€‰æ¡† --- */
 .ldap-option {
   display: flex;
   align-items: center;
@@ -605,7 +605,7 @@ onMounted(async () => {
   padding-left: 4px;
 }
 
-/* --- ¿¿¿¿ --- */
+/* --- é”™è¯¯æ¨ªå¹… --- */
 .error-banner {
   display: flex;
   align-items: center;
@@ -628,7 +628,7 @@ onMounted(async () => {
   font-size: 12px;
 }
 
-/* --- ¿¿¿¿ --- */
+/* --- ç™»å½•æŒ‰é’® --- */
 .login-btn {
   display: flex;
   align-items: center;
@@ -720,4 +720,3 @@ onMounted(async () => {
   }
 }
 </style>
-

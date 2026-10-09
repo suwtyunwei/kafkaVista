@@ -53,7 +53,7 @@ const outerSidebarCollapsed = ref(localStorage.getItem('sidebar_collapsed') === 
 const authFlag = ref(isAuthenticated())
 const authenticated = computed(() => authFlag.value)
 
-// ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿
+// ç›‘å¬è·¯ç”±å˜åŒ–ï¼Œç™»å½•åé‡æ–°è¯„ä¼°è®¤è¯çŠ¶æ€
 onMounted(() => {
   router.afterEach(() => {
     authFlag.value = isAuthenticated()
@@ -75,4 +75,3 @@ const handleNavigate = (path: string) => {
   router.push(path)
 }
 </script>
-

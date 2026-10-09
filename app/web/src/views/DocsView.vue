@@ -4,26 +4,26 @@
       <div>
         <p class="eyebrow">Dynamic Docs</p>
         <h1>API Docs</h1>
-        <p>{{ tr('¿¿¿ Gin ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Generated from backend Gin routes and always reflects deployed APIs.') }}</p>
+        <p>{{ tr('ä»åç«¯ Gin è·¯ç”±å®æ—¶ç”Ÿæˆï¼Œéƒ¨ç½²åè‡ªåŠ¨åæ˜ æœ€æ–°æ¥å£ã€‚', 'Generated from backend Gin routes and always reflects deployed APIs.') }}</p>
       </div>
       <div class="hero-actions">
         <button class="ghost" @click="copyOpenApi">{{ copyText }}</button>
-        <button class="primary" @click="loadDocs">{{ tr('¿¿', 'Refresh') }}</button>
+        <button class="primary" @click="loadDocs">{{ tr('åˆ·æ–°', 'Refresh') }}</button>
       </div>
     </section>
 
     <section class="panel toolbar">
-      <input v-model="keyword" :placeholder="tr('¿¿ path / method / group', 'Search path / method / group')" />
+      <input v-model="keyword" :placeholder="tr('æœç´¢ path / method / group', 'Search path / method / group')" />
       <select v-model="methodFilter"><option value="">All Methods</option><option v-for="method in methods" :key="method" :value="method">{{ method }}</option></select>
       <select v-model="groupFilter"><option value="">All Groups</option><option v-for="group in groups" :key="group" :value="group">{{ group }}</option></select>
     </section>
 
     <section class="panel auth-guide">
       <div>
-        <strong>{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿ Token', 'API testing uses your current login token automatically') }}</strong>
-        <p>{{ token ? tr(`¿¿¿¿¿¿¿${user?.display_name || user?.username || 'unknown'}¿Bearer Token ¿¿¿¿`, `Current user: ${user?.display_name || user?.username || 'unknown'}. Bearer token is ready.`) : tr('¿¿¿¿¿¿¿¿¿¿ API Docs ¿¿¿¿¿¿¿¿¿¿¿¿public ¿¿¿¿ Token¿', 'Please log in first, then return to API Docs to call authenticated APIs. Public APIs do not require a token.') }}</p>
+        <strong>{{ tr('æ¥å£è°ƒè¯•ä¼šè‡ªåŠ¨æºå¸¦å½“å‰ç™»å½• Token', 'API testing uses your current login token automatically') }}</strong>
+        <p>{{ token ? tr(`å½“å‰ç™»å½•ç”¨æˆ·ï¼š${user?.display_name || user?.username || 'unknown'}ã€‚Bearer Token å·²å°±ç»ªã€‚`, `Current user: ${user?.display_name || user?.username || 'unknown'}. Bearer token is ready.`) : tr('è¯·å…ˆç™»å½•ç³»ç»Ÿï¼Œå†å›åˆ° API Docs ç›´æ¥è¯·æ±‚éœ€è¦è®¤è¯çš„æ¥å£ã€‚public æ¥å£æ— éœ€ Tokenã€‚', 'Please log in first, then return to API Docs to call authenticated APIs. Public APIs do not require a token.') }}</p>
       </div>
-      <span :class="['token-state', token ? 'ready' : 'missing']">{{ token ? tr('Token ¿¿¿', 'Token Ready') : tr('¿¿¿', 'Not Logged In') }}</span>
+      <span :class="['token-state', token ? 'ready' : 'missing']">{{ token ? tr('Token å·²éªŒè¯', 'Token Ready') : tr('æœªç™»å½•', 'Not Logged In') }}</span>
     </section>
 
     <section class="panel docs-list">
@@ -35,23 +35,23 @@
           <span>{{ item.group }}</span>
           <span :class="['auth', item.auth]">{{ item.auth }}</span>
           <span>{{ item.summary }}</span>
-          <button class="ghost mini" @click="selectEndpoint(item)">{{ selectedKey === endpointKey(item) ? tr('¿¿', 'Collapse') : tr('¿¿', 'Try') }}</button>
+          <button class="ghost mini" @click="selectEndpoint(item)">{{ selectedKey === endpointKey(item) ? tr('æ”¶èµ·', 'Collapse') : tr('è°ƒè¯•', 'Try') }}</button>
         </div>
         <div v-if="selectedKey === endpointKey(item)" class="try-panel">
           <div class="try-grid">
-            <label>{{ tr('Path ¿¿ JSON', 'Path Params JSON') }}<textarea v-model="pathParamsText" :placeholder="pathParamPlaceholder(item)"></textarea></label>
-            <label>{{ tr('Query ¿¿ JSON', 'Query Params JSON') }}<textarea v-model="queryParamsText" placeholder='{"page":1,"page_size":20}'></textarea></label>
+            <label>{{ tr('Path å‚æ•° JSON', 'Path Params JSON') }}<textarea v-model="pathParamsText" :placeholder="pathParamPlaceholder(item)"></textarea></label>
+            <label>{{ tr('Query å‚æ•° JSON', 'Query Params JSON') }}<textarea v-model="queryParamsText" placeholder='{"page":1,"page_size":20}'></textarea></label>
             <label v-if="bodyAllowed(item.method)">{{ tr('Body JSON', 'Body JSON') }}<textarea v-model="bodyText" placeholder='{"name":"demo"}'></textarea></label>
           </div>
-          <div class="request-preview"><span>{{ tr('¿¿¿¿', 'Request URL') }}</span><code>{{ requestPreview(item) }}</code></div>
+          <div class="request-preview"><span>{{ tr('è¯·æ±‚åœ°å€', 'Request URL') }}</span><code>{{ requestPreview(item) }}</code></div>
           <div class="try-actions">
-            <button class="primary" :disabled="sendingKey === endpointKey(item) || (!token && item.auth !== 'public')" @click="sendApiRequest(item)">{{ sendingKey === endpointKey(item) ? tr('¿¿¿...', 'Sending...') : tr('¿¿¿¿', 'Send Request') }}</button>
-            <button class="ghost" @click="clearTryState">{{ tr('¿¿', 'Clear') }}</button>
+            <button class="primary" :disabled="sendingKey === endpointKey(item) || (!token && item.auth !== 'public')" @click="sendApiRequest(item)">{{ sendingKey === endpointKey(item) ? tr('è¯·æ±‚ä¸­...', 'Sending...') : tr('å‘é€è¯·æ±‚', 'Send Request') }}</button>
+            <button class="ghost" @click="clearTryState">{{ tr('æ¸…ç©º', 'Clear') }}</button>
           </div>
           <pre v-if="responseText" :class="['response-box', responseOk ? 'ok' : 'error']">{{ responseText }}</pre>
         </div>
       </div>
-      <div v-if="!filteredItems.length" class="empty">{{ tr('¿¿¿¿', 'No APIs') }}</div>
+      <div v-if="!filteredItems.length" class="empty">{{ tr('æš‚æ— æ¥å£', 'No APIs') }}</div>
     </section>
   </div>
 </template>
@@ -66,7 +66,7 @@ const docs = ref<any>({ items: [], openapi: {} })
 const keyword = ref('')
 const methodFilter = ref('')
 const groupFilter = ref('')
-const copyText = ref(tr('¿¿ OpenAPI', 'Copy OpenAPI'))
+const copyText = ref(tr('å¤åˆ¶ OpenAPI', 'Copy OpenAPI'))
 const selectedKey = ref('')
 const sendingKey = ref('')
 const pathParamsText = ref('{}')
@@ -174,11 +174,11 @@ const copyOpenApi = async () => {
       document.execCommand('copy')
       document.body.removeChild(textarea)
     }
-    copyText.value = tr('¿¿¿', 'Copied')
+    copyText.value = tr('å·²å¤åˆ¶', 'Copied')
   } catch {
-    copyText.value = tr('¿¿¿¿', 'Copy Failed')
+    copyText.value = tr('å¤åˆ¶å¤±è´¥', 'Copy Failed')
   } finally {
-    window.setTimeout(() => { copyText.value = tr('¿¿ OpenAPI', 'Copy OpenAPI') }, 1600)
+    window.setTimeout(() => { copyText.value = tr('å¤åˆ¶ OpenAPI', 'Copy OpenAPI') }, 1600)
   }
 }
 
@@ -220,4 +220,3 @@ code { color: var(--accent-secondary); overflow-wrap: anywhere; }
 .empty { color: var(--text-muted); padding: 28px; text-align: center; }
 @media (max-width: 900px) { .hero, .auth-guide { align-items: flex-start; flex-direction: column; } .toolbar, .try-grid { grid-template-columns: 1fr; } }
 </style>
-

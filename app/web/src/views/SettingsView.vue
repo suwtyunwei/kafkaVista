@@ -3,95 +3,92 @@
     <section class="hero">
       <div>
         <p class="eyebrow">System Settings</p>
-        <h1>{{ tr('¿¿¿¿', 'Settings') }}</h1>
-        <p>{{ tr('¿¿¿¿¿¿¿LDAP ¿¿¿OIDC / Keycloak ¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿', 'Configure login roles, LDAP, OIDC / Keycloak SSO, and Kafka cluster fine-grained permissions.') }}</p>
+        <h1>{{ tr('ç³»ç»Ÿè®¾ç½®', 'Settings') }}</h1>
+        <p>{{ tr('é…ç½®ç™»å½•è§’è‰²ã€LDAP ç™»å½•ã€OIDC / Keycloak å•ç‚¹ç™»å½•å’Œ Kafka é›†ç¾¤ç»†ç²’åº¦æˆæƒã€‚', 'Configure login roles, LDAP, OIDC / Keycloak SSO, and Kafka cluster fine-grained permissions.') }}</p>
       </div>
-      <button v-if="activeTab === 'basic' || activeTab === 'license' || activeTab === 'monitoring' || activeTab === 'monitoringAlerts' || activeTab === 'alertConfig'" class="primary" :disabled="saving" @click="saveAll">{{ saving ? tr('¿¿¿...', 'Saving...') : tr('¿¿¿¿', 'Save Settings') }}</button>
+      <button v-if="activeTab === 'basic' || activeTab === 'monitoring' || activeTab === 'monitoringAlerts' || activeTab === 'alertConfig'" class="primary" :disabled="saving" @click="saveAll">{{ saving ? tr('ä¿å­˜ä¸­...', 'Saving...') : tr('ä¿å­˜è®¾ç½®', 'Save Settings') }}</button>
     </section>
 
     <div class="settings-tabs">
-      <button :class="{ active: activeTab === 'basic' }" @click="activeTab = 'basic'">{{ tr('¿¿¿¿', 'Basic') }}</button>
-      <button :class="{ active: activeTab === 'license' }" @click="activeTab = 'license'">{{ tr('¿¿¿¿¿', 'License') }}</button>
-      <button :class="{ active: activeTab === 'monitoring' }" @click="activeTab = 'monitoring'">{{ tr('¿¿¿¿', 'Monitoring') }}</button>
-      <button :class="{ active: activeTab === 'monitoringAlerts' }" @click="activeTab = 'monitoringAlerts'">{{ tr('¿¿¿¿', 'Monitoring Alerts') }}</button>
-      <button :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">{{ tr('¿¿¿¿¿', 'Users & Roles') }}</button>
-      <button :class="{ active: activeTab === 'kafkaAuth' }" @click="activeTab = 'kafkaAuth'">{{ tr('Kafka ¿¿', 'Kafka Auth') }}</button>
+      <button :class="{ active: activeTab === 'basic' }" @click="activeTab = 'basic'">{{ tr('åŸºç¡€è®¾ç½®', 'Basic') }}</button>
+      <button :class="{ active: activeTab === 'monitoring' }" @click="activeTab = 'monitoring'">{{ tr('ç›‘æ§æŒ‡æ ‡', 'Monitoring') }}</button>
+      <button :class="{ active: activeTab === 'monitoringAlerts' }" @click="activeTab = 'monitoringAlerts'">{{ tr('ç›‘æ§å‘Šè­¦', 'Monitoring Alerts') }}</button>
+      <button :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">{{ tr('ç”¨æˆ·ä¸è§’è‰²', 'Users & Roles') }}</button>
+      <button :class="{ active: activeTab === 'kafkaAuth' }" @click="activeTab = 'kafkaAuth'">{{ tr('Kafka æˆæƒ', 'Kafka Auth') }}</button>
     </div>
 
     <section v-if="activeTab === 'basic'" class="grid">
       <div class="panel compact-panel">
-        <h2>{{ tr('¿¿¿¿', 'UI Settings') }}</h2>
+        <h2>{{ tr('ç•Œé¢è®¾ç½®', 'UI Settings') }}</h2>
         <div class="setting-row">
-          <div><label>{{ tr('¿¿¿¿', 'Language') }}</label><p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Switch sidebar and common entry display language.') }}</p></div>
-          <select v-model="settings.ui.language" class="compact-select" @change="applyLanguage"><option value="zh-CN">{{ tr('¿¿', 'Chinese') }}</option><option value="en-US">English</option></select>
+          <div><label>{{ tr('ç•Œé¢è¯­è¨€', 'Language') }}</label><p class="hint">{{ tr('åˆ‡æ¢ä¾§è¾¹æ å’Œé€šç”¨å…¥å£æ˜¾ç¤ºè¯­è¨€ã€‚', 'Switch sidebar and common entry display language.') }}</p></div>
+          <select v-model="settings.ui.language" class="compact-select" @change="applyLanguage"><option value="zh-CN">{{ tr('ä¸­æ–‡', 'Chinese') }}</option><option value="en-US">English</option></select>
         </div>
         <div class="setting-row">
-          <div><label>{{ tr('¿¿¿¿', 'Default Theme') }}</label><p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Set interface default light or dark mode.') }}</p></div>
-          <select v-model="settings.ui.theme" class="compact-select" @change="applyThemeSetting"><option value="dark">{{ tr('¿¿¿¿', 'Dark Mode') }}</option><option value="light">{{ tr('¿¿¿¿', 'Light Mode') }}</option></select>
+          <div><label>{{ tr('é»˜è®¤ä¸»é¢˜', 'Default Theme') }}</label><p class="hint">{{ tr('è®¾ç½®ç•Œé¢é»˜è®¤ä½¿ç”¨äº®è‰²æˆ–æš—è‰²æ¨¡å¼ã€‚', 'Set interface default light or dark mode.') }}</p></div>
+          <select v-model="settings.ui.theme" class="compact-select" @change="applyThemeSetting"><option value="dark">{{ tr('æš—è‰²æ¨¡å¼', 'Dark Mode') }}</option><option value="light">{{ tr('äº®è‰²æ¨¡å¼', 'Light Mode') }}</option></select>
         </div>
-        <div v-if="license.enterprise" class="setting-row">
-          <div><label>{{ tr('¿¿¿¿', 'Platform Name') }}</label><p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Full Edition can customize sidebar, login page, and browser title.') }}</p></div>
+        <div class="setting-row">
+          <div><label>{{ tr('å¹³å°åç§°', 'Platform Name') }}</label><p class="hint">{{ tr('è‡ªå®šä¹‰ä¾§è¾¹æ ã€ç™»å½•é¡µå’Œæµè§ˆå™¨æ ‡é¢˜ã€‚', 'Customize sidebar, login page, and browser title.') }}</p></div>
           <input v-model="settings.ui.platform_name" class="compact-input" placeholder="kafkaVista" />
         </div>
-        <div v-if="license.enterprise" class="setting-row">
-          <div><label>Logo URL</label><p class="hint">{{ tr('¿¿¿¿ URL¿¿¿ /logo.png ¿ https://example.com/logo.png¿', 'Image URL, e.g. /logo.png or https://example.com/logo.png.') }}</p></div>
+        <div class="setting-row">
+          <div><label>Logo URL</label><p class="hint">{{ tr('å¡«å†™å›¾ç‰‡ URLï¼Œä¾‹å¦‚ /logo.png æˆ– https://example.com/logo.pngã€‚', 'Image URL, e.g. /logo.png or https://example.com/logo.png.') }}</p></div>
           <input v-model="settings.ui.logo_url" class="compact-input" placeholder="/favicon.png?v=2026052102" />
         </div>
-        <p v-else class="hint warn">{{ tr('¿¿¿¿¿ Logo ¿¿¿¿¿¿¿¿¿¿', 'Platform name and Logo customization are available in Full Edition only.') }}</p>
-        <p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿Kafka ¿¿¿¿¿¿¿Kafka ¿¿¿¿¿¿¿¿¿', 'User roles are maintained in the "Users & Roles" tab; Kafka access scope in the "Kafka Auth" tab.') }}</p>
+        <p class="hint">{{ tr('ç”¨æˆ·è§’è‰²è¯·åœ¨â€œç”¨æˆ·ä¸è§’è‰²â€é€‰é¡¹å¡ç»´æŠ¤ï¼›Kafka è®¿é—®èŒƒå›´è¯·åœ¨â€œKafka æˆæƒâ€é€‰é¡¹å¡ç»´æŠ¤ã€‚', 'User roles are maintained in the "Users & Roles" tab; Kafka access scope in the "Kafka Auth" tab.') }}</p>
       </div>
 
       <div class="panel">
-        <div class="panel-title"><h2>{{ tr('LDAP ¿¿', 'LDAP Settings') }}</h2><div class="actions"><button class="ghost small" @click="testLdap">{{ tr('¿¿¿¿', 'Test Connection') }}</button><button class="primary small" @click="syncLdap">{{ tr('¿¿¿¿¿¿', 'Sync Users') }}</button></div></div>
-        <label class="check"><input v-model="settings.ldap.enabled" type="checkbox" :disabled="settings.oidc.enabled" @change="onLdapToggle" /> {{ tr('¿¿ LDAP ¿¿', 'Enable LDAP Login') }}</label>
-        <p v-if="settings.oidc.enabled" class="hint warn">{{ tr('OIDC ¿¿¿¿¿LDAP ¿¿¿¿¿¿¿', 'LDAP login is disabled when OIDC is enabled.') }}</p>
+        <div class="panel-title"><h2>{{ tr('LDAP è®¾ç½®', 'LDAP Settings') }}</h2><div class="actions"><button class="ghost small" @click="testLdap">{{ tr('æµ‹è¯•è¿æ¥', 'Test Connection') }}</button><button class="primary small" @click="syncLdap">{{ tr('ä¸€é”®æ‹‰å–ç”¨æˆ·', 'Sync Users') }}</button></div></div>
+        <label class="check"><input v-model="settings.ldap.enabled" type="checkbox" :disabled="settings.oidc.enabled" @change="onLdapToggle" /> {{ tr('å¯ç”¨ LDAP ç™»å½•', 'Enable LDAP Login') }}</label>
+        <p v-if="settings.oidc.enabled" class="hint warn">{{ tr('OIDC å·²å¯ç”¨æ—¶ï¼ŒLDAP ç™»å½•ä¼šè¢«å…³é—­ã€‚', 'LDAP login is disabled when OIDC is enabled.') }}</p>
         <input v-model="settings.ldap.url" placeholder="ldap://ldap.example.com:389" />
-        <input v-model="settings.ldap.bind_dn" :placeholder="tr('Bind DN¿¿ cn=admin,dc=example,dc=com', 'Bind DN, e.g. cn=admin,dc=example,dc=com')" />
-        <input v-model="settings.ldap.bind_password" type="password" :placeholder="tr('Bind ¿¿¿¿¿¿¿¿', 'Bind password, leave empty to keep')" />
-        <input v-model="settings.ldap.base_dn" :placeholder="tr('Base DN¿¿ ou=users,dc=example,dc=com', 'Base DN, e.g. ou=users,dc=example,dc=com')" />
-        <input v-model="settings.ldap.user_filter" :placeholder="tr('¿¿¿¿¿¿¿ (uid=%s)', 'User filter, e.g. (uid=%s)')" />
-        <div class="two"><input v-model="settings.ldap.display_name_attr" :placeholder="tr('¿¿¿¿¿ cn', 'Display name attribute cn')" /><input v-model="settings.ldap.email_attr" :placeholder="tr('¿¿¿¿ mail', 'Email attribute mail')" /></div>
+        <input v-model="settings.ldap.bind_dn" :placeholder="tr('Bind DNï¼Œå¦‚ cn=admin,dc=example,dc=com', 'Bind DN, e.g. cn=admin,dc=example,dc=com')" />
+        <input v-model="settings.ldap.bind_password" type="password" :placeholder="tr('Bind å¯†ç ï¼Œç•™ç©ºä¸ä¿®æ”¹', 'Bind password, leave empty to keep')" />
+        <input v-model="settings.ldap.base_dn" :placeholder="tr('Base DNï¼Œå¦‚ ou=users,dc=example,dc=com', 'Base DN, e.g. ou=users,dc=example,dc=com')" />
+        <input v-model="settings.ldap.user_filter" :placeholder="tr('ç”¨æˆ·è¿‡æ»¤å™¨ï¼Œå¦‚ (uid=%s)', 'User filter, e.g. (uid=%s)')" />
+        <div class="two"><input v-model="settings.ldap.display_name_attr" :placeholder="tr('æ˜¾ç¤ºåå±æ€§ cn', 'Display name attribute cn')" /><input v-model="settings.ldap.email_attr" :placeholder="tr('é‚®ç®±å±æ€§ mail', 'Email attribute mail')" /></div>
         <label class="check"><input v-model="settings.ldap.start_tls" type="checkbox" /> StartTLS</label>
       </div>
 
       <div class="panel wide">
-        <h2>{{ tr('OIDC / Keycloak ¿¿', 'OIDC / Keycloak Settings') }}</h2>
-        <label class="check"><input v-model="settings.oidc.enabled" type="checkbox" :disabled="!license.enterprise || settings.ldap.enabled" @change="onOidcToggle" /> {{ tr('¿¿ OIDC ¿¿¿¿', 'Enable OIDC SSO') }}</label>
-        <p v-if="settings.ldap.enabled" class="hint warn">{{ tr('LDAP ¿¿¿¿¿OIDC ¿¿¿¿¿¿¿¿¿', 'OIDC SSO is disabled when LDAP login is enabled.') }}</p>
-        <p v-if="!license.enterprise" class="hint warn">{{ tr('OIDC ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'OIDC is a Full Edition feature and unavailable when the Full Edition license expires.') }}</p>
-        <div class="two"><input v-model="settings.oidc.issuer_url" :placeholder="tr('Issuer URL¿¿ http://keycloak/realms/demo', 'Issuer URL, e.g. http://keycloak/realms/demo')" /><input v-model="settings.oidc.redirect_url" :placeholder="tr('Callback URL¿¿ http://host:3004/api/auth/oidc/callback', 'Callback URL, e.g. http://host:3004/api/auth/oidc/callback')" /></div>
-        <div class="two"><input v-model="settings.oidc.client_id" placeholder="Client ID" /><input v-model="settings.oidc.client_secret" type="password" :placeholder="tr('Client Secret¿¿¿¿¿¿', 'Client Secret, leave empty to keep')" /></div>
-        <div class="two"><input v-model="settings.oidc.scopes" placeholder="openid profile email" /><input v-model="settings.oidc.username_claim" :placeholder="tr('¿¿¿ Claim¿¿ preferred_username', 'Username Claim, e.g. preferred_username')" /></div>
-        <div class="two"><input v-model="settings.oidc.role_claim" :placeholder="tr('¿¿ Claim¿¿ roles', 'Role Claim, e.g. roles')" /><input v-model="adminRolesText" :placeholder="tr('¿¿¿¿¿¿¿ admin,kafkavista-admin', 'Admin roles, e.g. admin,kafkavista-admin')" /></div>
-        <input v-model="settings.oidc.button_text" :placeholder="tr('¿¿¿¿¿¿¿¿ ¿¿¿¿ SSO ¿¿', 'Login button text, e.g. Sign in with Company SSO')" />
-        <p class="hint">{{ tr('Keycloak ¿¿ Redirect URI¿`http://¿¿¿¿¿IP:3004/api/auth/oidc/callback`¿', 'Keycloak recommended Redirect URI: `http://your-domain-or-ip:3004/api/auth/oidc/callback`.') }}</p>
+        <h2>{{ tr('OIDC / Keycloak è®¾ç½®', 'OIDC / Keycloak Settings') }}</h2>
+        <label class="check"><input v-model="settings.oidc.enabled" type="checkbox" :disabled="settings.ldap.enabled" @change="onOidcToggle" /> {{ tr('å¯ç”¨ OIDC å•ç‚¹ç™»å½•', 'Enable OIDC SSO') }}</label>
+        <p v-if="settings.ldap.enabled" class="hint warn">{{ tr('LDAP å·²å¯ç”¨æ—¶ï¼ŒOIDC å•ç‚¹ç™»å½•ä¼šè¢«å…³é—­ã€‚', 'OIDC SSO is disabled when LDAP login is enabled.') }}</p>
+        <div class="two"><input v-model="settings.oidc.issuer_url" :placeholder="tr('Issuer URLï¼Œå¦‚ http://keycloak/realms/demo', 'Issuer URL, e.g. http://keycloak/realms/demo')" /><input v-model="settings.oidc.redirect_url" :placeholder="tr('Callback URLï¼Œå¦‚ http://host:3004/api/auth/oidc/callback', 'Callback URL, e.g. http://host:3004/api/auth/oidc/callback')" /></div>
+        <div class="two"><input v-model="settings.oidc.client_id" placeholder="Client ID" /><input v-model="settings.oidc.client_secret" type="password" :placeholder="tr('Client Secretï¼Œç•™ç©ºä¸ä¿®æ”¹', 'Client Secret, leave empty to keep')" /></div>
+        <div class="two"><input v-model="settings.oidc.scopes" placeholder="openid profile email" /><input v-model="settings.oidc.username_claim" :placeholder="tr('ç”¨æˆ·å Claimï¼Œå¦‚ preferred_username', 'Username Claim, e.g. preferred_username')" /></div>
+        <div class="two"><input v-model="settings.oidc.role_claim" :placeholder="tr('è§’è‰² Claimï¼Œå¦‚ roles', 'Role Claim, e.g. roles')" /><input v-model="adminRolesText" :placeholder="tr('ç®¡ç†å‘˜è§’è‰²ï¼Œå¦‚ admin,kafkavista-admin', 'Admin roles, e.g. admin,kafkavista-admin')" /></div>
+        <input v-model="settings.oidc.button_text" :placeholder="tr('ç™»å½•æŒ‰é’®åç§°ï¼Œå¦‚ ä½¿ç”¨å…¬å¸ SSO ç™»å½•', 'Login button text, e.g. Sign in with Company SSO')" />
+        <p class="hint">{{ tr('Keycloak æ¨è Redirect URIï¼š`http://ä½ çš„åŸŸåæˆ–IP:3004/api/auth/oidc/callback`ã€‚', 'Keycloak recommended Redirect URI: `http://your-domain-or-ip:3004/api/auth/oidc/callback`.') }}</p>
       </div>
 
     </section>
 
     <section v-if="activeTab === 'monitoring'" class="panel monitoring-panel">
-      <div class="panel-title"><h2>{{ tr('¿¿¿¿', 'Monitoring Metrics') }}</h2><span class="edition-pill">Prometheus Exporter</span></div>
-      <label class="check"><input v-model="settings.monitoring.enabled" type="checkbox" /> {{ tr('¿¿ Prometheus Exporter', 'Enable Prometheus Exporter') }}</label>
-      <p class="hint">{{ tr('¿¿¿¿¿¿¿ Kafka Exporter ¿¿¿Prometheus ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'When enabled, exposes Kafka Exporter metrics. Prometheus can scrape the global URL or each cluster\'s independent URL.') }}</p>
+      <div class="panel-title"><h2>{{ tr('ç›‘æ§æŒ‡æ ‡', 'Monitoring Metrics') }}</h2><span class="edition-pill">Prometheus Exporter</span></div>
+      <label class="check"><input v-model="settings.monitoring.enabled" type="checkbox" /> {{ tr('å¼€å¯ Prometheus Exporter', 'Enable Prometheus Exporter') }}</label>
+      <p class="hint">{{ tr('å¼€å¯åå¯¹å¤–æš´éœ² Kafka Exporter æŒ‡æ ‡ï¼ŒPrometheus å¯æŠ“å–æ€»åœ°å€æˆ–æ¯ä¸ªé›†ç¾¤çš„ç‹¬ç«‹åœ°å€ã€‚', 'When enabled, exposes Kafka Exporter metrics. Prometheus can scrape the global URL or each cluster\'s independent URL.') }}</p>
       <div class="metrics-list">
-        <div class="metrics-row"><span>{{ tr('¿¿¿¿', 'All Clusters') }}</span><code>{{ metricsUrl }}</code></div>
+        <div class="metrics-row"><span>{{ tr('å…¨éƒ¨é›†ç¾¤', 'All Clusters') }}</span><code>{{ metricsUrl }}</code></div>
         <div v-for="cluster in clusters" :key="cluster.id" class="metrics-row"><span>{{ cluster.name }}</span><code>{{ metricsClusterUrl(cluster) }}</code></div>
       </div>
     </section>
 
     <section v-if="activeTab === 'monitoringAlerts'" class="panel monitoring-alerts-panel">
-      <div class="panel-title"><h2>{{ tr('¿¿¿¿', 'Monitoring Alerts') }}</h2><div class="actions"><button class="ghost small" @click="openAlertConfigPage">{{ tr('¿¿¿¿¿¿', 'Rule Config') }}</button><span class="edition-pill">Alerting</span></div></div>
-      <p class="hint">{{ tr('¿¿¿¿¿Broker ¿¿¿¿¿¿¿¿¿¿', 'Configure lag, broker resource, and broker offline alert notifications.') }}</p>
-      <label class="check"><input v-model="settings.monitoring.alerting.enabled" type="checkbox" /> {{ tr('¿¿¿¿¿¿', 'Enable Monitoring Alerts') }}</label>
+      <div class="panel-title"><h2>{{ tr('ç›‘æ§å‘Šè­¦', 'Monitoring Alerts') }}</h2><div class="actions"><button class="ghost small" @click="openAlertConfigPage">{{ tr('è§„åˆ™é…ç½®æ–‡ä»¶', 'Rule Config') }}</button><span class="edition-pill">Alerting</span></div></div>
+      <p class="hint">{{ tr('é…ç½®ç§¯å‹ã€Broker èµ„æºä¸ç¦»çº¿å‘Šè­¦é€šçŸ¥ã€‚', 'Configure lag, broker resource, and broker offline alert notifications.') }}</p>
+      <label class="check"><input v-model="settings.monitoring.alerting.enabled" type="checkbox" /> {{ tr('å¼€å¯ç›‘æ§å‘Šè­¦', 'Enable Monitoring Alerts') }}</label>
       <div class="alert-rule-list compact-rules">
         <div class="alert-rule-head">
-          <span>{{ tr('¿¿', 'Status') }}</span>
-          <span>{{ tr('¿¿', 'Rule') }}</span>
-          <span>{{ tr('¿¿¿¿', 'Clusters') }}</span>
-          <span>{{ tr('¿¿', 'Direction') }}</span>
-          <span>{{ tr('¿¿', 'Threshold') }}</span>
-          <span>{{ tr('¿¿', 'Unit') }}</span>
-          <span>{{ tr('¿¿¿', 'Current') }}</span>
+          <span>{{ tr('çŠ¶æ€', 'Status') }}</span>
+          <span>{{ tr('è§„åˆ™', 'Rule') }}</span>
+          <span>{{ tr('é€‚ç”¨é›†ç¾¤', 'Clusters') }}</span>
+          <span>{{ tr('æ–¹å‘', 'Direction') }}</span>
+          <span>{{ tr('é˜ˆå€¼', 'Threshold') }}</span>
+          <span>{{ tr('å•ä½', 'Unit') }}</span>
+          <span>{{ tr('å½“å‰å€¼', 'Current') }}</span>
         </div>
         <div v-for="rule in settings.monitoring.alerting.rules" :key="rule.key" :class="['alert-rule-row', { enabled: rule.enabled }]">
           <label class="switch rule-switch"><input v-model="rule.enabled" type="checkbox" /><span></span></label>
@@ -99,16 +96,16 @@
           <details v-if="alertRuleUsesMigrationJobs(rule.key)" class="cluster-dropdown migration-job-dropdown" :open="openClusterDropdown === rule.key" @toggle="onClusterDropdownToggle($event, rule.key)">
             <summary @click.prevent="toggleClusterDropdown(rule.key)">{{ selectedMigrationJobLabel(rule) }}</summary>
             <div class="cluster-dropdown-menu">
-              <button type="button" :class="['cluster-select-all', { active: !rule.migration_job_ids?.length }]" @click="rule.migration_job_ids = []">{{ tr('¿¿¿¿¿¿', 'All Migration Jobs') }}</button>
+              <button type="button" :class="['cluster-select-all', { active: !rule.migration_job_ids?.length }]" @click="rule.migration_job_ids = []">{{ tr('æ‰€æœ‰è¿ç§»ä»»åŠ¡', 'All Migration Jobs') }}</button>
               <label v-for="job in migrationJobs" :key="job.id" class="cluster-check"><input v-model="rule.migration_job_ids" type="checkbox" :value="job.id" /> {{ migrationJobOptionLabel(job) }}</label>
-              <em v-if="!migrationJobs.length" class="dropdown-empty">{{ tr('¿¿¿¿¿¿', 'No migration jobs') }}</em>
+              <em v-if="!migrationJobs.length" class="dropdown-empty">{{ tr('æš‚æ— è¿ç§»ä»»åŠ¡', 'No migration jobs') }}</em>
             </div>
           </details>
-          <span v-else-if="!alertRuleUsesClusters(rule.key)" class="rule-global-scope">{{ tr('¿¿¿¿', 'Global Rule') }}</span>
+          <span v-else-if="!alertRuleUsesClusters(rule.key)" class="rule-global-scope">{{ tr('å…¨å±€è§„åˆ™', 'Global Rule') }}</span>
           <details v-else class="cluster-dropdown" :open="openClusterDropdown === rule.key" @toggle="onClusterDropdownToggle($event, rule.key)">
             <summary @click.prevent="toggleClusterDropdown(rule.key)">{{ selectedClusterLabel(rule) }}</summary>
             <div class="cluster-dropdown-menu">
-              <button type="button" :class="['cluster-select-all', { active: !rule.cluster_ids?.length }]" @click="rule.cluster_ids = []">{{ tr('¿¿¿¿', 'All Clusters') }}</button>
+              <button type="button" :class="['cluster-select-all', { active: !rule.cluster_ids?.length }]" @click="rule.cluster_ids = []">{{ tr('å…¨éƒ¨é›†ç¾¤', 'All Clusters') }}</button>
               <label v-for="cluster in clusters" :key="cluster.id" class="cluster-check"><input v-model="rule.cluster_ids" type="checkbox" :value="cluster.id" /> {{ cluster.name }}</label>
             </div>
           </details>
@@ -121,35 +118,35 @@
           <input v-model.number="rule.threshold" type="number" min="0" class="rule-threshold-input" />
           <em>{{ alertRuleUnit(rule.unit) }}</em>
           <div class="rule-current-value">
-            <button class="ghost small" :disabled="checkingRuleKey === rule.key" @click="checkAlertRuleValue(rule)">{{ checkingRuleKey === rule.key ? tr('¿¿¿...', 'Checking...') : tr('¿¿¿¿¿', 'View Value') }}</button>
+            <button class="ghost small" :disabled="checkingRuleKey === rule.key" @click="checkAlertRuleValue(rule)">{{ checkingRuleKey === rule.key ? tr('æŸ¥çœ‹ä¸­...', 'Checking...') : tr('æŸ¥çœ‹å½“å‰å€¼', 'View Value') }}</button>
             <small v-if="alertRuleValueText(rule.key)">{{ alertRuleValueText(rule.key) }}</small>
           </div>
         </div>
       </div>
-      <div class="panel-subtitle"><h3>{{ tr('¿¿¿¿', 'Notification Channels') }}</h3><span>{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Fill in notification endpoints; multiple channels can be configured.') }}</span></div>
+      <div class="panel-subtitle"><h3>{{ tr('é€šçŸ¥æ¸ é“', 'Notification Channels') }}</h3><span>{{ tr('å¡«å†™éœ€è¦å¯ç”¨çš„é€šçŸ¥åœ°å€ï¼Œå¯åŒæ—¶é…ç½®å¤šä¸ªã€‚', 'Fill in notification endpoints; multiple channels can be configured.') }}</span></div>
       <div class="notify-channel-list">
         <div class="notify-channel-row">
-          <div><strong>{{ tr('¿¿¿¿¿', 'DingTalk Bot') }}</strong><span>{{ tr('¿¿¿¿¿¿¿¿¿¿ Webhook¿¿¿¿¿¿¿¿¿¿¿', 'Enter a DingTalk custom bot webhook; alerts are sent to that group.') }}</span></div>
-          <div class="notify-input"><input v-model="settings.monitoring.alerting.dingtalk_webhook" placeholder="https://oapi.dingtalk.com/robot/send?access_token=..." /><button class="ghost small" :disabled="!settings.monitoring.alerting.enabled || testingChannel === 'dingtalk' || !settings.monitoring.alerting.dingtalk_webhook" @click="sendTestNotification('dingtalk')">{{ testingChannel === 'dingtalk' ? tr('¿¿¿...', 'Sending...') : tr('¿¿¿¿', 'Test') }}</button></div>
-          <label class="check notify-enabled"><input v-model="settings.monitoring.alerting.dingtalk_enabled" type="checkbox" /> {{ tr('¿¿', 'Enabled') }}</label>
+          <div><strong>{{ tr('é’‰é’‰æœºå™¨äºº', 'DingTalk Bot') }}</strong><span>{{ tr('å¡«å†™é’‰é’‰è‡ªå®šä¹‰æœºå™¨äºº Webhookï¼Œå‘Šè­¦ä¼šå‘é€åˆ°å¯¹åº”ç¾¤ã€‚', 'Enter a DingTalk custom bot webhook; alerts are sent to that group.') }}</span></div>
+          <div class="notify-input"><input v-model="settings.monitoring.alerting.dingtalk_webhook" placeholder="https://oapi.dingtalk.com/robot/send?access_token=..." /><button class="ghost small" :disabled="!settings.monitoring.alerting.enabled || testingChannel === 'dingtalk' || !settings.monitoring.alerting.dingtalk_webhook" @click="sendTestNotification('dingtalk')">{{ testingChannel === 'dingtalk' ? tr('å‘é€ä¸­...', 'Sending...') : tr('æµ‹è¯•å‘é€', 'Test') }}</button></div>
+          <label class="check notify-enabled"><input v-model="settings.monitoring.alerting.dingtalk_enabled" type="checkbox" /> {{ tr('å¯ç”¨', 'Enabled') }}</label>
         </div>
         <div class="notify-channel-row">
-          <div><strong>{{ tr('¿¿¿¿¿', 'Feishu Bot') }}</strong><span>{{ tr('¿¿¿¿¿¿¿¿ Webhook¿¿¿¿¿¿¿¿¿', 'Enter a Feishu bot webhook for operations alert groups.') }}</span></div>
-          <div class="notify-input"><input v-model="settings.monitoring.alerting.feishu_webhook" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/..." /><button class="ghost small" :disabled="!settings.monitoring.alerting.enabled || testingChannel === 'feishu' || !settings.monitoring.alerting.feishu_webhook" @click="sendTestNotification('feishu')">{{ testingChannel === 'feishu' ? tr('¿¿¿...', 'Sending...') : tr('¿¿¿¿', 'Test') }}</button></div>
-          <label class="check notify-enabled"><input v-model="settings.monitoring.alerting.feishu_enabled" type="checkbox" /> {{ tr('¿¿', 'Enabled') }}</label>
+          <div><strong>{{ tr('é£ä¹¦æœºå™¨äºº', 'Feishu Bot') }}</strong><span>{{ tr('å¡«å†™é£ä¹¦ç¾¤æœºå™¨äºº Webhookï¼Œé€‚åˆè¿ç»´å‘Šè­¦ç¾¤ã€‚', 'Enter a Feishu bot webhook for operations alert groups.') }}</span></div>
+          <div class="notify-input"><input v-model="settings.monitoring.alerting.feishu_webhook" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/..." /><button class="ghost small" :disabled="!settings.monitoring.alerting.enabled || testingChannel === 'feishu' || !settings.monitoring.alerting.feishu_webhook" @click="sendTestNotification('feishu')">{{ testingChannel === 'feishu' ? tr('å‘é€ä¸­...', 'Sending...') : tr('æµ‹è¯•å‘é€', 'Test') }}</button></div>
+          <label class="check notify-enabled"><input v-model="settings.monitoring.alerting.feishu_enabled" type="checkbox" /> {{ tr('å¯ç”¨', 'Enabled') }}</label>
         </div>
         <div class="notify-channel-row smtp-row">
-          <div><strong>{{ tr('¿¿ SMTP', 'Email SMTP') }}</strong><span>{{ tr('¿¿ SMTP ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Configure SMTP server, credentials, and recipients; alerts are sent by email directly.') }}</span></div>
+          <div><strong>{{ tr('é‚®ä»¶ SMTP', 'Email SMTP') }}</strong><span>{{ tr('é…ç½® SMTP æœåŠ¡å™¨ã€è´¦å·å¯†ç å’Œæ”¶ä»¶äººï¼Œå‘Šè­¦ä¼šç›´æ¥å‘é€é‚®ä»¶ã€‚', 'Configure SMTP server, credentials, and recipients; alerts are sent by email directly.') }}</span></div>
           <div class="smtp-config-grid">
-            <input v-model="settings.monitoring.alerting.email_smtp_host" :placeholder="tr('SMTP ¿¿¿¿¿¿ smtp.example.com', 'SMTP host, e.g. smtp.example.com')" />
+            <input v-model="settings.monitoring.alerting.email_smtp_host" :placeholder="tr('SMTP æœåŠ¡å™¨ï¼Œä¾‹å¦‚ smtp.example.com', 'SMTP host, e.g. smtp.example.com')" />
             <input v-model.number="settings.monitoring.alerting.email_smtp_port" type="number" min="1" placeholder="587" />
-            <input v-model="settings.monitoring.alerting.email_smtp_username" :placeholder="tr('SMTP ¿¿', 'SMTP username')" />
-            <input v-model="settings.monitoring.alerting.email_smtp_password" type="password" :placeholder="tr('SMTP ¿¿¿¿¿¿¿¿', 'SMTP password, leave empty to keep')" />
-            <input v-model="settings.monitoring.alerting.email_from" :placeholder="tr('¿¿¿¿¿¿ alert@example.com', 'From, e.g. alert@example.com')" />
-            <input v-model="settings.monitoring.alerting.email_to" :placeholder="tr('¿¿¿¿¿¿¿¿¿¿¿', 'Recipients, comma-separated')" />
-            <label class="check smtp-tls"><input v-model="settings.monitoring.alerting.email_use_tls" type="checkbox" /> {{ tr('¿¿ SSL/TLS¿465 ¿¿¿¿¿', 'Use SSL/TLS, usually port 465') }}</label>
-            <label class="check smtp-tls"><input v-model="settings.monitoring.alerting.email_smtp_enabled" type="checkbox" /> {{ tr('¿¿¿¿¿¿', 'Enable Email') }}</label>
-            <button class="ghost small" :disabled="!settings.monitoring.alerting.enabled || testingChannel === 'email' || !emailSmtpReady" @click="sendTestNotification('email')">{{ testingChannel === 'email' ? tr('¿¿¿...', 'Sending...') : tr('¿¿¿¿', 'Test') }}</button>
+            <input v-model="settings.monitoring.alerting.email_smtp_username" :placeholder="tr('SMTP è´¦å·', 'SMTP username')" />
+            <input v-model="settings.monitoring.alerting.email_smtp_password" type="password" :placeholder="tr('SMTP å¯†ç ï¼Œç•™ç©ºä¸ä¿®æ”¹', 'SMTP password, leave empty to keep')" />
+            <input v-model="settings.monitoring.alerting.email_from" :placeholder="tr('å‘ä»¶äººï¼Œä¾‹å¦‚ alert@example.com', 'From, e.g. alert@example.com')" />
+            <input v-model="settings.monitoring.alerting.email_to" :placeholder="tr('æ”¶ä»¶äººï¼Œå¤šä¸ªç”¨é€—å·åˆ†éš”', 'Recipients, comma-separated')" />
+            <label class="check smtp-tls"><input v-model="settings.monitoring.alerting.email_use_tls" type="checkbox" /> {{ tr('ä½¿ç”¨ SSL/TLSï¼ˆ465 ç«¯å£å¸¸ç”¨ï¼‰', 'Use SSL/TLS, usually port 465') }}</label>
+            <label class="check smtp-tls"><input v-model="settings.monitoring.alerting.email_smtp_enabled" type="checkbox" /> {{ tr('å¯ç”¨é‚®ä»¶é€šçŸ¥', 'Enable Email') }}</label>
+            <button class="ghost small" :disabled="!settings.monitoring.alerting.enabled || testingChannel === 'email' || !emailSmtpReady" @click="sendTestNotification('email')">{{ testingChannel === 'email' ? tr('å‘é€ä¸­...', 'Sending...') : tr('æµ‹è¯•å‘é€', 'Test') }}</button>
           </div>
         </div>
       </div>
@@ -157,54 +154,41 @@
 
     <section v-if="activeTab === 'alertConfig'" class="panel alert-config-page">
       <div class="panel-title">
-        <div><h2>{{ tr('¿¿¿¿¿¿', 'Rule Config File') }}</h2><p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿ JSON¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Edit monitoring alert rule JSON on a dedicated page. Apply it, return to alerts, then save settings to persist.') }}</p></div>
-        <div class="actions"><button class="ghost" @click="backToAlertSettings">{{ tr('¿¿¿¿¿¿', 'Back to Alerts') }}</button></div>
+        <div><h2>{{ tr('è§„åˆ™é…ç½®æ–‡ä»¶', 'Rule Config File') }}</h2><p class="hint">{{ tr('ç‹¬ç«‹é¡µé¢åœ¨çº¿ç¼–è¾‘ç›‘æ§å‘Šè­¦è§„åˆ™ JSONã€‚åº”ç”¨é…ç½®åè¿”å›å‘Šè­¦é¡µç¡®è®¤ï¼Œç‚¹å‡»ä¿å­˜è®¾ç½®åæŒä¹…åŒ–ã€‚', 'Edit monitoring alert rule JSON on a dedicated page. Apply it, return to alerts, then save settings to persist.') }}</p></div>
+        <div class="actions"><button class="ghost" @click="backToAlertSettings">{{ tr('è¿”å›ç›‘æ§å‘Šè­¦', 'Back to Alerts') }}</button></div>
       </div>
       <div class="alert-config-editor page-mode">
         <div class="config-editor-head">
-          <div><h3>{{ tr('¿¿¿¿¿¿', 'Rule Config File') }}</h3><span>{{ tr('¿¿¿¿¿¿ JSON ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Edit JSON config online; applying it syncs to the rule cards above.') }}</span></div>
-          <div class="config-editor-actions"><button class="ghost small" @click="refreshAlertRulesConfig">{{ tr('¿¿¿¿¿¿¿', 'Generate From Current') }}</button><button class="primary small" @click="applyAlertRulesConfig">{{ tr('¿¿¿¿', 'Apply Config') }}</button></div>
+          <div><h3>{{ tr('è§„åˆ™é…ç½®æ–‡ä»¶', 'Rule Config File') }}</h3><span>{{ tr('æ”¯æŒåœ¨çº¿ç¼–è¾‘ JSON é…ç½®ï¼Œåº”ç”¨åä¼šåŒæ­¥åˆ°ä¸Šæ–¹è§„åˆ™å¡ç‰‡ã€‚', 'Edit JSON config online; applying it syncs to the rule cards above.') }}</span></div>
+          <div class="config-editor-actions"><button class="ghost small" @click="refreshAlertRulesConfig">{{ tr('ä»å½“å‰è§„åˆ™ç”Ÿæˆ', 'Generate From Current') }}</button><button class="primary small" @click="applyAlertRulesConfig">{{ tr('åº”ç”¨é…ç½®', 'Apply Config') }}</button></div>
         </div>
         <textarea v-model="alertRulesConfigText" spellcheck="false" class="config-editor-textarea"></textarea>
-        <p class="hint">{{ tr('¿¿¿key/name/enabled/threshold/unit/direction/cluster_ids/migration_job_ids¿cluster_ids ¿¿¿¿¿¿¿¿¿migration_job_ids ¿¿¿¿¿¿¿¿¿¿¿', 'Fields: key/name/enabled/threshold/unit/direction/cluster_ids/migration_job_ids. Empty cluster_ids means all clusters; empty migration_job_ids means all migration jobs.') }}</p>
+        <p class="hint">{{ tr('å­—æ®µï¼škey/name/enabled/threshold/unit/direction/cluster_ids/migration_job_idsã€‚cluster_ids ä¸ºç©ºè¡¨ç¤ºå…¨éƒ¨é›†ç¾¤ï¼›migration_job_ids ä¸ºç©ºè¡¨ç¤ºæ‰€æœ‰è¿ç§»ä»»åŠ¡ã€‚', 'Fields: key/name/enabled/threshold/unit/direction/cluster_ids/migration_job_ids. Empty cluster_ids means all clusters; empty migration_job_ids means all migration jobs.') }}</p>
       </div>
-    </section>
-
-    <section v-if="activeTab === 'license'" class="panel license-panel">
-      <div class="panel-title"><h2>{{ tr('¿¿¿¿¿', 'License') }}</h2><span :class="['edition-pill', { enterprise: license.enterprise }]">{{ editionLabel }}</span></div>
-      <div class="license-summary">
-        <div><span>{{ tr('¿¿¿¿', 'Current Version') }}</span><strong>{{ editionLabel }}</strong></div>
-        <div><span>{{ tr('¿¿¿¿¿¿¿', 'Full Edition Expires At') }}</span><strong>{{ formatDateTime(license.expires_at) }}</strong></div>
-      </div>
-      <div class="license-activate">
-        <input v-model="licenseInput" :placeholder="tr('¿¿¿¿¿¿¿¿', 'Enter Full Edition license key')" />
-        <button class="primary" :disabled="!licenseInput.trim() || saving" @click="activateLicenseKey">{{ tr('¿¿¿¿', 'Activate') }}</button>
-      </div>
-      <p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Community edition is ready to use. Paste a valid Full Edition license key and activate to see Full Edition features and expiration.') }}</p>
     </section>
 
     <section v-if="activeTab === 'users'" class="panel users-panel">
       <div class="panel-title">
-        <h2>{{ tr('¿¿¿¿¿', 'Users & Roles') }}</h2>
+        <h2>{{ tr('ç”¨æˆ·ä¸è§’è‰²', 'Users & Roles') }}</h2>
         <div class="actions">
-          <button class="primary" :disabled="isExternalAuth" :title="isExternalAuth ? tr('LDAP/OIDC ¿¿¿¿¿¿¿¿¿¿¿', 'Local user creation is disabled when LDAP/OIDC is enabled') : ''" @click="openUserDialog">{{ tr('¿¿¿¿', 'Create User') }}</button>
-          <button class="primary" @click="openRoleDialog">{{ tr('¿¿¿¿', 'Create Role') }}</button>
-          <button class="ghost" @click="loadUsersAndRoles">{{ tr('¿¿', 'Refresh') }}</button>
+          <button class="primary" :disabled="isExternalAuth" :title="isExternalAuth ? tr('LDAP/OIDC å¯ç”¨æ—¶ä¸èƒ½åˆ›å»ºæœ¬åœ°ç”¨æˆ·', 'Local user creation is disabled when LDAP/OIDC is enabled') : ''" @click="openUserDialog">{{ tr('åˆ›å»ºç”¨æˆ·', 'Create User') }}</button>
+          <button class="primary" @click="openRoleDialog">{{ tr('åˆ›å»ºè§’è‰²', 'Create Role') }}</button>
+          <button class="ghost" @click="loadUsersAndRoles">{{ tr('åˆ·æ–°', 'Refresh') }}</button>
         </div>
       </div>
-      <p v-if="isExternalAuth" class="hint warn">{{ tr('¿¿¿ LDAP ¿ OIDC¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ LDAP/OIDC ¿¿¿¿¿¿¿¿¿¿', 'LDAP or OIDC is enabled. Local user creation is disabled. Create roles and assign them to LDAP/OIDC users for authorization.') }}</p>
+      <p v-if="isExternalAuth" class="hint warn">{{ tr('å·²å¯ç”¨ LDAP æˆ– OIDCï¼Œæœ¬åœ°ç”¨æˆ·åˆ›å»ºå·²ç¦ç”¨ã€‚è¯·é€šè¿‡åˆ›å»ºè§’è‰²å¹¶ä¸º LDAP/OIDC ç”¨æˆ·åˆ†é…è§’è‰²æ¥æˆæƒã€‚', 'LDAP or OIDC is enabled. Local user creation is disabled. Create roles and assign them to LDAP/OIDC users for authorization.') }}</p>
       <div class="role-list">
-        <span v-for="role in roles" :key="role.name" class="role-chip">{{ role.name }}<button v-if="!['admin','user'].includes(role.name)" @click="removeRole(role.name)">×</button></span>
+        <span v-for="role in roles" :key="role.name" class="role-chip">{{ role.name }}<button v-if="!['admin','user'].includes(role.name)" @click="removeRole(role.name)">Ã—</button></span>
       </div>
       <div class="user-table">
-        <div class="user-head"><span>{{ tr('¿¿¿', 'Username') }}</span><span>{{ tr('¿¿¿', 'Display Name') }}</span><span>{{ tr('¿¿', 'Source') }}</span><span>{{ tr('¿¿', 'Role') }}</span><span>{{ tr('¿¿', 'Status') }}</span><span>{{ tr('¿¿', 'Actions') }}</span></div>
+        <div class="user-head"><span>{{ tr('ç”¨æˆ·å', 'Username') }}</span><span>{{ tr('æ˜¾ç¤ºå', 'Display Name') }}</span><span>{{ tr('æ¥æº', 'Source') }}</span><span>{{ tr('è§’è‰²', 'Role') }}</span><span>{{ tr('çŠ¶æ€', 'Status') }}</span><span>{{ tr('æ“ä½œ', 'Actions') }}</span></div>
         <div v-for="u in users" :key="u.username" class="user-row">
           <span>{{ u.username }}</span><span>{{ u.display_name || '-' }}</span><span :class="{ 'source-external': u.source === 'ldap' || u.source === 'oidc' }">{{ u.source || 'local' }}</span>
           <select v-model="u.role" @change="saveUser(u)"><option v-for="role in roles" :key="role.name" :value="role.name">{{ role.name }}</option></select>
-          <label class="check"><input v-model="u.is_active" type="checkbox" @change="saveUser(u)" /> {{ tr('¿¿', 'Active') }}</label>
+          <label class="check"><input v-model="u.is_active" type="checkbox" @change="saveUser(u)" /> {{ tr('å¯ç”¨', 'Active') }}</label>
           <div class="user-actions">
-            <button class="ghost small" :disabled="isExternalAuth && u.source !== 'local'" @click="resetPassword(u)">{{ tr('¿¿¿¿', 'Reset Password') }}</button>
-            <button v-if="u.source === 'local' && u.username !== 'admin'" class="ghost small danger" :disabled="isExternalAuth" @click="removeUser(u)">{{ tr('¿¿', 'Delete') }}</button>
+            <button class="ghost small" :disabled="isExternalAuth && u.source !== 'local'" @click="resetPassword(u)">{{ tr('é‡ç½®å¯†ç ', 'Reset Password') }}</button>
+            <button v-if="u.source === 'local' && u.username !== 'admin'" class="ghost small danger" :disabled="isExternalAuth" @click="removeUser(u)">{{ tr('åˆ é™¤', 'Delete') }}</button>
           </div>
         </div>
       </div>
@@ -212,38 +196,38 @@
 
     <div v-if="showUserDialog" class="modal-backdrop" @click.self="showUserDialog = false">
       <form class="modal-card" @submit.prevent="createUser">
-        <div class="modal-title"><h3>{{ tr('¿¿¿¿', 'Create User') }}</h3><button type="button" class="modal-close" @click="showUserDialog = false">×</button></div>
-        <input v-model="userForm.username" :placeholder="tr('¿¿¿¿¿ demo', 'Username, e.g. demo')" autofocus />
-        <input v-model="userForm.display_name" :placeholder="tr('¿¿¿¿¿¿', 'Display name, optional')" />
-        <input v-model="userForm.email" :placeholder="tr('¿¿¿¿¿', 'Email, optional')" />
-        <input v-model="userForm.password" type="password" :placeholder="tr('¿¿¿¿', 'Initial password')" />
+        <div class="modal-title"><h3>{{ tr('åˆ›å»ºç”¨æˆ·', 'Create User') }}</h3><button type="button" class="modal-close" @click="showUserDialog = false">Ã—</button></div>
+        <input v-model="userForm.username" :placeholder="tr('ç”¨æˆ·åï¼Œå¦‚ demo', 'Username, e.g. demo')" autofocus />
+        <input v-model="userForm.display_name" :placeholder="tr('æ˜¾ç¤ºåï¼Œå¯é€‰', 'Display name, optional')" />
+        <input v-model="userForm.email" :placeholder="tr('é‚®ç®±ï¼Œå¯é€‰', 'Email, optional')" />
+        <input v-model="userForm.password" type="password" :placeholder="tr('åˆå§‹å¯†ç ', 'Initial password')" />
         <select v-model="userForm.role"><option v-for="role in roles" :key="role.name" :value="role.name">{{ role.name }}</option></select>
-        <div class="modal-actions"><button type="button" class="ghost" @click="showUserDialog = false">{{ tr('¿¿', 'Cancel') }}</button><button class="primary" :disabled="!userForm.username || !userForm.password">{{ tr('¿¿¿¿', 'Create User') }}</button></div>
+        <div class="modal-actions"><button type="button" class="ghost" @click="showUserDialog = false">{{ tr('å–æ¶ˆ', 'Cancel') }}</button><button class="primary" :disabled="!userForm.username || !userForm.password">{{ tr('åˆ›å»ºç”¨æˆ·', 'Create User') }}</button></div>
       </form>
     </div>
 
     <div v-if="showRoleDialog" class="modal-backdrop" @click.self="showRoleDialog = false">
       <form class="modal-card" @submit.prevent="createRole">
-        <div class="modal-title"><h3>{{ tr('¿¿¿¿', 'Create Role') }}</h3><button type="button" class="modal-close" @click="showRoleDialog = false">×</button></div>
-        <input v-model="roleForm.name" :placeholder="tr('¿¿¿¿¿¿ ops', 'Role name, e.g. ops')" autofocus />
-        <input v-model="roleForm.description" :placeholder="tr('¿¿¿¿¿¿¿', 'Role description, optional')" />
-        <div class="modal-actions"><button type="button" class="ghost" @click="showRoleDialog = false">{{ tr('¿¿', 'Cancel') }}</button><button class="primary" :disabled="!roleForm.name">{{ tr('¿¿¿¿', 'Create Role') }}</button></div>
+        <div class="modal-title"><h3>{{ tr('åˆ›å»ºè§’è‰²', 'Create Role') }}</h3><button type="button" class="modal-close" @click="showRoleDialog = false">Ã—</button></div>
+        <input v-model="roleForm.name" :placeholder="tr('è§’è‰²åç§°ï¼Œå¦‚ ops', 'Role name, e.g. ops')" autofocus />
+        <input v-model="roleForm.description" :placeholder="tr('è§’è‰²æè¿°ï¼Œå¯é€‰', 'Role description, optional')" />
+        <div class="modal-actions"><button type="button" class="ghost" @click="showRoleDialog = false">{{ tr('å–æ¶ˆ', 'Cancel') }}</button><button class="primary" :disabled="!roleForm.name">{{ tr('åˆ›å»ºè§’è‰²', 'Create Role') }}</button></div>
       </form>
     </div>
 
     <section v-if="activeTab === 'kafkaAuth'" class="panel kafka-auth-panel">
       <div class="panel-title">
         <div>
-          <h2>{{ tr('Kafka ¿¿', 'Kafka Auth') }}</h2>
-          <p class="hint">{{ tr('¿¿¿¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Kafka ¿¿¿', 'Configure fine-grained Kafka cluster permissions by user or role. Users also inherit permissions from their roles.') }}</p>
+          <h2>{{ tr('Kafka æˆæƒ', 'Kafka Auth') }}</h2>
+          <p class="hint">{{ tr('æŒ‰ç”¨æˆ·æˆ–è§’è‰²é…ç½® Kafka é›†ç¾¤ç»†ç²’åº¦æƒé™ã€‚ç”¨æˆ·ä¼šåŒæ—¶ç»§æ‰¿æ‰€å±è§’è‰²çš„ Kafka æˆæƒã€‚', 'Configure fine-grained Kafka cluster permissions by user or role. Users also inherit permissions from their roles.') }}</p>
         </div>
-        <button class="ghost" @click="loadKafkaAuth">{{ tr('¿¿¿¿', 'Refresh Auth') }}</button>
+        <button class="ghost" @click="loadKafkaAuth">{{ tr('åˆ·æ–°æˆæƒ', 'Refresh Auth') }}</button>
       </div>
       <div class="auth-toolbar">
-        <select v-model="authSubjectType" @change="loadClusterPermission"><option value="user">{{ tr('¿¿¿¿', 'Authorize User') }}</option><option value="role">{{ tr('¿¿¿¿', 'Authorize Role') }}</option></select>
-        <select v-if="authSubjectType === 'user'" v-model="authUsername" @change="loadClusterPermission"><option value="">{{ tr('¿¿¿¿', 'Select User') }}</option><option v-for="u in users" :key="u.username" :value="u.username">{{ u.username }} / {{ u.display_name || '-' }}</option></select>
-        <select v-else v-model="authRole" @change="loadClusterPermission"><option value="">{{ tr('¿¿¿¿', 'Select Role') }}</option><option v-for="r in roles" :key="r.name" :value="r.name">{{ r.name }} / {{ r.description || '-' }}</option></select>
-        <select v-model="authClusterId" @change="loadClusterPermission"><option value="">{{ tr('¿¿ Kafka ¿¿', 'Select Kafka Cluster') }}</option><option v-for="c in clusters" :key="c.id" :value="c.id">{{ c.name }} / {{ c.bootstrap_servers }}</option></select>
+        <select v-model="authSubjectType" @change="loadClusterPermission"><option value="user">{{ tr('æˆæƒç”¨æˆ·', 'Authorize User') }}</option><option value="role">{{ tr('æˆæƒè§’è‰²', 'Authorize Role') }}</option></select>
+        <select v-if="authSubjectType === 'user'" v-model="authUsername" @change="loadClusterPermission"><option value="">{{ tr('é€‰æ‹©ç”¨æˆ·', 'Select User') }}</option><option v-for="u in users" :key="u.username" :value="u.username">{{ u.username }} / {{ u.display_name || '-' }}</option></select>
+        <select v-else v-model="authRole" @change="loadClusterPermission"><option value="">{{ tr('é€‰æ‹©è§’è‰²', 'Select Role') }}</option><option v-for="r in roles" :key="r.name" :value="r.name">{{ r.name }} / {{ r.description || '-' }}</option></select>
+        <select v-model="authClusterId" @change="loadClusterPermission"><option value="">{{ tr('é€‰æ‹© Kafka é›†ç¾¤', 'Select Kafka Cluster') }}</option><option v-for="c in clusters" :key="c.id" :value="c.id">{{ c.name }} / {{ c.bootstrap_servers }}</option></select>
       </div>
       <div class="permission-grid">
         <label v-for="action in actionOptions" :key="action.value" class="permission-card">
@@ -253,16 +237,16 @@
         </label>
       </div>
       <div class="auth-actions">
-        <button class="ghost" :disabled="!currentAuthSubject || !authClusterId" @click="selectReadOnly">{{ tr('¿¿¿¿', 'Read Only') }}</button>
-        <button class="ghost" :disabled="!currentAuthSubject || !authClusterId" @click="selectOps">{{ tr('¿¿¿¿', 'Ops') }}</button>
-        <button class="ghost" :disabled="!currentAuthSubject || !authClusterId" @click="authActions = []">{{ tr('¿¿', 'Clear') }}</button>
-        <button class="primary" :disabled="!currentAuthSubject || !authClusterId || authSaving" @click="saveClusterPermission">{{ authSaving ? tr('¿¿¿...', 'Saving...') : tr('¿¿ Kafka ¿¿', 'Save Kafka Auth') }}</button>
+        <button class="ghost" :disabled="!currentAuthSubject || !authClusterId" @click="selectReadOnly">{{ tr('åªè¯»æƒé™', 'Read Only') }}</button>
+        <button class="ghost" :disabled="!currentAuthSubject || !authClusterId" @click="selectOps">{{ tr('è¿ç»´æƒé™', 'Ops') }}</button>
+        <button class="ghost" :disabled="!currentAuthSubject || !authClusterId" @click="authActions = []">{{ tr('æ¸…ç©º', 'Clear') }}</button>
+        <button class="primary" :disabled="!currentAuthSubject || !authClusterId || authSaving" @click="saveClusterPermission">{{ authSaving ? tr('ä¿å­˜ä¸­...', 'Saving...') : tr('ä¿å­˜ Kafka æˆæƒ', 'Save Kafka Auth') }}</button>
       </div>
     </section>
 
     <div v-if="noticeDialog.visible" class="modal-backdrop" @click.self="noticeDialog.visible = false">
       <div :class="['notice-card', noticeDialog.type]">
-        <div class="notice-icon">{{ noticeDialog.type === 'error' ? '!' : noticeDialog.type === 'warn' ? 'i' : '¿' }}</div>
+        <div class="notice-icon">{{ noticeDialog.type === 'error' ? '!' : noticeDialog.type === 'warn' ? 'i' : 'âœ“' }}</div>
         <div class="notice-body">
           <p class="notice-eyebrow">{{ noticeDialog.eyebrow }}</p>
           <h3>{{ noticeDialog.title }}</h3>
@@ -270,7 +254,7 @@
             <p v-for="(line, index) in noticeMessageLines" :key="index">{{ line }}</p>
           </div>
         </div>
-        <div class="modal-actions notice-actions"><button class="primary" @click="noticeDialog.visible = false">{{ tr('¿¿¿', 'OK') }}</button></div>
+        <div class="modal-actions notice-actions"><button class="primary" @click="noticeDialog.visible = false">{{ tr('çŸ¥é“äº†', 'OK') }}</button></div>
       </div>
     </div>
 
@@ -293,7 +277,7 @@ const users = ref<any[]>([])
 const roles = ref<any[]>([])
 const clusters = ref<any[]>([])
 const migrationJobs = ref<any[]>([])
-const activeTab = ref<'basic' | 'license' | 'monitoring' | 'monitoringAlerts' | 'alertConfig' | 'users' | 'kafkaAuth'>('basic')
+const activeTab = ref<'basic' | 'monitoring' | 'monitoringAlerts' | 'alertConfig' | 'users' | 'kafkaAuth'>('basic')
 const saving = ref(false)
 const authSaving = ref(false)
 const testingChannel = ref('')
@@ -308,7 +292,6 @@ const authRole = ref('')
 const authClusterId = ref('')
 const authActions = ref<string[]>([])
 const clusterPermissions = ref<any[]>([])
-const licenseInput = ref('')
 const roleForm = ref({ name: '', description: '' })
 const userForm = ref({ username: '', display_name: '', email: '', role: 'user', password: '' })
 const showUserDialog = ref(false)
@@ -316,7 +299,6 @@ const showRoleDialog = ref(false)
 const noticeDialog = ref({ visible: false, type: 'success', eyebrow: 'Success', title: '', message: '' })
 const isExternalAuth = computed(() => ssoStatus.value.ldap_enabled === true || ssoStatus.value.oidc_enabled === true)
 const currentAuthSubject = computed(() => authSubjectType.value === 'role' ? authRole.value : authUsername.value)
-const editionLabel = computed(() => `${license.value.enterprise ? tr('¿¿¿', 'Full Edition') : tr('¿¿¿', 'Community')} 1.0.0`)
 const emailSmtpReady = computed(() => !!settings.value.monitoring?.alerting?.email_smtp_host && !!settings.value.monitoring?.alerting?.email_from && !!settings.value.monitoring?.alerting?.email_to)
 const noticeMessageLines = computed(() => String(noticeDialog.value.message || '').split('\n').filter(Boolean))
 
@@ -339,27 +321,27 @@ const defaultAlertRules = () => [
 ]
 
 const alertRuleTitles: Record<string, [string, string]> = {
-  consumer_group_lag: ['¿¿¿¿¿', 'Consumer Group Lag'],
-  broker_offline: ['Broker ¿¿', 'Broker Offline'],
-  broker_unavailable: ['Broker ¿¿¿', 'Broker Unavailable'],
-  under_replicated_partition: ['¿¿¿¿¿¿¿', 'Under Replicated Partitions'],
-  offline_partition: ['¿¿¿¿', 'Offline Partitions'],
-  topic_partition_count: ['Topic ¿¿¿¿¿', 'Topic Partition Count'],
-  topic_log_size: ['Topic ¿¿¿¿¿¿', 'Topic Log Size'],
-  consumer_member_zero: ['¿¿¿¿¿¿', 'Consumer Group No Members'],
-  migration_incremental_sync_abnormal: ['¿¿¿¿¿¿¿¿', 'Migration Incremental Sync Abnormal'],
+  consumer_group_lag: ['æ¶ˆè´¹ç»„ç§¯å‹', 'Consumer Group Lag'],
+  broker_offline: ['Broker ç¦»çº¿', 'Broker Offline'],
+  broker_unavailable: ['Broker ä¸å¯ç”¨', 'Broker Unavailable'],
+  under_replicated_partition: ['å‰¯æœ¬ä¸åŒæ­¥åˆ†åŒº', 'Under Replicated Partitions'],
+  offline_partition: ['ç¦»çº¿åˆ†åŒº', 'Offline Partitions'],
+  topic_partition_count: ['Topic åˆ†åŒºæ•°è¿‡é«˜', 'Topic Partition Count'],
+  topic_log_size: ['Topic æ—¥å¿—å®¹é‡è¿‡é«˜', 'Topic Log Size'],
+  consumer_member_zero: ['æ¶ˆè´¹ç»„æ— æˆå‘˜', 'Consumer Group No Members'],
+  migration_incremental_sync_abnormal: ['è¿ç§»å¢é‡åŒæ­¥å¼‚å¸¸', 'Migration Incremental Sync Abnormal'],
 }
 
 const alertRuleDescriptions: Record<string, [string, string]> = {
-  consumer_group_lag: ['¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Alerts when total consumer group lag reaches the threshold.'],
-  broker_offline: ['¿¿ Broker ¿¿¿¿¿¿¿¿¿¿¿¿¿ Broker ¿¿¿', 'Alerts when available broker count is below the threshold.'],
-  broker_unavailable: ['¿¿¿ Broker ¿¿¿¿¿¿¿¿¿', 'Alerts when unavailable broker count reaches the threshold.'],
-  under_replicated_partition: ['¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Alerts when under-replicated partitions reach the threshold.'],
-  offline_partition: ['¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Alerts when offline partitions reach the threshold.'],
-  topic_partition_count: ['Topic ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Alerts when topic count reaches the threshold.'],
-  topic_log_size: ['¿¿ Topic ¿¿¿¿¿¿¿¿¿¿¿¿', 'Alerts when a topic log size reaches the threshold.'],
-  consumer_member_zero: ['¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Alerts when groups without active members reach the threshold.'],
-  migration_incremental_sync_abnormal: ['¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Alerts when a smooth migration with incremental sync enabled fails.'],
+  consumer_group_lag: ['æ¶ˆè´¹ç»„æ€»ç§¯å‹è¾¾åˆ°é˜ˆå€¼æ—¶å‘Šè­¦ï¼Œç”¨äºå‘ç°æ¶ˆè´¹å †ç§¯ã€‚', 'Alerts when total consumer group lag reaches the threshold.'],
+  broker_offline: ['å¯ç”¨ Broker æ•°ä½äºé˜ˆå€¼æ—¶å‘Šè­¦ï¼Œç”¨äºå‘ç° Broker ç¦»çº¿ã€‚', 'Alerts when available broker count is below the threshold.'],
+  broker_unavailable: ['ä¸å¯ç”¨ Broker æ•°è¾¾åˆ°é˜ˆå€¼æ—¶å‘Šè­¦ã€‚', 'Alerts when unavailable broker count reaches the threshold.'],
+  under_replicated_partition: ['å‰¯æœ¬ä¸åŒæ­¥åˆ†åŒºæ•°è¾¾åˆ°é˜ˆå€¼æ—¶å‘Šè­¦ã€‚', 'Alerts when under-replicated partitions reach the threshold.'],
+  offline_partition: ['ç¦»çº¿åˆ†åŒºæ•°è¾¾åˆ°é˜ˆå€¼æ—¶å‘Šè­¦ã€‚', 'Alerts when offline partitions reach the threshold.'],
+  topic_partition_count: ['Topic æ•°è¾¾åˆ°é˜ˆå€¼æ—¶å‘Šè­¦ï¼Œç”¨äºå‘ç°é›†ç¾¤è§„æ¨¡è¿‡å¤§ã€‚', 'Alerts when topic count reaches the threshold.'],
+  topic_log_size: ['å•ä¸ª Topic æ—¥å¿—å¤§å°è¾¾åˆ°é˜ˆå€¼æ—¶å‘Šè­¦ã€‚', 'Alerts when a topic log size reaches the threshold.'],
+  consumer_member_zero: ['æ— åœ¨çº¿æˆå‘˜çš„æ¶ˆè´¹ç»„æ•°é‡è¾¾åˆ°é˜ˆå€¼æ—¶å‘Šè­¦ã€‚', 'Alerts when groups without active members reach the threshold.'],
+  migration_incremental_sync_abnormal: ['å¹³æ»‘è¿ç§»ä»»åŠ¡å¼€å¯å¢é‡åŒæ­¥åå¤±è´¥æ—¶å‘Šè­¦ï¼Œç”¨äºå‘ç°å¢é‡åŒæ­¥å¼‚å¸¸ä¸­æ–­ã€‚', 'Alerts when a smooth migration with incremental sync enabled fails.'],
 }
 
 const alertRuleTitle = (key: string, fallback: string) => {
@@ -368,35 +350,35 @@ const alertRuleTitle = (key: string, fallback: string) => {
 }
 const alertRuleDesc = (key: string) => {
   const item = alertRuleDescriptions[key]
-  return item ? tr(item[0], item[1]) : tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'This rule alerts when the configured threshold is reached.')
+  return item ? tr(item[0], item[1]) : tr('è¯¥è§„åˆ™è¾¾åˆ°é…ç½®é˜ˆå€¼æ—¶è§¦å‘å‘Šè­¦ã€‚', 'This rule alerts when the configured threshold is reached.')
 }
-const alertRuleUnit = (unit: string) => unit === 'messages' ? tr('¿¿¿', 'messages') : unit === 'broker' ? 'broker' : unit === 'partition' ? tr('¿¿¿', 'partitions') : unit === 'group' ? 'group' : unit === 'job' ? tr('¿¿¿', 'jobs') : unit
+const alertRuleUnit = (unit: string) => unit === 'messages' ? tr('æ¡æ¶ˆæ¯', 'messages') : unit === 'broker' ? 'broker' : unit === 'partition' ? tr('ä¸ªåˆ†åŒº', 'partitions') : unit === 'group' ? 'group' : unit === 'job' ? tr('ä¸ªä»»åŠ¡', 'jobs') : unit
 const alertRuleValueText = (key: string) => {
   const items = alertRuleValues.value[key] || []
   if (!items.length) return ''
   const first = items[0]
-  const value = first.available === false || first.value === null || first.value === undefined ? tr('¿¿¿¿', 'No data') : `${first.value} ${alertRuleUnit(first.unit || '')}`.trim()
-  const suffix = items.length > 1 ? tr(`¿ ${items.length} ¿¿¿`, `${items.length} clusters`) : (first.cluster || '')
+  const value = first.available === false || first.value === null || first.value === undefined ? tr('æš‚æ— æ•°æ®', 'No data') : `${first.value} ${alertRuleUnit(first.unit || '')}`.trim()
+  const suffix = items.length > 1 ? tr(`ç­‰ ${items.length} ä¸ªé›†ç¾¤`, `${items.length} clusters`) : (first.cluster || '')
   return suffix ? `${suffix}: ${value}` : value
 }
 const alertRuleUsesClusters = (key: string) => key !== 'migration_incremental_sync_abnormal'
 const alertRuleUsesMigrationJobs = (key: string) => key === 'migration_incremental_sync_abnormal'
 const supportedAlertRuleKeys = () => new Set(defaultAlertRules().map((rule: any) => rule.key))
 const selectedClusterLabel = (rule: any) => {
-  if (!alertRuleUsesClusters(rule.key)) return tr('¿¿¿¿', 'Global Rule')
+  if (!alertRuleUsesClusters(rule.key)) return tr('å…¨å±€è§„åˆ™', 'Global Rule')
   const ids = Array.isArray(rule.cluster_ids) ? rule.cluster_ids : []
-  if (ids.length === 0) return tr('¿¿¿¿', 'All Clusters')
-  if (ids.length === 1) return clusters.value.find(cluster => cluster.id === ids[0])?.name || tr('¿¿ 1 ¿', '1 selected')
-  return tr(`¿¿ ${ids.length} ¿¿¿`, `${ids.length} selected`)
+  if (ids.length === 0) return tr('å…¨éƒ¨é›†ç¾¤', 'All Clusters')
+  if (ids.length === 1) return clusters.value.find(cluster => cluster.id === ids[0])?.name || tr('å·²é€‰ 1 ä¸ª', '1 selected')
+  return tr(`å·²é€‰ ${ids.length} ä¸ªé›†ç¾¤`, `${ids.length} selected`)
 }
 const selectedMigrationJobLabel = (rule: any) => {
   const ids = Array.isArray(rule.migration_job_ids) ? rule.migration_job_ids : []
-  if (ids.length === 0) return tr('¿¿¿¿¿¿', 'All Migration Jobs')
-  if (ids.length === 1) return migrationJobs.value.find(job => job.id === ids[0])?.id || tr('¿¿ 1 ¿¿¿', '1 job selected')
-  return tr(`¿¿ ${ids.length} ¿¿¿`, `${ids.length} jobs selected`)
+  if (ids.length === 0) return tr('æ‰€æœ‰è¿ç§»ä»»åŠ¡', 'All Migration Jobs')
+  if (ids.length === 1) return migrationJobs.value.find(job => job.id === ids[0])?.id || tr('å·²é€‰ 1 ä¸ªä»»åŠ¡', '1 job selected')
+  return tr(`å·²é€‰ ${ids.length} ä¸ªä»»åŠ¡`, `${ids.length} jobs selected`)
 }
 const migrationJobOptionLabel = (job: any) => `${job.id} / ${job.source_cluster || '-'} -> ${job.target_cluster || '-'} / ${statusLabel(job.status)}`
-const statusLabel = (status: string) => status === 'completed' ? tr('¿¿¿', 'Completed') : status === 'failed' ? tr('¿¿', 'Failed') : status === 'running' ? tr('¿¿¿', 'Running') : status === 'incremental' ? tr('¿¿¿¿¿', 'Incremental Syncing') : status === 'stopping' ? tr('¿¿¿', 'Stopping') : status === 'stopped' ? tr('¿¿¿', 'Stopped') : tr('¿¿¿', 'Queued')
+const statusLabel = (status: string) => status === 'completed' ? tr('å·²å®Œæˆ', 'Completed') : status === 'failed' ? tr('å¤±è´¥', 'Failed') : status === 'running' ? tr('è¿è¡Œä¸­', 'Running') : status === 'incremental' ? tr('å¢é‡åŒæ­¥ä¸­', 'Incremental Syncing') : status === 'stopping' ? tr('åœæ­¢ä¸­', 'Stopping') : status === 'stopped' ? tr('å·²åœæ­¢', 'Stopped') : tr('æ’é˜Ÿä¸­', 'Queued')
 
 const toggleClusterDropdown = (key: string) => {
   openClusterDropdown.value = openClusterDropdown.value === key ? '' : key
@@ -456,7 +438,7 @@ const backToAlertSettings = () => {
 const applyAlertRulesConfig = () => {
   try {
     const parsed = JSON.parse(alertRulesConfigText.value)
-    if (!Array.isArray(parsed)) throw new Error(tr('¿¿¿¿¿¿¿¿¿¿', 'Config root must be an array'))
+    if (!Array.isArray(parsed)) throw new Error(tr('é…ç½®æ ¹èŠ‚ç‚¹å¿…é¡»æ˜¯æ•°ç»„', 'Config root must be an array'))
     settings.value.monitoring.alerting.rules = parsed.map((item: any) => ({
       key: String(item.key || '').trim(),
       name: String(item.name || item.key || '').trim(),
@@ -469,23 +451,23 @@ const applyAlertRulesConfig = () => {
     })).filter((item: any) => item.key)
     ensureAlerting()
     refreshAlertRulesConfig()
-    showNotice(tr('¿¿¿¿¿', 'Config Applied'), tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Alert rule config applied. Save settings to persist it.'))
+    showNotice(tr('é…ç½®å·²åº”ç”¨', 'Config Applied'), tr('å‘Šè­¦è§„åˆ™é…ç½®å·²åº”ç”¨ï¼Œç‚¹å‡»ä¿å­˜è®¾ç½®åç”Ÿæ•ˆã€‚', 'Alert rule config applied. Save settings to persist it.'))
   } catch (err: any) {
-    showNotice(tr('¿¿¿¿¿¿', 'Invalid Config'), err.message || tr('¿¿¿ JSON ¿¿¿', 'Check the JSON format.'), 'error')
+    showNotice(tr('é…ç½®æ ¼å¼é”™è¯¯', 'Invalid Config'), err.message || tr('è¯·æ£€æŸ¥ JSON æ ¼å¼ã€‚', 'Check the JSON format.'), 'error')
   }
 }
 
 const actionOptions = computed(() => [
-  { value: 'cluster_view', label: tr('¿¿¿¿', 'View Cluster'), desc: tr('¿¿¿¿¿¿¿¿ Kafka ¿¿', 'Allows viewing and entering this Kafka cluster') },
-  { value: 'topic_create', label: tr('¿¿ Topic', 'Create Topic'), desc: tr('¿¿¿¿ Topic', 'Allows creating new topics') },
-  { value: 'topic_delete', label: tr('¿¿ Topic', 'Delete Topic'), desc: tr('¿¿¿¿ Topic', 'Allows deleting topics') },
-  { value: 'topic_config_manage', label: tr('¿¿ Topic ¿¿', 'Manage Topic Config'), desc: tr('¿¿¿¿ retention¿cleanup.policy ¿¿¿', 'Allows modifying retention, cleanup.policy, etc.') },
-  { value: 'message_read', label: tr('¿¿¿¿', 'Read Messages'), desc: tr('¿¿¿¿¿¿¿ Topic ¿¿', 'Allows consuming and querying topic messages') },
-  { value: 'message_send', label: tr('¿¿¿¿', 'Write Messages'), desc: tr('¿¿¿¿¿¿¿ Produce Message', 'Allows single or batch produce messages') },
-  { value: 'message_delete', label: tr('¿¿¿¿', 'Delete Messages'), desc: tr('¿¿¿ offset ¿¿¿¿', 'Allows deleting records by offset') },
-  { value: 'group_create', label: tr('¿¿ Group', 'Create Group'), desc: tr('¿¿¿¿ Consumer Group ¿¿', 'Registers create consumer group operation') },
-  { value: 'group_delete', label: tr('¿¿ Group', 'Delete Group'), desc: tr('¿¿¿¿ Consumer Group', 'Allows deleting consumer groups') },
-  { value: 'permission_manage', label: tr('Kafka ¿¿', 'Kafka Auth'), desc: tr('¿¿¿¿¿¿¿¿ Kafka ¿¿', 'Allows managing Kafka permissions for this cluster') },
+  { value: 'cluster_view', label: tr('æŸ¥çœ‹é›†ç¾¤', 'View Cluster'), desc: tr('å…è®¸çœ‹åˆ°å¹¶è¿›å…¥è¯¥ Kafka é›†ç¾¤', 'Allows viewing and entering this Kafka cluster') },
+  { value: 'topic_create', label: tr('åˆ›å»º Topic', 'Create Topic'), desc: tr('å…è®¸æ–°å¢ Topic', 'Allows creating new topics') },
+  { value: 'topic_delete', label: tr('åˆ é™¤ Topic', 'Delete Topic'), desc: tr('å…è®¸åˆ é™¤ Topic', 'Allows deleting topics') },
+  { value: 'topic_config_manage', label: tr('ç®¡ç† Topic é…ç½®', 'Manage Topic Config'), desc: tr('å…è®¸ä¿®æ”¹ retentionã€cleanup.policy ç­‰é…ç½®', 'Allows modifying retention, cleanup.policy, etc.') },
+  { value: 'message_read', label: tr('è¯»å–æ¶ˆæ¯', 'Read Messages'), desc: tr('å…è®¸æ¶ˆè´¹å’ŒæŸ¥è¯¢ Topic æ¶ˆæ¯', 'Allows consuming and querying topic messages') },
+  { value: 'message_send', label: tr('å†™å…¥æ¶ˆæ¯', 'Write Messages'), desc: tr('å…è®¸å•æ¡æˆ–æ‰¹é‡ Produce Message', 'Allows single or batch produce messages') },
+  { value: 'message_delete', label: tr('åˆ é™¤æ¶ˆæ¯', 'Delete Messages'), desc: tr('å…è®¸æŒ‰ offset åˆ é™¤è®°å½•', 'Allows deleting records by offset') },
+  { value: 'group_create', label: tr('åˆ›å»º Group', 'Create Group'), desc: tr('ç™»è®°åˆ›å»º Consumer Group æ“ä½œ', 'Registers create consumer group operation') },
+  { value: 'group_delete', label: tr('åˆ é™¤ Group', 'Delete Group'), desc: tr('å…è®¸åˆ é™¤ Consumer Group', 'Allows deleting consumer groups') },
+  { value: 'permission_manage', label: tr('Kafka æˆæƒ', 'Kafka Auth'), desc: tr('å…è®¸ç®¡ç†è¯¥é›†ç¾¤çš„ Kafka æˆæƒ', 'Allows managing Kafka permissions for this cluster') },
 ])
 
 const loadSettings = async () => {
@@ -530,20 +512,8 @@ watch(() => route.name, (name) => {
 
 const applyLanguage = () => setLanguage(settings.value.ui?.language || 'zh-CN')
 const applyThemeSetting = () => applyTheme((settings.value.ui?.theme === 'light' ? 'light' : 'dark') as ThemeMode)
-const formatDateTime = (value?: string) => value ? new Date(value).toLocaleString() : '-'
 const metricsUrl = computed(() => `${window.location.origin}/metrics`)
 const metricsClusterUrl = (cluster: any) => `${window.location.origin}/metrics/${encodeURIComponent(cluster.id)}`
-
-const parseLicenseKey = (key: string) => {
-  const raw = (key || '').trim().replace(/^KV-ENTERPRISE-/, '').replace(/-/g, '+').replace(/_/g, '/')
-  if (!raw) return null
-  try {
-    const padded = raw + '='.repeat((4 - raw.length % 4) % 4)
-    return JSON.parse(atob(padded))
-  } catch {
-    try { return JSON.parse(key) } catch { return null }
-  }
-}
 
 const persistSettings = async () => {
   settings.value.rbac ||= { default_role: 'user', admin_users: ['admin'] }
@@ -560,9 +530,9 @@ const sendTestNotification = async (channel: string) => {
   try {
     await persistSettings()
     await testNotificationChannel(channel)
-    showNotice(tr('¿¿¿¿¿¿¿', 'Test Message Sent'), tr('¿¿¿¿¿¿¿¿¿¿', 'Check the notification channel.'))
+    showNotice(tr('æµ‹è¯•æ¶ˆæ¯å·²å‘é€', 'Test Message Sent'), tr('è¯·æ£€æŸ¥å¯¹åº”é€šçŸ¥æ¸ é“ã€‚', 'Check the notification channel.'))
   } catch (err: any) {
-    showNotice(tr('¿¿¿¿¿¿', 'Failed to Send Test'), errorMessage(err, tr('¿¿¿¿¿¿', 'Failed to send test message')), 'error')
+    showNotice(tr('æµ‹è¯•å‘é€å¤±è´¥', 'Failed to Send Test'), errorMessage(err, tr('æµ‹è¯•å‘é€å¤±è´¥', 'Failed to send test message')), 'error')
   } finally {
     testingChannel.value = ''
   }
@@ -574,46 +544,16 @@ const checkAlertRuleValue = async (rule: any) => {
     const data = await getAlertRuleValue(normalizeAlertRule(rule))
     alertRuleValues.value = { ...alertRuleValues.value, [rule.key]: data.items || [] }
     const lines = (data.items || []).map((item: any) => {
-      const value = item.available === false || item.value === null || item.value === undefined ? tr('¿¿¿¿', 'No data') : `${item.value} ${alertRuleUnit(item.unit || '')}`.trim()
-      const state = item.error ? item.error : (item.triggered ? tr('¿¿¿¿¿¿¿', 'Triggered') : tr('¿¿¿¿¿¿¿', 'Not triggered'))
+      const value = item.available === false || item.value === null || item.value === undefined ? tr('æš‚æ— æ•°æ®', 'No data') : `${item.value} ${alertRuleUnit(item.unit || '')}`.trim()
+      const state = item.error ? item.error : (item.triggered ? tr('å·²è¾¾åˆ°å‘Šè­¦æ¡ä»¶', 'Triggered') : tr('æœªè¾¾åˆ°å‘Šè­¦æ¡ä»¶', 'Not triggered'))
       const detail = item.detail && item.detail !== 'no_current_value_source' ? ` (${item.detail})` : ''
       return `${item.cluster || '-'}: ${value}${detail} - ${state}`
     })
-    showNotice(tr('¿¿¿', 'Current Value'), lines.length ? lines.join('\n') : tr('¿¿¿¿¿¿¿', 'No available cluster.'))
+    showNotice(tr('å½“å‰å€¼', 'Current Value'), lines.length ? lines.join('\n') : tr('æ²¡æœ‰å¯ç”¨é›†ç¾¤ã€‚', 'No available cluster.'))
   } catch (err: any) {
-    showNotice(tr('¿¿¿¿¿¿¿', 'Failed to Query Value'), errorMessage(err, tr('¿¿¿¿¿¿¿', 'Failed to query current value')), 'error')
+    showNotice(tr('å½“å‰å€¼æŸ¥è¯¢å¤±è´¥', 'Failed to Query Value'), errorMessage(err, tr('å½“å‰å€¼æŸ¥è¯¢å¤±è´¥', 'Failed to query current value')), 'error')
   } finally {
     checkingRuleKey.value = ''
-  }
-}
-
-const activateLicenseKey = async () => {
-  const key = licenseInput.value.trim()
-  const parsed = parseLicenseKey(key)
-  if (!parsed) {
-    showNotice(tr('¿¿¿¿¿¿', 'Invalid License Key'), tr('¿¿¿¿¿¿¿¿¿¿¿', 'Check the Full Edition license key format.'), 'error')
-    return
-  }
-  settings.value.license ||= { active_key: '', keys: [] }
-  settings.value.license.keys ||= []
-  const existing = settings.value.license.keys.find((item: any) => item.key === key)
-  if (!existing) {
-    settings.value.license.keys.push({ key, edition: parsed.edition || '', expires_at: parsed.expires_at || '', created_at: new Date().toISOString() })
-  }
-  const expiresAt = parsed.expires_at ? new Date(parsed.expires_at).getTime() : NaN
-  if ((parsed.edition || '').toLowerCase() !== 'enterprise' || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
-    await persistSettings()
-    showNotice(tr('¿¿¿¿¿', 'Key Saved'), tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Key added but it is not a valid Full Edition license.'), 'warn')
-    return
-  }
-  saving.value = true
-  try {
-    settings.value.license.active_key = key
-    await persistSettings()
-    licenseInput.value = ''
-    showNotice(tr('¿¿¿¿¿¿', 'License Activated'), tr('¿¿¿¿¿¿¿¿¿', 'Full Edition features are now enabled.'))
-  } finally {
-    saving.value = false
   }
 }
 
@@ -639,7 +579,7 @@ const saveAll = async () => {
   saving.value = true
   try {
     await persistSettings()
-    showNotice(tr('¿¿¿¿', 'Saved Successfully'), tr('¿¿¿¿¿¿¿¿¿¿¿', 'System settings have been saved and applied.'))
+    showNotice(tr('ä¿å­˜æˆåŠŸ', 'Saved Successfully'), tr('ç³»ç»Ÿè®¾ç½®å·²ä¿å­˜å¹¶ç”Ÿæ•ˆã€‚', 'System settings have been saved and applied.'))
   } finally {
     saving.value = false
   }
@@ -667,19 +607,19 @@ const createUser = async () => {
     showUserDialog.value = false
     await loadUsers()
   } catch (err: any) {
-    showNotice(tr('¿¿¿¿¿¿', 'Failed to Create User'), errorMessage(err, tr('¿¿¿¿¿¿', 'Failed to create user')), 'error')
+    showNotice(tr('ç”¨æˆ·åˆ›å»ºå¤±è´¥', 'Failed to Create User'), errorMessage(err, tr('ç”¨æˆ·åˆ›å»ºå¤±è´¥', 'Failed to create user')), 'error')
   }
 }
 
 const resetPassword = async (u: any) => {
-  const password = prompt(`¿¿¿ ${u.username} ¿¿¿¿¿`)
+  const password = prompt(`ä¸ºç”¨æˆ· ${u.username} è®¾ç½®æ–°å¯†ç `)
   if (!password) return
   await updateSystemUser(u.username, { password })
-  showNotice(tr('¿¿¿¿¿', 'Password Updated'))
+  showNotice(tr('å¯†ç å·²æ›´æ–°', 'Password Updated'))
 }
 
 const removeUser = async (u: any) => {
-  if (!confirm(`¿¿¿¿ ${u.username}¿`)) return
+  if (!confirm(`åˆ é™¤ç”¨æˆ· ${u.username}ï¼Ÿ`)) return
   await deleteSystemUser(u.username)
   await loadUsers()
 }
@@ -691,12 +631,12 @@ const createRole = async () => {
     showRoleDialog.value = false
     await loadUsersAndRoles()
   } catch (err: any) {
-    showNotice(tr('¿¿¿¿¿¿', 'Failed to Create Role'), errorMessage(err, tr('¿¿¿¿¿¿', 'Failed to create role')), 'error')
+    showNotice(tr('è§’è‰²åˆ›å»ºå¤±è´¥', 'Failed to Create Role'), errorMessage(err, tr('è§’è‰²åˆ›å»ºå¤±è´¥', 'Failed to create role')), 'error')
   }
 }
 
 const removeRole = async (role: string) => {
-  if (!confirm(`¿¿¿¿ ${role}¿¿¿¿¿¿¿¿¿¿¿¿¿ user¿`)) return
+  if (!confirm(`åˆ é™¤è§’è‰² ${role}ï¼Ÿä½¿ç”¨è¯¥è§’è‰²çš„ç”¨æˆ·ä¼šå›é€€ä¸º userã€‚`)) return
   await deleteSystemRole(role)
   await loadUsersAndRoles()
 }
@@ -732,7 +672,7 @@ const saveClusterPermission = async () => {
   try {
     await saveKafkaPermissions(authClusterId.value, { subject_type: authSubjectType.value, username: authSubjectType.value === 'user' ? authUsername.value : undefined, role: authSubjectType.value === 'role' ? authRole.value : undefined, actions: authActions.value })
     await loadClusterPermission()
-    showNotice(tr('Kafka ¿¿¿¿¿', 'Kafka Permissions Saved'), tr('¿¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿', 'Users can re-enter Kafka Management to see the latest permissions.'))
+    showNotice(tr('Kafka æˆæƒå·²ä¿å­˜', 'Kafka Permissions Saved'), tr('ç”¨æˆ·é‡æ–°è¿›å…¥ Kafka ç®¡ç†åå³å¯çœ‹åˆ°æœ€æ–°æƒé™ã€‚', 'Users can re-enter Kafka Management to see the latest permissions.'))
   } finally {
     authSaving.value = false
   }
@@ -741,20 +681,20 @@ const saveClusterPermission = async () => {
 const testLdap = async () => {
   try {
     const resp = await testLdapSettings(settings.value)
-    showNotice(tr('LDAP ¿¿¿¿', 'LDAP Connected'), tr(`¿¿¿¿ ${resp.data?.matched ?? 0} ¿¿¿¿`, `Matched ${resp.data?.matched ?? 0} users.`))
+    showNotice(tr('LDAP è¿æ¥æˆåŠŸ', 'LDAP Connected'), tr(`æµ‹è¯•åŒ¹é… ${resp.data?.matched ?? 0} ä¸ªç”¨æˆ·ã€‚`, `Matched ${resp.data?.matched ?? 0} users.`))
   } catch (err: any) {
-    showNotice(tr('LDAP ¿¿¿¿', 'LDAP Test Failed'), errorMessage(err, tr('LDAP ¿¿¿¿', 'LDAP test failed')), 'error')
+    showNotice(tr('LDAP æµ‹è¯•å¤±è´¥', 'LDAP Test Failed'), errorMessage(err, tr('LDAP æµ‹è¯•å¤±è´¥', 'LDAP test failed')), 'error')
   }
 }
 
 const syncLdap = async () => {
-  if (!confirm('¿¿¿ LDAP ¿¿¿¿¿¿¿¿¿¿¿¿¿')) return
+  if (!confirm('ç¡®è®¤ä» LDAP æ‹‰å–ç”¨æˆ·å¹¶å†™å…¥æœ¬åœ°ç”¨æˆ·è¡¨ï¼Ÿ')) return
   try {
     const resp = await syncLdapUsers()
-    showNotice(tr('LDAP ¿¿¿¿', 'LDAP Sync Complete'), tr(`¿¿ ${resp.data?.synced ?? 0} ¿¿¿¿¿¿ ${resp.data?.matched ?? 0} ¿ LDAP ¿¿¿`, `Wrote ${resp.data?.synced ?? 0} users, matched ${resp.data?.matched ?? 0} LDAP entries.`))
+    showNotice(tr('LDAP åŒæ­¥å®Œæˆ', 'LDAP Sync Complete'), tr(`å†™å…¥ ${resp.data?.synced ?? 0} ä¸ªç”¨æˆ·ï¼ŒåŒ¹é… ${resp.data?.matched ?? 0} ä¸ª LDAP æ¡ç›®ã€‚`, `Wrote ${resp.data?.synced ?? 0} users, matched ${resp.data?.matched ?? 0} LDAP entries.`))
     await loadUsers()
   } catch (err: any) {
-    showNotice(tr('LDAP ¿¿¿¿', 'LDAP Sync Failed'), errorMessage(err, tr('LDAP ¿¿¿¿', 'LDAP sync failed')), 'error')
+    showNotice(tr('LDAP åŒæ­¥å¤±è´¥', 'LDAP Sync Failed'), errorMessage(err, tr('LDAP åŒæ­¥å¤±è´¥', 'LDAP sync failed')), 'error')
   }
 }
 
@@ -822,7 +762,7 @@ button { border: 0; border-radius: 9px; padding: 9px 14px; cursor: pointer; font
 .rule-global-scope { width: 170px; box-sizing: border-box; padding: 7px 10px; border: 1px solid rgba(34,211,238,.28); border-radius: 9px; background: rgba(34,211,238,.08); color: var(--accent-secondary); font-size: 12px; text-align: center; }
 .cluster-dropdown summary { list-style: none; cursor: pointer; padding: 7px 28px 7px 10px; border: 1px solid var(--border-light); border-radius: 9px; background: var(--bg-input); color: var(--text-secondary); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cluster-dropdown summary::-webkit-details-marker { display: none; }
-.cluster-dropdown summary::after { content: '¿'; position: absolute; right: 10px; top: 7px; color: var(--text-muted); }
+.cluster-dropdown summary::after { content: 'â–¾'; position: absolute; right: 10px; top: 7px; color: var(--text-muted); }
 .cluster-dropdown[open] summary { border-color: var(--accent-primary); color: var(--text-primary); }
 .cluster-dropdown-menu { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; width: min(280px, 80vw); max-height: 280px; overflow: auto; display: grid; gap: 6px; padding: 10px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); box-shadow: 0 18px 46px rgba(0,0,0,.35); }
 .migration-job-dropdown .cluster-dropdown-menu { width: min(520px, 90vw); }
@@ -904,4 +844,3 @@ button { border: 0; border-radius: 9px; padding: 9px 14px; cursor: pointer; font
 button:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 900px) { .grid, .two, .auth-toolbar, .permission-grid, .license-summary, .license-activate, .alert-rule-list, .notify-channel-row, .notify-input { grid-template-columns: 1fr; } .wide { grid-column: auto; } .panel-title, .config-editor-head { align-items: flex-start; gap: 10px; flex-direction: column; } .user-head, .user-row, .metrics-row { grid-template-columns: 1fr; } .setting-row { grid-template-columns: 1fr; align-items: start; } }
 </style>
-

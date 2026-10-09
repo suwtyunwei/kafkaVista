@@ -1,804 +1,150 @@
 package api
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"sort"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/gin-gonic/gin"
-
-	kafkasvc "kafkavista/server/internal/kafka"
-	"kafkavista/server/internal/model"
 )
 
-type migrationRequest struct {
-	SourceClusterID     string   `json:"source_cluster_id"`
-	TargetClusterID     string   `json:"target_cluster_id"`
-	Topics              []string `json:"topics"`
-	CreateTopics        bool     `json:"create_topics"`
-	CopyTopicConfigs    bool     `json:"copy_topic_configs"`
-	CopyData            bool     `json:"copy_data"`
-	OverwriteExisting   bool     `json:"overwrite_existing_topics"`
-	IncrementalSync     bool     `json:"incremental_sync"`
-	BatchSize           int      `json:"batch_size"`
-	ThrottleMS          int      `json:"throttle_ms"`
-	IncrementalPollMS   int      `json:"incremental_poll_ms"`
-	MaxMessagesPerTopic int64    `json:"max_messages_per_topic"`
-	ReplicationFactor   int32    `json:"replication_factor"`
-	TargetPartitions    int32    `json:"target_partitions"`
-}
-
-type migrationCheckResult struct {
-	Topics         []string `json:"topics"`
-	ExistingTopics []string `json:"existing_topics"`
-	SourceOK       bool     `json:"source_ok"`
-	TargetOK       bool     `json:"target_ok"`
-	CanStart       bool     `json:"can_start"`
-}
-
-type migrationTopicPlan struct {
-	Topic             string
-	SourcePartitions  int32
-	TargetPartitions  int32
-	ReplicationFactor int32
-	Strategy          string
-}
-
-type migrationJob struct {
-	ID             string     `json:"id"`
-	Status         string     `json:"status"`
-	SourceCluster  string     `json:"source_cluster"`
-	TargetCluster  string     `json:"target_cluster"`
-	Topics         []string   `json:"topics"`
-	CurrentTopic   string     `json:"current_topic"`
-	Message        string     `json:"message"`
-	Error          string     `json:"error"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
-	CompletedAt    *time.Time `json:"completed_at,omitempty"`
-	TotalTopics    int        `json:"total_topics"`
-	DoneTopics     int        `json:"done_topics"`
-	TotalMessages  int64      `json:"total_messages"`
-	CopiedMessages int64      `json:"copied_messages"`
-	CurrentCopied  int64      `json:"current_copied"`
-	CurrentTotal   int64      `json:"current_total"`
-	Progress       int        `json:"progress"`
-	Options        gin.H      `json:"options"`
-}
-
-var migrationState = struct {
-	sync.Mutex
-	jobs map[string]*migrationJob
-}{jobs: map[string]*migrationJob{}}
-
-func (a *API) listMigrations(c *gin.Context) {
-	if !a.enterpriseEnabled() {
-		errorJSON(c, http.StatusForbidden, "Kafka ¿¿¿¿¿¿¿¿¿¿")
-		return
-	}
-	migrationState.Lock()
-	items := make([]*migrationJob, 0, len(migrationState.jobs))
-	cutoff := time.Now().Add(-1 * time.Hour)
-	for id, job := range migrationState.jobs {
-		copy := *job
-		items = append(items, &copy)
-		if (job.Status == "completed" || job.Status == "failed" || job.Status == "cancelled") && job.UpdatedAt.Before(cutoff) {
-			delete(migrationState.jobs, id)
-		}
-	}
-	migrationState.Unlock()
-	var rows []model.KafkaMigrationJob
-	if err := a.db.Order("created_at desc").Find(&rows).Error; err == nil {
-		seen := map[string]bool{}
-		for _, item := range items {
-			seen[item.ID] = true
-		}
-		for _, row := range rows {
-			if !seen[row.ID] {
-				items = append(items, migrationJobFromRecord(row))
+func apiDocs(router *gin.Engine, a *API) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		routes := router.Routes()
+		items := make([]gin.H, 0, len(routes))
+		paths := gin.H{}
+		enterprise := a.enterpriseEnabled()
+		for _, route := range routes {
+			if route.Path == "/api/docs" || route.Path == "/metrics" || strings.HasPrefix(route.Path, "/metrics/") {
+				continue
 			}
+			if !enterprise && apiDocEnterpriseOnly(route.Path) {
+				continue
+			}
+			group := apiDocGroup(route.Path)
+			auth := apiDocAuth(route.Path)
+			item := gin.H{"method": route.Method, "path": route.Path, "group": group, "auth": auth, "summary": apiDocSummary(route.Method, route.Path)}
+			items = append(items, item)
+			pathItem, _ := paths[route.Path].(gin.H)
+			if pathItem == nil {
+				pathItem = gin.H{}
+				paths[route.Path] = pathItem
+			}
+			pathItem[strings.ToLower(route.Method)] = gin.H{"summary": item["summary"], "tags": []string{group}, "security": apiDocSecurity(auth)}
 		}
-	}
-	c.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{"items": items}})
-}
-
-func (a *API) getMigration(c *gin.Context) {
-	if !a.enterpriseEnabled() {
-		errorJSON(c, http.StatusForbidden, "Kafka ¿¿¿¿¿¿¿¿¿¿")
-		return
-	}
-	migrationState.Lock()
-	job, ok := migrationState.jobs[c.Param("job")]
-	if ok {
-		copy := *job
-		job = &copy
-	}
-	migrationState.Unlock()
-	if !ok {
-		var row model.KafkaMigrationJob
-		if err := a.db.First(&row, "id = ?", c.Param("job")).Error; err != nil {
-			errorJSON(c, http.StatusNotFound, "¿¿¿¿¿¿¿")
-			return
-		}
-		job = migrationJobFromRecord(row)
-	}
-	c.JSON(http.StatusOK, gin.H{"code": 0, "data": job})
-}
-
-func (a *API) stopMigration(c *gin.Context) {
-	if !a.enterpriseEnabled() {
-		errorJSON(c, http.StatusForbidden, "Kafka ¿¿¿¿¿¿¿¿¿¿")
-		return
-	}
-	jobID := c.Param("job")
-	migrationState.Lock()
-	job, ok := migrationState.jobs[jobID]
-	var snapshot *migrationJob
-	if ok && (job.Status == "running" || job.Status == "queued" || job.Status == "incremental") {
-		job.Status = "stopping"
-		job.Message = "¿¿¿¿¿¿¿¿"
-		job.UpdatedAt = time.Now()
-		copy := *job
-		snapshot = &copy
-	}
-	migrationState.Unlock()
-	if !ok {
-		var row model.KafkaMigrationJob
-		if err := a.db.First(&row, "id = ?", jobID).Error; err != nil {
-			errorJSON(c, http.StatusNotFound, "¿¿¿¿¿¿¿")
-			return
-		}
-		if row.Status != "running" && row.Status != "queued" && row.Status != "incremental" && row.Status != "stopping" {
-			errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿¿¿¿¿¿")
-			return
-		}
-		now := time.Now()
-		row.Status = "stopped"
-		row.Message = "¿¿¿¿¿¿¿"
-		row.CompletedAt = &now
-		row.UpdatedAt = now
-		a.db.Save(&row)
-		snapshot = migrationJobFromRecord(row)
-	}
-	if snapshot != nil {
-		a.persistMigrationJob(snapshot)
-	}
-	a.audit(current(c).Username, "", "migration_stop", jobID, gin.H{})
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
-}
-
-func (a *API) checkMigration(c *gin.Context) {
-	if !a.enterpriseEnabled() {
-		errorJSON(c, http.StatusForbidden, "Kafka ¿¿¿¿¿¿¿¿¿¿")
-		return
-	}
-	var req migrationRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
-		return
-	}
-	if req.SourceClusterID == "" || req.TargetClusterID == "" || req.SourceClusterID == req.TargetClusterID {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿ Kafka ¿¿¿ Kafka")
-		return
-	}
-	source, ok := a.clusterByID(req.SourceClusterID)
-	if !ok {
-		errorJSON(c, http.StatusNotFound, "¿ Kafka ¿¿¿¿¿")
-		return
-	}
-	target, ok := a.clusterByID(req.TargetClusterID)
-	if !ok {
-		errorJSON(c, http.StatusNotFound, "¿¿ Kafka ¿¿¿¿¿")
-		return
-	}
-	check, err := a.migrationPreflight(source, target, req)
-	if err != nil {
-		errorJSON(c, http.StatusBadGateway, err.Error())
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"code": 0, "data": check})
-}
-
-func (a *API) createMigration(c *gin.Context) {
-	if !a.enterpriseEnabled() {
-		errorJSON(c, http.StatusForbidden, "Kafka ¿¿¿¿¿¿¿¿¿¿")
-		return
-	}
-	var req migrationRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
-		return
-	}
-	if req.SourceClusterID == "" || req.TargetClusterID == "" || req.SourceClusterID == req.TargetClusterID {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿ Kafka ¿¿¿ Kafka")
-		return
-	}
-	source, ok := a.clusterByID(req.SourceClusterID)
-	if !ok {
-		errorJSON(c, http.StatusNotFound, "¿ Kafka ¿¿¿¿¿")
-		return
-	}
-	target, ok := a.clusterByID(req.TargetClusterID)
-	if !ok {
-		errorJSON(c, http.StatusNotFound, "¿¿ Kafka ¿¿¿¿¿")
-		return
-	}
-	if req.BatchSize <= 0 || req.BatchSize > 100 {
-		req.BatchSize = 50
-	}
-	if req.ThrottleMS < 500 {
-		req.ThrottleMS = 500
-	}
-	if req.IncrementalPollMS < 5000 {
-		req.IncrementalPollMS = 10000
-	}
-	req.IncrementalSync = req.IncrementalSync && req.CopyData
-	if req.IncrementalSync {
-		if req.BatchSize > 50 {
-			req.BatchSize = 50
-		}
-		if req.ThrottleMS < 1000 {
-			req.ThrottleMS = 1000
-		}
-		if req.IncrementalPollMS < 30000 {
-			req.IncrementalPollMS = 30000
-		}
-	}
-	if req.ReplicationFactor <= 0 {
-		req.ReplicationFactor = 1
-	}
-	if req.OverwriteExisting && !req.CreateTopics {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿ Topic ¿¿¿¿¿¿¿¿¿ Topic")
-		return
-	}
-	check, err := a.migrationPreflight(source, target, req)
-	if err != nil {
-		errorJSON(c, http.StatusBadGateway, err.Error())
-		return
-	}
-	if len(check.ExistingTopics) > 0 && !req.OverwriteExisting {
-		c.JSON(http.StatusConflict, gin.H{"code": 409, "message": "¿¿ Kafka ¿¿¿¿¿ Topic¿¿¿¿¿¿¿¿", "data": check})
-		return
-	}
-	req.Topics = check.Topics
-	job := &migrationJob{ID: fmt.Sprintf("mig-%d", time.Now().UnixNano()), Status: "queued", SourceCluster: source.Name, TargetCluster: target.Name, Topics: check.Topics, TotalTopics: len(check.Topics), CreatedAt: time.Now(), UpdatedAt: time.Now(), Options: gin.H{"create_topics": req.CreateTopics, "copy_topic_configs": req.CopyTopicConfigs, "copy_data": req.CopyData, "overwrite_existing_topics": req.OverwriteExisting, "existing_topics": check.ExistingTopics, "incremental_sync": req.IncrementalSync, "batch_size": req.BatchSize, "throttle_ms": req.ThrottleMS, "incremental_poll_ms": req.IncrementalPollMS, "max_messages_per_topic": req.MaxMessagesPerTopic, "target_partitions": req.TargetPartitions, "replication_factor": req.ReplicationFactor, "strategy": migrationStrategy(source, target)}}
-	migrationState.Lock()
-	migrationState.jobs[job.ID] = job
-	migrationState.Unlock()
-	a.persistMigrationJob(job)
-	a.audit(current(c).Username, source.ID, "migration_start", target.ID, gin.H{"job_id": job.ID, "topics": req.Topics})
-	go a.runMigration(job.ID, source, target, req)
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": job})
-}
-
-func (a *API) clusterByID(id string) (model.KafkaCluster, bool) {
-	var cluster model.KafkaCluster
-	if err := a.db.Where("id = ? AND is_active = ?", id, true).First(&cluster).Error; err != nil {
-		return cluster, false
-	}
-	return cluster, true
-}
-
-func (a *API) runMigration(jobID string, source, target model.KafkaCluster, req migrationRequest) {
-	a.updateMigration(jobID, func(job *migrationJob) { job.Status = "running"; job.Message = "¿¿¿¿¿¿¿¿" })
-	topics := req.Topics
-	a.updateMigration(jobID, func(job *migrationJob) {
-		job.Topics = topics
-		job.TotalTopics = len(topics)
-		job.Message = "¿¿¿¿¿¿¿"
-	})
-	incrementalOffsets := map[string]map[int32]int64{}
-	for _, topic := range topics {
-		if a.migrationStopping(jobID) {
-			a.stopMigrationJob(jobID)
-			return
-		}
-		a.updateMigration(jobID, func(job *migrationJob) { job.CurrentTopic = topic; job.Message = "¿¿¿¿ Topic ¿¿¿" })
-		plan, err := a.migrationTopicPlan(source, target, topic, req)
-		if err != nil {
-			a.failMigration(jobID, err)
-			return
-		}
-		a.updateMigration(jobID, func(job *migrationJob) {
-			job.Options["strategy"] = plan.Strategy
-			job.Options["target_partitions"] = plan.TargetPartitions
-			job.Options["replication_factor"] = plan.ReplicationFactor
+		sort.SliceStable(items, func(i, j int) bool {
+			left := items[i]["path"].(string) + items[i]["method"].(string)
+			right := items[j]["path"].(string) + items[j]["method"].(string)
+			return left < right
 		})
-		if req.CreateTopics {
-			if req.OverwriteExisting {
-				a.updateMigration(jobID, func(job *migrationJob) { job.Message = "¿¿¿¿¿¿¿¿¿ Topic" })
-				if err := a.deleteMigrationTopicIfExists(target, topic); err != nil {
-					a.failMigration(jobID, err)
-					return
-				}
-			}
-			if err := a.kafka.CreateTopic(target, topic, plan.TargetPartitions, plan.ReplicationFactor); err != nil && !isTopicAlreadyExistsError(err) {
-				a.failMigration(jobID, err)
-				return
-			}
-		}
-		if req.CopyTopicConfigs {
-			_ = a.copyMigrationTopicConfigs(source, target, topic)
-		}
-		if req.CopyData {
-			offsets, err := a.copyMigrationTopicData(jobID, source, target, plan, req)
-			if err != nil {
-				a.failMigration(jobID, err)
-				return
-			}
-			incrementalOffsets[topic] = offsets
-		}
-		a.updateMigration(jobID, func(job *migrationJob) {
-			job.DoneTopics++
-			job.CurrentCopied = 0
-			job.CurrentTotal = 0
-			job.Progress = migrationProgress(job)
-			job.Message = "Topic ¿¿¿¿"
-		})
-		time.Sleep(time.Second)
+		c.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{"title": "kafkaVista API Docs", "version": "1.0.0", "items": items, "openapi": gin.H{"openapi": "3.0.3", "info": gin.H{"title": "kafkaVista API", "version": "1.0.0"}, "paths": paths, "components": gin.H{"securitySchemes": gin.H{"bearerAuth": gin.H{"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}}}}}})
 	}
-	if req.IncrementalSync && req.CopyData {
-		a.runIncrementalSync(jobID, source, target, topics, incrementalOffsets, req)
-		return
-	}
-	now := time.Now()
-	a.updateMigration(jobID, func(job *migrationJob) {
-		job.Status = "completed"
-		job.Progress = 100
-		job.CompletedAt = &now
-		job.Message = "¿¿¿¿"
-	})
 }
 
-func (a *API) migrationPreflight(source, target model.KafkaCluster, req migrationRequest) (migrationCheckResult, error) {
-	sourceTopics, err := a.kafka.TopicNames(source)
-	if err != nil {
-		return migrationCheckResult{}, fmt.Errorf("¿ Kafka ¿¿¿¿¿¿¿%w", err)
-	}
-	targetTopics, err := a.kafka.TopicNames(target)
-	if err != nil {
-		return migrationCheckResult{}, fmt.Errorf("¿¿ Kafka ¿¿¿¿¿¿¿%w", err)
-	}
-	topics := sourceTopics
-	if len(req.Topics) > 0 {
-		topics = normalizeMigrationTopics(req.Topics)
-	}
-	sourceSet := stringSet(sourceTopics)
-	targetSet := stringSet(targetTopics)
-	existing := make([]string, 0)
-	for _, topic := range topics {
-		if !sourceSet[topic] {
-			return migrationCheckResult{}, fmt.Errorf("¿ Kafka ¿¿¿ Topic¿%s", topic)
-		}
-		if targetSet[topic] {
-			existing = append(existing, topic)
-		}
-	}
-	return migrationCheckResult{Topics: topics, ExistingTopics: existing, SourceOK: true, TargetOK: true, CanStart: len(existing) == 0 || req.OverwriteExisting}, nil
+func apiDocEnterpriseOnly(path string) bool {
+	return strings.Contains(path, "/migrations")
 }
 
-func normalizeMigrationTopics(selected []string) []string {
-	items := make([]string, 0, len(selected))
-	seen := map[string]bool{}
-	for _, topic := range selected {
-		trimmed := strings.TrimSpace(topic)
-		if trimmed != "" && !seen[trimmed] {
-			items = append(items, trimmed)
-			seen[trimmed] = true
-		}
-	}
-	return items
-}
-
-func stringSet(items []string) map[string]bool {
-	set := make(map[string]bool, len(items))
-	for _, item := range items {
-		set[item] = true
-	}
-	return set
-}
-
-func (a *API) deleteMigrationTopicIfExists(cluster model.KafkaCluster, topic string) error {
-	exists, err := a.kafka.TopicExists(cluster, topic)
-	if err != nil || !exists {
-		return err
-	}
-	if err := a.kafka.DeleteTopic(cluster, topic); err != nil && !isTopicNotExistsError(err) {
-		return err
-	}
-	for i := 0; i < 30; i++ {
-		exists, err = a.kafka.TopicExists(cluster, topic)
-		if err != nil || !exists {
-			return err
-		}
-		time.Sleep(time.Second)
-	}
-	return fmt.Errorf("¿¿¿¿ Topic %s ¿¿¿¿", topic)
-}
-
-func migrationStrategy(source, target model.KafkaCluster) string {
-	if source.ClusterType == "cluster" && target.ClusterType == "cluster" {
-		return "cluster_to_cluster_preserve"
-	}
-	if source.ClusterType == "cluster" && target.ClusterType == "single" {
-		return "cluster_to_single_1p1r"
-	}
-	if source.ClusterType == "single" && target.ClusterType == "cluster" {
-		return "single_to_cluster_custom"
-	}
-	return "single_to_single"
-}
-
-func (a *API) migrationTopicPlan(source, target model.KafkaCluster, topic string, req migrationRequest) (migrationTopicPlan, error) {
-	detail, err := a.kafka.DescribeTopic(source, topic)
-	if err != nil {
-		return migrationTopicPlan{}, err
-	}
-	partitions, _ := detail["partitions"].([]map[string]interface{})
-	sourcePartitions := int32(len(partitions))
-	if sourcePartitions <= 0 {
-		sourcePartitions = 1
-	}
-	sourceReplication := int32(1)
-	for _, row := range partitions {
-		if replicas, ok := row["replicas"].([]int32); ok && int32(len(replicas)) > sourceReplication {
-			sourceReplication = int32(len(replicas))
-		}
-	}
-	plan := migrationTopicPlan{Topic: topic, SourcePartitions: sourcePartitions, TargetPartitions: sourcePartitions, ReplicationFactor: sourceReplication, Strategy: migrationStrategy(source, target)}
-	switch plan.Strategy {
-	case "cluster_to_cluster_preserve":
-		return plan, nil
-	case "cluster_to_single_1p1r", "single_to_single":
-		plan.TargetPartitions = 1
-		plan.ReplicationFactor = 1
-		return plan, nil
-	case "single_to_cluster_custom":
-		if req.TargetPartitions > 0 {
-			plan.TargetPartitions = req.TargetPartitions
-		}
-		if req.ReplicationFactor > 0 {
-			plan.ReplicationFactor = req.ReplicationFactor
-		} else {
-			plan.ReplicationFactor = 3
-		}
-		return plan, nil
+func apiDocGroup(path string) string {
+	switch {
+	case strings.HasPrefix(path, "/api/auth"):
+		return "Auth"
+	case strings.HasPrefix(path, "/api/admin"):
+		return "Admin"
+	case strings.Contains(path, "/migrations"):
+		return "Migration"
+	case strings.Contains(path, "/audit-logs"):
+		return "Audit"
+	case strings.Contains(path, "/permissions"):
+		return "Kafka Auth"
+	case strings.Contains(path, "/clusters"):
+		return "Kafka"
+	case strings.HasPrefix(path, "/api/license"):
+		return "License"
+	case strings.HasPrefix(path, "/api/app") || strings.HasPrefix(path, "/api/health"):
+		return "System"
 	default:
-		return plan, nil
+		return "Other"
 	}
 }
 
-func (a *API) resolveMigrationTopics(cluster model.KafkaCluster, selected []string) ([]string, error) {
-	if len(selected) > 0 {
-		items := make([]string, 0, len(selected))
-		for _, topic := range selected {
-			if trimmed := strings.TrimSpace(topic); trimmed != "" {
-				items = append(items, trimmed)
-			}
-		}
-		return items, nil
+func apiDocAuth(path string) string {
+	if strings.HasPrefix(path, "/api/auth/login") || strings.HasPrefix(path, "/api/auth/sso") || strings.HasPrefix(path, "/api/auth/oidc") || strings.HasPrefix(path, "/api/app/status") || strings.HasPrefix(path, "/api/health") || strings.HasPrefix(path, "/api/license/tokens") {
+		return "public"
 	}
-	items := []string{}
-	for page := 1; ; page++ {
-		data, err := a.kafka.TopicPage(cluster, page, 100, "", "", "")
-		if err != nil {
-			return nil, err
-		}
-		rows, _ := data["items"].([]map[string]interface{})
-		for _, row := range rows {
-			if topic, _ := row["topic"].(string); topic != "" {
-				items = append(items, topic)
-			}
-		}
-		total, _ := data["total"].(int)
-		if len(items) >= total || len(rows) == 0 {
-			break
-		}
+	if strings.HasPrefix(path, "/api/admin") || strings.Contains(path, "/migrations") || strings.Contains(path, "/audit-logs") {
+		return "admin"
 	}
-	return items, nil
+	return "bearer"
 }
 
-func (a *API) copyMigrationTopicConfigs(source, target model.KafkaCluster, topic string) error {
-	data, err := a.kafka.TopicConfigs(source, topic)
-	if err != nil {
-		return err
+func apiDocSecurity(auth string) []gin.H {
+	if auth == "public" {
+		return []gin.H{}
 	}
-	rows, _ := data["configs"].([]map[string]interface{})
-	configs := map[string]*string{}
-	for _, row := range rows {
-		allowed, _ := row["allowed"].(bool)
-		readOnly, _ := row["read_only"].(bool)
-		value, _ := row["value"].(string)
-		name, _ := row["name"].(string)
-		if allowed && !readOnly && name != "" && value != "" {
-			v := value
-			configs[name] = &v
-		}
-	}
-	if len(configs) == 0 {
-		return nil
-	}
-	return a.kafka.AlterTopicConfigs(target, topic, configs)
+	return []gin.H{{"bearerAuth": []string{}}}
 }
 
-func (a *API) copyMigrationTopicData(jobID string, source, target model.KafkaCluster, plan migrationTopicPlan, req migrationRequest) (map[int32]int64, error) {
-	detail, err := a.kafka.DescribeTopic(source, plan.Topic)
-	if err != nil {
-		return nil, err
-	}
-	partitions, _ := detail["partitions"].([]map[string]interface{})
-	nextOffsets := map[int32]int64{}
-	var topicTotal int64
-	for _, row := range partitions {
-		partition := int32(toInt(row["partition"]))
-		oldest := toInt64(row["beginning_offset"])
-		newest := toInt64(row["end_offset"])
-		nextOffsets[partition] = newest
-		if newest > oldest {
-			topicTotal += newest - oldest
+func apiDocSummary(method, path string) string {
+	switch {
+	case strings.Contains(path, "/migrations"):
+		return apiDocMethodName(method) + "è¿ç§»ä»»åŠ¡"
+	case strings.Contains(path, "/audit-logs"):
+		return apiDocMethodName(method) + "æ“ä½œå®¡è®¡æ—¥å¿—"
+	case strings.Contains(path, "/permissions"):
+		return apiDocMethodName(method) + "Kafka æƒé™é…ç½®"
+	case strings.Contains(path, "/topics") && strings.Contains(path, "/data"):
+		return apiDocMethodName(method) + "Topic æ¶ˆæ¯æ•°æ®"
+	case strings.Contains(path, "/topics") && strings.Contains(path, "/configs"):
+		return apiDocMethodName(method) + "Topic é…ç½®"
+	case strings.Contains(path, "/topics"):
+		return apiDocMethodName(method) + "Kafka Topic"
+	case strings.Contains(path, "/groups"):
+		return apiDocMethodName(method) + "Consumer Group"
+	case strings.Contains(path, "/messages"):
+		return apiDocMethodName(method) + "Kafka æ¶ˆæ¯"
+	case strings.Contains(path, "/clusters"):
+		return apiDocMethodName(method) + "Kafka å®žä¾‹"
+	case strings.HasPrefix(path, "/api/auth/login"):
+		return "è´¦å·ç™»å½•"
+	case strings.HasPrefix(path, "/api/auth/sso"):
+		return "èŽ·å–å•ç‚¹ç™»å½•é…ç½®"
+	case strings.HasPrefix(path, "/api/auth/oidc"):
+		return "OIDC ç™»å½•å›žè°ƒ"
+	case strings.HasPrefix(path, "/api/admin/settings"):
+		return apiDocMethodName(method) + "ç³»ç»Ÿè®¾ç½®"
+	case strings.HasPrefix(path, "/api/admin/users"):
+		return apiDocMethodName(method) + "ç³»ç»Ÿç”¨æˆ·"
+	case strings.HasPrefix(path, "/api/admin/roles"):
+		return apiDocMethodName(method) + "ç³»ç»Ÿè§’è‰²"
+	case strings.HasPrefix(path, "/api/license"):
+		return apiDocMethodName(method) + "License"
+	case strings.HasPrefix(path, "/api/app/status"):
+		return "èŽ·å–åº”ç”¨çŠ¶æ€"
+	case strings.HasPrefix(path, "/api/health"):
+		return "å¥åº·æ£€æŸ¥"
+	default:
+		name := strings.Trim(path, "/")
+		name = strings.ReplaceAll(name, "/", " ")
+		name = strings.ReplaceAll(name, ":", "")
+		if name == "" {
+			name = "æ ¹è·¯å¾„"
 		}
-	}
-	if req.MaxMessagesPerTopic > 0 && (topicTotal == 0 || topicTotal > req.MaxMessagesPerTopic) {
-		topicTotal = req.MaxMessagesPerTopic
-	}
-	a.updateMigration(jobID, func(job *migrationJob) {
-		job.CurrentCopied = 0
-		job.CurrentTotal = topicTotal
-		job.Progress = migrationProgress(job)
-	})
-	var topicCopied int64
-	for _, row := range partitions {
-		if a.migrationStopping(jobID) {
-			return nextOffsets, nil
-		}
-		partition := int32(toInt(row["partition"]))
-		oldest := toInt64(row["beginning_offset"])
-		newest := toInt64(row["end_offset"])
-		for offset := oldest; offset < newest; {
-			if a.migrationStopping(jobID) {
-				return nextOffsets, nil
-			}
-			if req.MaxMessagesPerTopic > 0 && topicCopied >= req.MaxMessagesPerTopic {
-				return nextOffsets, nil
-			}
-			data, err := a.kafka.ReadTopicData(source, plan.Topic, partition, "earliest", &offset, nil, nil, nil, "", "", req.BatchSize, 1000)
-			if err != nil {
-				return nil, err
-			}
-			rows, _ := data["messages"].([]map[string]interface{})
-			if len(rows) == 0 {
-				break
-			}
-			sort.SliceStable(rows, func(i, j int) bool {
-				return toInt64(rows[i]["offset"]) < toInt64(rows[j]["offset"])
-			})
-			messages := make([]kafkasvc.ProduceMessage, 0, len(rows))
-			for _, item := range rows {
-				p := targetPartition(partition, plan.TargetPartitions)
-				messages = append(messages, kafkasvc.ProduceMessage{Partition: &p, Key: fmt.Sprint(item["key"]), Value: fmt.Sprint(item["value"])})
-			}
-			copied := int64(len(messages))
-			if req.MaxMessagesPerTopic > 0 && topicCopied+copied > req.MaxMessagesPerTopic {
-				copied = req.MaxMessagesPerTopic - topicCopied
-				messages = messages[:int(copied)]
-			}
-			if copied <= 0 {
-				return nextOffsets, nil
-			}
-			if _, err := a.kafka.SendMessages(target, plan.Topic, messages); err != nil {
-				return nil, err
-			}
-			topicCopied += copied
-			next := toInt64(data["next_offset"])
-			if next <= offset {
-				offset += copied
-			} else {
-				offset = next
-			}
-			nextOffsets[partition] = offset
-			a.updateMigration(jobID, func(job *migrationJob) {
-				job.CopiedMessages += copied
-				job.TotalMessages += copied
-				job.CurrentCopied = topicCopied
-				job.Progress = migrationProgress(job)
-				if topicTotal > 0 {
-					job.Message = fmt.Sprintf("¿¿¿¿¿¿¿¿¿¿¿ Topic %d/%d ¿¿", topicCopied, topicTotal)
-				} else {
-					job.Message = "¿¿¿¿¿¿¿¿"
-				}
-			})
-			time.Sleep(time.Duration(req.ThrottleMS) * time.Millisecond)
-		}
-	}
-	return nextOffsets, nil
-}
-
-func (a *API) runIncrementalSync(jobID string, source, target model.KafkaCluster, topics []string, offsets map[string]map[int32]int64, req migrationRequest) {
-	a.updateMigration(jobID, func(job *migrationJob) {
-		job.Status = "incremental"
-		job.Progress = 99
-		job.Message = "¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿"
-	})
-	for !a.migrationStopping(jobID) {
-		for _, topic := range topics {
-			if a.migrationStopping(jobID) {
-				break
-			}
-			a.incrementalSyncTopic(jobID, source, target, topic, offsets, req)
-			time.Sleep(time.Duration(req.ThrottleMS) * time.Millisecond)
-		}
-		time.Sleep(time.Duration(req.IncrementalPollMS) * time.Millisecond)
-	}
-	a.stopMigrationJob(jobID)
-}
-
-func (a *API) incrementalSyncTopic(jobID string, source, target model.KafkaCluster, topic string, offsets map[string]map[int32]int64, req migrationRequest) {
-	plan, err := a.migrationTopicPlan(source, target, topic, req)
-	if err != nil {
-		a.failMigration(jobID, err)
-		return
-	}
-	detail, err := a.kafka.DescribeTopic(source, topic)
-	if err != nil {
-		a.failMigration(jobID, err)
-		return
-	}
-	if offsets[topic] == nil {
-		offsets[topic] = map[int32]int64{}
-	}
-	partitions, _ := detail["partitions"].([]map[string]interface{})
-	for _, row := range partitions {
-		if a.migrationStopping(jobID) {
-			return
-		}
-		partition := int32(toInt(row["partition"]))
-		newest := toInt64(row["end_offset"])
-		offset := offsets[topic][partition]
-		if offset <= 0 {
-			offset = newest
-			offsets[topic][partition] = offset
-		}
-		if offset >= newest {
-			continue
-		}
-		a.updateMigration(jobID, func(job *migrationJob) {
-			job.CurrentTopic = topic
-			job.CurrentCopied = offset
-			job.CurrentTotal = newest
-			job.Message = "¿¿¿¿¿¿¿¿¿¿¿¿"
-		})
-		data, err := a.kafka.ReadTopicData(source, topic, partition, "earliest", &offset, nil, nil, nil, "", "", min(req.BatchSize, 20), 800)
-		if err != nil {
-			a.failMigration(jobID, err)
-			return
-		}
-		rows, _ := data["messages"].([]map[string]interface{})
-		if len(rows) == 0 {
-			continue
-		}
-		sort.SliceStable(rows, func(i, j int) bool { return toInt64(rows[i]["offset"]) < toInt64(rows[j]["offset"]) })
-		messages := make([]kafkasvc.ProduceMessage, 0, len(rows))
-		for _, item := range rows {
-			p := targetPartition(partition, plan.TargetPartitions)
-			messages = append(messages, kafkasvc.ProduceMessage{Partition: &p, Key: fmt.Sprint(item["key"]), Value: fmt.Sprint(item["value"])})
-		}
-		if _, err := a.kafka.SendMessages(target, topic, messages); err != nil {
-			a.failMigration(jobID, err)
-			return
-		}
-		next := toInt64(data["next_offset"])
-		if next <= offset {
-			next = offset + int64(len(messages))
-		}
-		offsets[topic][partition] = next
-		a.updateMigration(jobID, func(job *migrationJob) {
-			job.CopiedMessages += int64(len(messages))
-			job.TotalMessages += int64(len(messages))
-			job.CurrentCopied = next
-			job.CurrentTotal = newest
-			job.Progress = 99
-			job.Message = fmt.Sprintf("¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Topic ¿¿ %d¿offset %d/%d¿", partition, next, newest)
-		})
-		time.Sleep(time.Duration(req.ThrottleMS) * time.Millisecond)
+		return apiDocMethodName(method) + name
 	}
 }
 
-func (a *API) migrationStopping(jobID string) bool {
-	migrationState.Lock()
-	defer migrationState.Unlock()
-	job := migrationState.jobs[jobID]
-	return job != nil && job.Status == "stopping"
-}
-
-func (a *API) stopMigrationJob(jobID string) {
-	now := time.Now()
-	a.updateMigration(jobID, func(job *migrationJob) {
-		job.Status = "stopped"
-		job.Message = "¿¿¿¿¿¿¿"
-		job.CompletedAt = &now
-	})
-}
-
-func targetPartition(sourcePartition int32, targetPartitions int32) int32 {
-	if targetPartitions <= 1 {
-		return 0
-	}
-	return sourcePartition % targetPartitions
-}
-
-func isTopicAlreadyExistsError(err error) bool {
-	message := strings.ToLower(err.Error())
-	return strings.Contains(message, "¿¿¿") || strings.Contains(message, "already exists") || strings.Contains(message, "topic with this name already exists")
-}
-
-func isTopicNotExistsError(err error) bool {
-	message := strings.ToLower(err.Error())
-	return strings.Contains(message, "¿¿¿") || strings.Contains(message, "unknown topic") || strings.Contains(message, "does not exist")
-}
-
-func (a *API) updateMigration(jobID string, fn func(*migrationJob)) {
-	migrationState.Lock()
-	var snapshot *migrationJob
-	if job := migrationState.jobs[jobID]; job != nil {
-		fn(job)
-		job.UpdatedAt = time.Now()
-		copy := *job
-		snapshot = &copy
-	}
-	migrationState.Unlock()
-	if snapshot != nil {
-		a.persistMigrationJob(snapshot)
+func apiDocMethodName(method string) string {
+	switch method {
+	case http.MethodGet:
+		return "æŸ¥è¯¢"
+	case http.MethodPost:
+		return "åˆ›å»º"
+	case http.MethodPut:
+		return "æ›´æ–°"
+	case http.MethodDelete:
+		return "åˆ é™¤"
+	default:
+		return method + " "
 	}
 }
-
-func (a *API) persistMigrationJob(job *migrationJob) {
-	topics, _ := json.Marshal(job.Topics)
-	options, _ := json.Marshal(job.Options)
-	row := model.KafkaMigrationJob{ID: job.ID, Status: job.Status, SourceCluster: job.SourceCluster, TargetCluster: job.TargetCluster, TopicsJSON: string(topics), CurrentTopic: job.CurrentTopic, Message: job.Message, Error: job.Error, CreatedAt: job.CreatedAt, UpdatedAt: job.UpdatedAt, CompletedAt: job.CompletedAt, TotalTopics: job.TotalTopics, DoneTopics: job.DoneTopics, TotalMessages: job.TotalMessages, CopiedMessages: job.CopiedMessages, CurrentCopied: job.CurrentCopied, CurrentTotal: job.CurrentTotal, Progress: job.Progress, OptionsJSON: string(options)}
-	a.db.Save(&row)
-}
-
-func migrationJobFromRecord(row model.KafkaMigrationJob) *migrationJob {
-	topics := []string{}
-	_ = json.Unmarshal([]byte(row.TopicsJSON), &topics)
-	options := gin.H{}
-	_ = json.Unmarshal([]byte(row.OptionsJSON), &options)
-	return &migrationJob{ID: row.ID, Status: row.Status, SourceCluster: row.SourceCluster, TargetCluster: row.TargetCluster, Topics: topics, CurrentTopic: row.CurrentTopic, Message: row.Message, Error: row.Error, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt, CompletedAt: row.CompletedAt, TotalTopics: row.TotalTopics, DoneTopics: row.DoneTopics, TotalMessages: row.TotalMessages, CopiedMessages: row.CopiedMessages, CurrentCopied: row.CurrentCopied, CurrentTotal: row.CurrentTotal, Progress: row.Progress, Options: options}
-}
-
-func (a *API) failMigration(jobID string, err error) {
-	now := time.Now()
-	a.updateMigration(jobID, func(job *migrationJob) {
-		job.Status = "failed"
-		job.Error = err.Error()
-		job.Message = "¿¿¿¿"
-		job.CompletedAt = &now
-	})
-}
-
-func migrationProgress(job *migrationJob) int {
-	if job.TotalTopics == 0 {
-		return 1
-	}
-	done := float64(job.DoneTopics)
-	if job.CurrentTotal > 0 && job.CurrentCopied > 0 {
-		current := float64(job.CurrentCopied) / float64(job.CurrentTotal)
-		if current > 1 {
-			current = 1
-		}
-		done += current
-	}
-	base := int(done / float64(job.TotalTopics) * 99)
-	if base > 99 {
-		return 99
-	}
-	if (job.Status == "running" || job.Status == "incremental") && base < 1 {
-		return 1
-	}
-	return base
-}
-

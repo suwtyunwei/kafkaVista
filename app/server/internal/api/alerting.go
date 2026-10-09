@@ -66,11 +66,11 @@ func (a *API) alertRuleValue(c *gin.Context) {
 		Rule MonitoringAlertRule `json:"rule"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil || strings.TrimSpace(req.Rule.Key) == "" {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è¯·æ±‚æ ¼å¼é”™è¯¯")
 		return
 	}
 	if !supportedAlertRuleKey(req.Rule.Key) {
-		errorJSON(c, http.StatusBadRequest, "¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿")
+		errorJSON(c, http.StatusBadRequest, "è¯¥å‘Šè­¦è§„åˆ™æ²¡æœ‰å¯ç”¨ç›‘æ§æŒ‡æ ‡ï¼Œå·²ä»è§„åˆ™åˆ—è¡¨ç§»é™¤")
 		return
 	}
 	items, err := a.currentAlertRuleValues(req.Rule)
@@ -146,7 +146,7 @@ func (a *API) runAlertScan(force bool) ([]alertEvent, error) {
 		data, err := a.kafka.Metrics(cluster, settings.Monitoring.TopicLimit, settings.Monitoring.GroupLimit)
 		if err != nil {
 			if rule, ok := rules["broker_offline"]; ok {
-				events = append(events, alertEvent{Cluster: cluster, Rule: rule, Message: fmt.Sprintf("¿¿ %s ¿¿¿¿¿%v", cluster.Name, err), Value: 1, Threshold: rule.Threshold})
+				events = append(events, alertEvent{Cluster: cluster, Rule: rule, Message: fmt.Sprintf("é›†ç¾¤ %s è¿æ¥å¤±è´¥ï¼š%v", cluster.Name, err), Value: 1, Threshold: rule.Threshold})
 			}
 			continue
 		}
@@ -211,7 +211,7 @@ func evaluateAlertRules(cluster model.KafkaCluster, data map[string]interface{},
 			triggered = value < rule.Threshold
 		}
 		if triggered {
-			events = append(events, alertEvent{Cluster: cluster, Rule: rule, Value: value, Threshold: rule.Threshold, Message: fmt.Sprintf("¿¿ %s ¿¿ %s ¿¿¿ %d¿¿¿ %s %d¿%s", cluster.Name, rule.Key, value, rule.Direction, rule.Threshold, detail)})
+			events = append(events, alertEvent{Cluster: cluster, Rule: rule, Value: value, Threshold: rule.Threshold, Message: fmt.Sprintf("é›†ç¾¤ %s è§„åˆ™ %s å½“å‰å€¼ %dï¼Œé˜ˆå€¼ %s %dã€‚%s", cluster.Name, rule.Key, value, rule.Direction, rule.Threshold, detail)})
 		}
 	}
 	return events
@@ -284,15 +284,15 @@ func (a *API) evaluateMigrationIncrementalAlert(rule MonitoringAlertRule) []aler
 	if !compareAlertValue(value, rule.Direction, rule.Threshold) {
 		return nil
 	}
-	cluster := model.KafkaCluster{ID: "global", Name: "¿¿"}
-	message := fmt.Sprintf("¿¿¿¿¿¿¿¿¿¿¿¿¿ %d¿¿¿¿¿ %d¿%s", value, rule.Threshold, detail)
+	cluster := model.KafkaCluster{ID: "global", Name: "å…¨å±€"}
+	message := fmt.Sprintf("å¹³æ»‘è¿ç§»å¢é‡åŒæ­¥å¼‚å¸¸ä»»åŠ¡æ•° %dï¼Œè¾¾åˆ°é˜ˆå€¼ %dã€‚%s", value, rule.Threshold, detail)
 	return []alertEvent{{Cluster: cluster, Rule: rule, Value: value, Threshold: rule.Threshold, Message: message}}
 }
 
 func (a *API) migrationIncrementalAlertValue(rule MonitoringAlertRule) gin.H {
 	value, detail := a.countAbnormalIncrementalMigrationsForRule(rule)
 	triggered := compareAlertValue(value, rule.Direction, rule.Threshold)
-	return gin.H{"cluster_id": "global", "cluster": "¿¿", "key": rule.Key, "value": value, "unit": rule.Unit, "threshold": rule.Threshold, "direction": rule.Direction, "triggered": triggered, "available": true, "detail": detail}
+	return gin.H{"cluster_id": "global", "cluster": "å…¨å±€", "key": rule.Key, "value": value, "unit": rule.Unit, "threshold": rule.Threshold, "direction": rule.Direction, "triggered": triggered, "available": true, "detail": detail}
 }
 
 func (a *API) countAbnormalIncrementalMigrations() (int64, string) {
@@ -378,22 +378,22 @@ func alertKey(event alertEvent) string {
 }
 
 func sendAlertEvent(settings AuthSettings, event alertEvent) error {
-	title := fmt.Sprintf("KafkaVista ¿¿¿%s", event.Rule.Name)
+	title := fmt.Sprintf("KafkaVista å‘Šè­¦ï¼š%s", event.Rule.Name)
 	now := time.Now().Format("2006-01-02 15:04:05")
 	unit := strings.TrimSpace(event.Rule.Unit)
 	if unit == "" {
 		unit = "value"
 	}
-	plain := fmt.Sprintf("%s\n\n¿¿¿Warning\n¿¿¿%s\n¿¿¿%s\n¿¿¿¿%d %s\n¿¿¿%s %d %s\n¿¿¿%s\n\n%s\n\n¿¿¿¿¿¿ KafkaVista ¿¿ Consumer Group¿Broker ¿ Topic ¿¿¿", title, event.Cluster.Name, event.Rule.Key, event.Value, unit, event.Rule.Direction, event.Threshold, unit, now, event.Message)
-	dingTalkMarkdown := fmt.Sprintf("### %s\n\n> **¿¿**¿<font color=\"warning\">Warning</font>  \n> **¿¿**¿%s  \n> **¿¿**¿%s  \n> **¿¿¿**¿%d %s  \n> **¿¿**¿%s %d %s  \n> **¿¿**¿%s  \n\n**¿¿¿¿**  \n%s  \n\n**¿¿¿¿**  \n¿¿¿ KafkaVista ¿¿ Consumer Group¿Broker ¿ Topic ¿¿¿", title, event.Cluster.Name, event.Rule.Key, event.Value, unit, event.Rule.Direction, event.Threshold, unit, now, event.Message)
-	emailHTML := fmt.Sprintf(`<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e5e7eb;padding:24px;border-radius:16px;max-width:680px"><div style="font-size:18px;font-weight:700;color:#fbbf24;margin-bottom:12px">%s</div><div style="background:#111827;border:1px solid #334155;border-radius:12px;padding:16px"><p><b>¿¿¿</b><span style="color:#f59e0b">Warning</span></p><p><b>¿¿¿</b>%s</p><p><b>¿¿¿</b>%s</p><p><b>¿¿¿¿</b>%d %s</p><p><b>¿¿¿</b>%s %d %s</p><p><b>¿¿¿</b>%s</p></div><p style="margin-top:16px;color:#cbd5e1">%s</p><p style="color:#93c5fd">¿¿¿¿¿¿ KafkaVista ¿¿ Consumer Group¿Broker ¿ Topic ¿¿¿</p></div>`, title, event.Cluster.Name, event.Rule.Key, event.Value, unit, event.Rule.Direction, event.Threshold, unit, now, event.Message)
+	plain := fmt.Sprintf("%s\n\nçº§åˆ«ï¼šWarning\né›†ç¾¤ï¼š%s\nè§„åˆ™ï¼š%s\nå½“å‰å€¼ï¼š%d %s\né˜ˆå€¼ï¼š%s %d %s\næ—¶é—´ï¼š%s\n\n%s\n\nå»ºè®®ï¼šè¯·è¿›å…¥ KafkaVista æ£€æŸ¥ Consumer Groupã€Broker æˆ– Topic çŠ¶æ€ã€‚", title, event.Cluster.Name, event.Rule.Key, event.Value, unit, event.Rule.Direction, event.Threshold, unit, now, event.Message)
+	dingTalkMarkdown := fmt.Sprintf("### %s\n\n> **çº§åˆ«**ï¼š<font color=\"warning\">Warning</font>  \n> **é›†ç¾¤**ï¼š%s  \n> **è§„åˆ™**ï¼š%s  \n> **å½“å‰å€¼**ï¼š%d %s  \n> **é˜ˆå€¼**ï¼š%s %d %s  \n> **æ—¶é—´**ï¼š%s  \n\n**å‘Šè­¦è¯¦æƒ…**  \n%s  \n\n**å¤„ç†å»ºè®®**  \nè¯·è¿›å…¥ KafkaVista æ£€æŸ¥ Consumer Groupã€Broker æˆ– Topic çŠ¶æ€ã€‚", title, event.Cluster.Name, event.Rule.Key, event.Value, unit, event.Rule.Direction, event.Threshold, unit, now, event.Message)
+	emailHTML := fmt.Sprintf(`<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#0f172a;color:#e5e7eb;padding:24px;border-radius:16px;max-width:680px"><div style="font-size:18px;font-weight:700;color:#fbbf24;margin-bottom:12px">%s</div><div style="background:#111827;border:1px solid #334155;border-radius:12px;padding:16px"><p><b>çº§åˆ«ï¼š</b><span style="color:#f59e0b">Warning</span></p><p><b>é›†ç¾¤ï¼š</b>%s</p><p><b>è§„åˆ™ï¼š</b>%s</p><p><b>å½“å‰å€¼ï¼š</b>%d %s</p><p><b>é˜ˆå€¼ï¼š</b>%s %d %s</p><p><b>æ—¶é—´ï¼š</b>%s</p></div><p style="margin-top:16px;color:#cbd5e1">%s</p><p style="color:#93c5fd">å»ºè®®ï¼šè¯·è¿›å…¥ KafkaVista æ£€æŸ¥ Consumer Groupã€Broker æˆ– Topic çŠ¶æ€ã€‚</p></div>`, title, event.Cluster.Name, event.Rule.Key, event.Value, unit, event.Rule.Direction, event.Threshold, unit, now, event.Message)
 	webhooks := []struct {
 		enabled bool
 		url     string
 		payload any
 	}{
 		{settings.Monitoring.Alerting.DingTalkEnabled, strings.TrimSpace(settings.Monitoring.Alerting.DingTalkWebhook), gin.H{"msgtype": "markdown", "markdown": gin.H{"title": title, "text": dingTalkMarkdown}}},
-		{settings.Monitoring.Alerting.FeishuEnabled, strings.TrimSpace(settings.Monitoring.Alerting.FeishuWebhook), gin.H{"msg_type": "interactive", "card": gin.H{"config": gin.H{"wide_screen_mode": true}, "header": gin.H{"template": "orange", "title": gin.H{"tag": "plain_text", "content": title}}, "elements": []gin.H{{"tag": "div", "text": gin.H{"tag": "lark_md", "content": fmt.Sprintf("**¿¿¿** Warning\n**¿¿¿** %s\n**¿¿¿** %s\n**¿¿¿¿** %d %s\n**¿¿¿** %s %d %s\n**¿¿¿** %s", event.Cluster.Name, event.Rule.Key, event.Value, unit, event.Rule.Direction, event.Threshold, unit, now)}}, {"tag": "hr"}, {"tag": "div", "text": gin.H{"tag": "lark_md", "content": fmt.Sprintf("**¿¿¿¿**\n%s", event.Message)}}, {"tag": "note", "elements": []gin.H{{"tag": "plain_text", "content": "¿¿¿¿¿¿ KafkaVista ¿¿ Consumer Group¿Broker ¿ Topic ¿¿¿"}}}}}}},
+		{settings.Monitoring.Alerting.FeishuEnabled, strings.TrimSpace(settings.Monitoring.Alerting.FeishuWebhook), gin.H{"msg_type": "interactive", "card": gin.H{"config": gin.H{"wide_screen_mode": true}, "header": gin.H{"template": "orange", "title": gin.H{"tag": "plain_text", "content": title}}, "elements": []gin.H{{"tag": "div", "text": gin.H{"tag": "lark_md", "content": fmt.Sprintf("**çº§åˆ«ï¼š** Warning\n**é›†ç¾¤ï¼š** %s\n**è§„åˆ™ï¼š** %s\n**å½“å‰å€¼ï¼š** %d %s\n**é˜ˆå€¼ï¼š** %s %d %s\n**æ—¶é—´ï¼š** %s", event.Cluster.Name, event.Rule.Key, event.Value, unit, event.Rule.Direction, event.Threshold, unit, now)}}, {"tag": "hr"}, {"tag": "div", "text": gin.H{"tag": "lark_md", "content": fmt.Sprintf("**å‘Šè­¦è¯¦æƒ…**\n%s", event.Message)}}, {"tag": "note", "elements": []gin.H{{"tag": "plain_text", "content": "å»ºè®®ï¼šè¯·è¿›å…¥ KafkaVista æ£€æŸ¥ Consumer Groupã€Broker æˆ– Topic çŠ¶æ€ã€‚"}}}}}}},
 	}
 	for _, webhook := range webhooks {
 		if !webhook.enabled || webhook.url == "" {
@@ -423,7 +423,7 @@ func sendEmailNotification(settings AuthSettings, subject, textBody, htmlBody st
 	from := strings.TrimSpace(alerting.EmailFrom)
 	to := splitEmailRecipients(alerting.EmailTo)
 	if host == "" || from == "" || len(to) == 0 {
-		return errors.New("¿¿¿¿¿¿ SMTP ¿¿¿¿¿¿¿¿¿¿¿")
+		return errors.New("è¯·å…ˆå®Œæ•´é…ç½® SMTP æœåŠ¡å™¨ã€å‘ä»¶äººå’Œæ”¶ä»¶äºº")
 	}
 	port := alerting.EmailSMTPPort
 	if port <= 0 {
@@ -493,4 +493,3 @@ func buildEmailMessage(from string, to []string, subject, textBody, htmlBody str
 	}
 	return []byte(fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative; boundary=%q\r\n\r\n--%s\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s\r\n--%s\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n--%s--", from, strings.Join(to, ", "), subject, boundary, boundary, textBody, boundary, htmlBody, boundary))
 }
-

@@ -24,8 +24,8 @@ func Init(db *gorm.DB, cfg config.Config) error {
 	if err := db.AutoMigrate(&model.KafkaCluster{}, &model.KafkaPermission{}, &model.KafkaRolePermission{}, &model.KafkaAuditLog{}, &model.KafkaGroupPlaceholder{}, &model.KafkaGroupMetric{}, &model.KafkaClusterMetric{}, &model.KafkaMigrationJob{}, &model.AppUser{}, &model.AppRole{}, &model.SystemSetting{}); err != nil {
 		return err
 	}
-	db.Where(model.AppRole{Name: "admin"}).FirstOrCreate(&model.AppRole{Name: "admin", Description: "¿¿¿¿¿"})
-	db.Where(model.AppRole{Name: "user"}).FirstOrCreate(&model.AppRole{Name: "user", Description: "¿¿¿¿"})
+	db.Where(model.AppRole{Name: "admin"}).FirstOrCreate(&model.AppRole{Name: "admin", Description: "ç³»ç»Ÿç®¡ç†å‘˜"})
+	db.Where(model.AppRole{Name: "user"}).FirstOrCreate(&model.AppRole{Name: "user", Description: "æ™®é€šç”¨æˆ·"})
 	nowUser := model.AppUser{Username: cfg.DefaultUser, DisplayName: cfg.DefaultUser, Role: "admin", Source: "local", IsActive: true}
 	db.Where(model.AppUser{Username: cfg.DefaultUser}).FirstOrCreate(&nowUser)
 	var dbUser model.AppUser
@@ -44,7 +44,7 @@ func Init(db *gorm.DB, cfg config.Config) error {
 		ClusterType:      "cluster",
 		BootstrapServers: cfg.DefaultBootstrapServers,
 		SecurityProtocol: "PLAINTEXT",
-		Description:      "¿¿ Kafka ¿¿",
+		Description:      "é»˜è®¤ Kafka é›†ç¾¤",
 		IsActive:         true,
 	}
 	if err := db.Create(&cluster).Error; err != nil {
@@ -70,4 +70,3 @@ func HashPassword(password string) (string, error) {
 func VerifyPassword(stored, password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(stored), []byte(password)) == nil
 }
-

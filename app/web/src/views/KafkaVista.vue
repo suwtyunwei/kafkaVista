@@ -3,49 +3,49 @@
     <div v-if="!currentCluster" class="hero">
       <div>
         <p class="eyebrow">Kafka Operations</p>
-        <h1>{{ currentCluster ? currentCluster.name : tr('Kafka ¿¿¿¿', 'Kafka Clusters') }}</h1>
-        <p>{{ currentCluster ? tr('¿¿¿¿ Kafka ¿¿¿ Broker¿Topic¿¿¿¿Consumer Group ¿¿¿¿', 'Manage brokers, topics, messages, consumer groups, and permissions for this Kafka instance.') : tr('¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿¿ Topic¿¿¿¿¿¿¿¿', 'Select a Kafka instance first, then manage topics, messages, and consumer groups.') }}</p>
+        <h1>{{ currentCluster ? currentCluster.name : tr('Kafka é›†ç¾¤åˆ—è¡¨', 'Kafka Clusters') }}</h1>
+        <p>{{ currentCluster ? tr('ç®¡ç†å½“å‰ Kafka å®ä¾‹çš„ Brokerã€Topicã€æ¶ˆæ¯ã€Consumer Group å’Œæƒé™ã€‚', 'Manage brokers, topics, messages, consumer groups, and permissions for this Kafka instance.') : tr('å…ˆé€‰æ‹©ä¸€ä¸ª Kafka å®ä¾‹ï¼Œè¿›å…¥åå†ç®¡ç† Topicã€æ¶ˆæ¯å’Œæ¶ˆè´¹ç»„ã€‚', 'Select a Kafka instance first, then manage topics, messages, and consumer groups.') }}</p>
       </div>
       <div class="hero-actions">
-        <button v-if="currentCluster" class="ghost" @click="backToClusters">{{ tr('¿¿¿¿¿¿', 'Back to Clusters') }}</button>
-        <button class="primary" :disabled="loading" @click="refreshAll()">{{ loading ? tr('¿¿¿...', 'Refreshing...') : tr('¿¿', 'Refresh') }}</button>
+        <button v-if="currentCluster" class="ghost" @click="backToClusters">{{ tr('è¿”å›é›†ç¾¤åˆ—è¡¨', 'Back to Clusters') }}</button>
+        <button class="primary" :disabled="loading" @click="refreshAll()">{{ loading ? tr('åˆ·æ–°ä¸­...', 'Refreshing...') : tr('åˆ·æ–°', 'Refresh') }}</button>
       </div>
     </div>
 
     <section v-if="!currentCluster" class="cluster-home panel">
       <div class="panel-title">
         <div>
-          <h2>{{ tr('¿¿ Kafka ¿¿', 'Select Kafka Instance') }}</h2>
-          <p class="muted">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Click a cluster card to enter the workspace. Only clusters with view permission are shown.') }}</p>
+          <h2>{{ tr('é€‰æ‹© Kafka å®ä¾‹', 'Select Kafka Instance') }}</h2>
+          <p class="muted">{{ tr('ç‚¹å‡»é›†ç¾¤å¡ç‰‡è¿›å…¥å·¥ä½œå°ã€‚åªæœ‰å…·å¤‡æŸ¥çœ‹æƒé™çš„é›†ç¾¤ä¼šæ˜¾ç¤ºåœ¨è¿™é‡Œã€‚', 'Click a cluster card to enter the workspace. Only clusters with view permission are shown.') }}</p>
         </div>
         <div class="panel-actions">
-          <input v-model="clusterSearch" :placeholder="tr('¿¿¿¿¿¿ / IP...', 'Search instance name / IP...')" class="search-input" />
-          <button v-if="isAdminUser" class="primary small" @click="openCluster(null)">{{ tr('¿¿ Kafka ¿¿', 'Add Kafka Instance') }}</button>
+          <input v-model="clusterSearch" :placeholder="tr('æœç´¢å®ä¾‹åç§° / IP...', 'Search instance name / IP...')" class="search-input" />
+          <button v-if="isAdminUser" class="primary small" @click="openCluster(null)">{{ tr('æ–°å¢ Kafka å®ä¾‹', 'Add Kafka Instance') }}</button>
         </div>
       </div>
       <div class="cluster-table">
-        <div class="cluster-head"><span>{{ tr('¿¿¿¿', 'Instance Name') }}</span><span>{{ tr('¿¿', 'Type') }}</span><span>Topic</span><span>Broker</span><span>Consumer Group</span><span>{{ tr('¿¿', 'Description') }}</span><span>{{ tr('¿¿¿¿', 'Created At') }}</span><span>{{ tr('¿¿', 'Actions') }}</span></div>
+        <div class="cluster-head"><span>{{ tr('å®ä¾‹åç§°', 'Instance Name') }}</span><span>{{ tr('ç±»å‹', 'Type') }}</span><span>Topic</span><span>Broker</span><span>Consumer Group</span><span>{{ tr('æè¿°', 'Description') }}</span><span>{{ tr('åˆ›å»ºæ—¶é—´', 'Created At') }}</span><span>{{ tr('æ“ä½œ', 'Actions') }}</span></div>
         <button v-for="cluster in pagedClusters" :key="cluster.id" class="cluster-row" @click="enterCluster(cluster.id)">
           <span><strong>{{ cluster.name }}</strong><small>{{ cluster.bootstrap_servers }}</small></span>
-          <span>{{ cluster.cluster_type === 'single' ? tr('¿¿', 'Standalone') : tr('¿¿', 'Cluster') }}</span>
+          <span>{{ cluster.cluster_type === 'single' ? tr('å•æœº', 'Standalone') : tr('é›†ç¾¤', 'Cluster') }}</span>
           <span>{{ cluster.topic_count ?? '-' }}</span>
           <span>{{ cluster.broker_count ?? '-' }}</span>
           <span>{{ cluster.group_count ?? '-' }}</span>
           <span class="muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cluster.description || '-' }}</span>
           <span>{{ formatTimeText(cluster.created_at) }}</span>
-          <span class="cluster-actions"><button v-if="isAdminUser" class="ghost mini" @click.stop="openCluster(cluster)">{{ tr('¿¿', 'Edit') }}</button><button v-if="isAdminUser" class="danger mini" @click.stop="deleteClusterFromList(cluster)">{{ tr('¿¿', 'Delete') }}</button></span>
+          <span class="cluster-actions"><button v-if="isAdminUser" class="ghost mini" @click.stop="openCluster(cluster)">{{ tr('ç¼–è¾‘', 'Edit') }}</button><button v-if="isAdminUser" class="danger mini" @click.stop="deleteClusterFromList(cluster)">{{ tr('åˆ é™¤', 'Delete') }}</button></span>
         </button>
       </div>
-      <div v-if="filteredClusters.length === 0" class="empty">{{ tr('¿¿¿¿¿¿ Kafka ¿¿', 'No visible Kafka clusters') }}</div>
+      <div v-if="filteredClusters.length === 0" class="empty">{{ tr('æš‚æ— å¯æŸ¥çœ‹çš„ Kafka é›†ç¾¤', 'No visible Kafka clusters') }}</div>
       <div v-if="filteredClusters.length > 0" class="pagination-bar cluster-pagination">
-        <span>{{ tr(`¿ ${filteredClusters.length} ¿¿¿`, `${filteredClusters.length} clusters`) }}</span>
+        <span>{{ tr(`å…± ${filteredClusters.length} ä¸ªé›†ç¾¤`, `${filteredClusters.length} clusters`) }}</span>
         <span class="page-btns">
-          <button :disabled="clusterPage <= 1" @click="clusterPage--">{{ tr('¿¿¿', 'Previous') }}</button>
+          <button :disabled="clusterPage <= 1" @click="clusterPage--">{{ tr('ä¸Šä¸€é¡µ', 'Previous') }}</button>
           <span>{{ clusterPage }} / {{ clusterTotalPages }}</span>
-          <button :disabled="clusterPage >= clusterTotalPages" @click="clusterPage++">{{ tr('¿¿¿', 'Next') }}</button>
+          <button :disabled="clusterPage >= clusterTotalPages" @click="clusterPage++">{{ tr('ä¸‹ä¸€é¡µ', 'Next') }}</button>
         </span>
         <select v-model.number="clusterPageSize">
-          <option :value="10">{{ tr('10 ¿/¿', '10 / page') }}</option><option :value="20">{{ tr('20 ¿/¿', '20 / page') }}</option><option :value="50">{{ tr('50 ¿/¿', '50 / page') }}</option>
+          <option :value="10">{{ tr('10 æ¡/é¡µ', '10 / page') }}</option><option :value="20">{{ tr('20 æ¡/é¡µ', '20 / page') }}</option><option :value="50">{{ tr('50 æ¡/é¡µ', '50 / page') }}</option>
         </select>
       </div>
     </section>
@@ -53,72 +53,72 @@
     <div v-else>
       <main class="content-stack">
         <section v-if="currentCluster && activeTab === 'brokers'" class="panel">
-            <div class="panel-title compact"><h2>{{ tr('Broker ¿¿', 'Broker Nodes') }}</h2><div class="title-side"><span class="cluster-inline-pill">{{ currentClusterLabel }}</span><span>{{ clusterDetail.alive_broker_count ?? 0 }} / {{ clusterDetail.broker_count || 0 }} {{ tr('¿¿', 'alive') }}</span></div></div>
+            <div class="panel-title compact"><h2>{{ tr('Broker èŠ‚ç‚¹', 'Broker Nodes') }}</h2><div class="title-side"><span class="cluster-inline-pill">{{ currentClusterLabel }}</span><span>{{ clusterDetail.alive_broker_count ?? 0 }} / {{ clusterDetail.broker_count || 0 }} {{ tr('å­˜æ´»', 'alive') }}</span></div></div>
             <div class="broker-table">
-              <div class="broker-head"><span>Node ID</span><span>Host</span><span>Role</span><span>Rack</span><span>{{ tr('¿¿', 'Status') }}</span></div>
+              <div class="broker-head"><span>Node ID</span><span>Host</span><span>Role</span><span>Rack</span><span>{{ tr('çŠ¶æ€', 'Status') }}</span></div>
               <div v-for="broker in clusterDetail.brokers || []" :key="broker.node_id" class="broker-row">
                 <strong>#{{ broker.node_id }}</strong>
                 <span>{{ broker.host }}</span>
                 <span>{{ broker.is_controller || broker.node_id === clusterDetail.controller_id ? 'Controller' : 'Broker' }}</span>
                 <span>{{ broker.rack || '-' }}</span>
-                <span :class="['broker-status', broker.alive ? 'alive' : 'down']">{{ broker.alive ? tr('¿¿', 'Alive') : tr('¿¿', 'Abnormal') }}</span>
+                <span :class="['broker-status', broker.alive ? 'alive' : 'down']">{{ broker.alive ? tr('å­˜æ´»', 'Alive') : tr('å¼‚å¸¸', 'Abnormal') }}</span>
               </div>
-              <div v-if="!(clusterDetail.brokers || []).length" class="empty compact">{{ tr('¿¿ Broker ¿¿', 'No broker information') }}</div>
+              <div v-if="!(clusterDetail.brokers || []).length" class="empty compact">{{ tr('æš‚æ—  Broker ä¿¡æ¯', 'No broker information') }}</div>
             </div>
         </section>
 
         <section v-if="activeTab === 'topics' && !selectedTopic" class="panel">
           <div class="panel-title">
             <div>
-              <h2>{{ tr('Topic ¿¿', 'Topics') }}</h2>
-              <p class="muted">{{ tr('¿¿ Topic ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Configurations¿', 'Open a topic to manage partitions, messages, and configurations.') }}</p>
+              <h2>{{ tr('Topic åˆ—è¡¨', 'Topics') }}</h2>
+              <p class="muted">{{ tr('ç‚¹å‡» Topic è¿›å…¥ç‹¬ç«‹ç®¡ç†é¡µï¼ŒæŸ¥çœ‹åˆ†åŒºã€æ¶ˆæ¯å’Œ Configurationsã€‚', 'Open a topic to manage partitions, messages, and configurations.') }}</p>
             </div>
             <div class="actions">
               <span class="cluster-inline-pill">{{ currentClusterLabel }}</span>
-              <span class="count-pill">{{ tr(`¿ ${topicTotal} ¿ Topic`, `${topicTotal} Topics`) }}</span>
-              <button class="ghost small" @click="backToClusters">{{ tr('¿¿¿¿¿¿', 'Back to Clusters') }}</button>
-              <button class="primary small" :disabled="loading" @click="refreshAll()">{{ loading ? tr('¿¿¿...', 'Refreshing...') : tr('¿¿', 'Refresh') }}</button>
-              <button v-if="can('topic_create') || can('topic_manage')" class="ghost small" @click="showTopicModal = true">{{ tr('¿¿ Topic', 'Add Topic') }}</button>
+              <span class="count-pill">{{ tr(`å…± ${topicTotal} ä¸ª Topic`, `${topicTotal} Topics`) }}</span>
+              <button class="ghost small" @click="backToClusters">{{ tr('è¿”å›é›†ç¾¤åˆ—è¡¨', 'Back to Clusters') }}</button>
+              <button class="primary small" :disabled="loading" @click="refreshAll()">{{ loading ? tr('åˆ·æ–°ä¸­...', 'Refreshing...') : tr('åˆ·æ–°', 'Refresh') }}</button>
+              <button v-if="can('topic_create') || can('topic_manage')" class="ghost small" @click="showTopicModal = true">{{ tr('æ–°å¢ Topic', 'Add Topic') }}</button>
             </div>
           </div>
-          <input v-model="topicKeyword" class="search-input" :placeholder="tr('¿¿ Topic', 'Search Topic')" />
+          <input v-model="topicKeyword" class="search-input" :placeholder="tr('æœç´¢ Topic', 'Search Topic')" />
           <div class="topic-table">
-            <div class="topic-head"><span>{{ tr('Topic ¿¿', 'Topic Name') }}</span><span>{{ tr('¿¿', 'Partitions') }}</span><button class="sort-head" @click="toggleLogSizeSort">Log Size {{ logSizeSortLabel }}</button><span>{{ tr('¿¿¿', 'Messages') }}</span><span>{{ tr('¿¿', 'Actions') }}</span></div>
+            <div class="topic-head"><span>{{ tr('Topic åç§°', 'Topic Name') }}</span><span>{{ tr('åˆ†åŒº', 'Partitions') }}</span><button class="sort-head" @click="toggleLogSizeSort">Log Size {{ logSizeSortLabel }}</button><span>{{ tr('æ¶ˆæ¯é‡', 'Messages') }}</span><span>{{ tr('æ“ä½œ', 'Actions') }}</span></div>
             <button v-for="topic in topicPageItems" :key="topic.topic" class="topic-row" @click="selectTopic(topic.topic)">
               <span>{{ topic.topic }}</span>
               <span>{{ topic.partition_count ?? '-' }}</span>
               <span>{{ formatLogSize(topic.log_size || 0) }}</span>
               <span>{{ formatNumber(topic.message_count || 0) }}</span>
-              <strong>{{ tr('¿¿¿¿', 'Manage') }}</strong>
+              <strong>{{ tr('è¿›å…¥ç®¡ç†', 'Manage') }}</strong>
             </button>
           </div>
           <div class="pagination-bar">
-            <span>{{ tr(`¿ ${topicTotal} ¿¿¿ ${topicPage} / ${topicTotalPages} ¿`, `${topicTotal} items, page ${topicPage} / ${topicTotalPages}`) }}</span>
-            <select v-model.number="topicPageSize"><option :value="10">{{ tr('10 ¿/¿', '10 / page') }}</option><option :value="20">{{ tr('20 ¿/¿', '20 / page') }}</option><option :value="50">{{ tr('50 ¿/¿', '50 / page') }}</option><option :value="100">{{ tr('100 ¿/¿', '100 / page') }}</option></select>
-            <button class="ghost small" :disabled="topicPage <= 1" @click="topicPage--">{{ tr('¿¿¿', 'Previous') }}</button>
-            <button class="ghost small" :disabled="topicPage >= topicTotalPages" @click="topicPage++">{{ tr('¿¿¿', 'Next') }}</button>
+            <span>{{ tr(`å…± ${topicTotal} æ¡ï¼Œç¬¬ ${topicPage} / ${topicTotalPages} é¡µ`, `${topicTotal} items, page ${topicPage} / ${topicTotalPages}`) }}</span>
+            <select v-model.number="topicPageSize"><option :value="10">{{ tr('10 æ¡/é¡µ', '10 / page') }}</option><option :value="20">{{ tr('20 æ¡/é¡µ', '20 / page') }}</option><option :value="50">{{ tr('50 æ¡/é¡µ', '50 / page') }}</option><option :value="100">{{ tr('100 æ¡/é¡µ', '100 / page') }}</option></select>
+            <button class="ghost small" :disabled="topicPage <= 1" @click="topicPage--">{{ tr('ä¸Šä¸€é¡µ', 'Previous') }}</button>
+            <button class="ghost small" :disabled="topicPage >= topicTotalPages" @click="topicPage++">{{ tr('ä¸‹ä¸€é¡µ', 'Next') }}</button>
           </div>
-          <div v-if="topicTotal === 0" class="empty compact">{{ tr('¿¿ Topic ¿¿¿¿¿¿', 'No topics or no permission') }}</div>
+          <div v-if="topicTotal === 0" class="empty compact">{{ tr('æš‚æ—  Topic æˆ–æ— æƒé™æŸ¥çœ‹', 'No topics or no permission') }}</div>
         </section>
 
         <section v-if="activeTab === 'topics' && selectedTopic" class="panel topic-detail-page">
             <div v-if="selectedTopic" class="topic-summary">
               <strong>{{ selectedTopic }}</strong>
               <span class="cluster-inline-pill">{{ currentClusterLabel }}</span>
-              <span>{{ tr(`${topicPartitions.length} ¿¿¿`, `${topicPartitions.length} partitions`) }}</span>
-              <span>{{ tr(`${formatNumber(topicSummaryMap[selectedTopic]?.message_count || 0)} ¿¿¿`, `${formatNumber(topicSummaryMap[selectedTopic]?.message_count || 0)} messages`) }}</span>
+              <span>{{ tr(`${topicPartitions.length} ä¸ªåˆ†åŒº`, `${topicPartitions.length} partitions`) }}</span>
+              <span>{{ tr(`${formatNumber(topicSummaryMap[selectedTopic]?.message_count || 0)} æ¡æ¶ˆæ¯`, `${formatNumber(topicSummaryMap[selectedTopic]?.message_count || 0)} messages`) }}</span>
               <button :class="['ghost small', { selected: topicSubTab === 'overview' }]" @click="topicSubTab = 'overview'">Overview</button>
               <button :class="['ghost small', { selected: topicSubTab === 'messages' }]" @click="topicSubTab = 'messages'">Consume Message</button>
               <button v-if="can('message_send')" class="primary small" @click="openProduceModal">Produce Message</button>
               <button :class="['ghost small', { selected: topicSubTab === 'configs' }]" @click="topicSubTab = 'configs'">Configurations</button>
-              <button v-if="can('topic_manage')" class="ghost small" @click="openPartitionModal">{{ tr('¿¿¿¿', 'Edit Partitions') }}</button>
-              <button v-if="can('topic_delete') || can('topic_manage')" class="danger small" @click="removeTopic">{{ tr('¿¿', 'Delete') }}</button>
+              <button v-if="can('topic_manage')" class="ghost small" @click="openPartitionModal">{{ tr('ä¿®æ”¹åˆ†åŒº', 'Edit Partitions') }}</button>
+              <button v-if="can('topic_delete') || can('topic_manage')" class="danger small" @click="removeTopic">{{ tr('åˆ é™¤', 'Delete') }}</button>
             </div>
             <div v-if="selectedTopic && topicSubTab === 'overview'" class="partition-grid compact-grid">
               <button v-for="p in topicPartitions" :key="p.partition" :class="['partition-card', { active: Number(messageForm.partition) === p.partition }]" @click="messageForm.partition = p.partition">
                 <label>Partition {{ p.partition }}</label>
                 <strong>{{ p.beginning_offset ?? '-' }} - {{ p.end_offset ?? '-' }}</strong>
-                <span>{{ tr(`${formatNumber(p.message_count ?? p.lag_window ?? 0)} ¿¿¿`, `${formatNumber(p.message_count ?? p.lag_window ?? 0)} messages`) }}</span>
+                <span>{{ tr(`${formatNumber(p.message_count ?? p.lag_window ?? 0)} æ¡æ¶ˆæ¯`, `${formatNumber(p.message_count ?? p.lag_window ?? 0)} messages`) }}</span>
                 <small v-if="p.leader !== undefined && p.leader !== null">Leader {{ p.leader }}</small>
               </button>
             </div>
@@ -133,8 +133,8 @@
                 <div class="field"><label>{{ t('queryMode') }}</label><select v-model="messageForm.timeMode"><option value="none">{{ t('noTimeFilter') }}</option><option value="from">{{ t('searchByTime') }}</option><option value="range">{{ t('searchByTimeRange') }}</option><option value="offsetRange">{{ t('searchByOffsetRange') }}</option></select></div>
                 <div class="field"><label>autoOffsetReset</label><select v-model="messageForm.autoOffsetReset"><option value="newest">newest</option><option value="earliest">earliest</option></select></div>
                 <div v-if="messageForm.timeMode === 'none'" class="field"><label>start offset</label><input v-model="messageForm.offset" :placeholder="t('defaultNewestHint')" /></div>
-                <div v-if="messageForm.timeMode === 'offsetRange'" class="field"><label>start offset</label><input v-model="messageForm.offset" placeholder="¿¿ 100" /></div>
-                <div v-if="messageForm.timeMode === 'offsetRange'" class="field"><label>end offset</label><input v-model="messageForm.endOffset" :placeholder="tr('¿¿ 200¿¿¿¿ offset', 'e.g. 200, inclusive')" /></div>
+                <div v-if="messageForm.timeMode === 'offsetRange'" class="field"><label>start offset</label><input v-model="messageForm.offset" placeholder="ä¾‹å¦‚ 100" /></div>
+                <div v-if="messageForm.timeMode === 'offsetRange'" class="field"><label>end offset</label><input v-model="messageForm.endOffset" :placeholder="tr('ä¾‹å¦‚ 200ï¼ŒåŒ…å«è¯¥ offset', 'e.g. 200, inclusive')" /></div>
                 <div v-if="messageForm.timeMode === 'from' || messageForm.timeMode === 'range'" class="field datetime-field"><label>{{ t('startTime') }}</label><button type="button" class="datetime-trigger" @click="activeDateTimePicker = activeDateTimePicker === 'startTime' ? '' : 'startTime'">{{ formatDateTimeInput(messageForm.startTime) || t('selectStartTime') }}</button><div v-if="activeDateTimePicker === 'startTime'" class="datetime-popover"><div class="dt-picker-row"><span class="dt-picker-group"><label>{{ t('date') }}</label><input :value="datePart(messageForm.startTime)" type="date" class="dt-native" @input="updateDateTime('startTime', 'date', $event)" /></span><span class="dt-picker-group"><label>{{ t('time') }}</label><input :value="timePart(messageForm.startTime)" type="time" step="1" class="dt-native" @input="updateDateTime('startTime', 'time', $event)" /></span></div><div class="datetime-actions"><button class="ghost" @click="setDateTimeNow('startTime')">{{ t('now') }}</button><button class="ghost" @click="messageForm.startTime = ''">{{ t('clear') }}</button><button class="primary" @click="activeDateTimePicker = ''">{{ t('confirm') }}</button></div></div></div>
                 <div v-if="messageForm.timeMode === 'range'" class="field datetime-field"><label>{{ t('endTime') }}</label><button type="button" class="datetime-trigger" @click="activeDateTimePicker = activeDateTimePicker === 'endTime' ? '' : 'endTime'">{{ formatDateTimeInput(messageForm.endTime) || t('selectEndTime') }}</button><div v-if="activeDateTimePicker === 'endTime'" class="datetime-popover"><div class="dt-picker-row"><span class="dt-picker-group"><label>{{ t('date') }}</label><input :value="datePart(messageForm.endTime)" type="date" class="dt-native" @input="updateDateTime('endTime', 'date', $event)" /></span><span class="dt-picker-group"><label>{{ t('time') }}</label><input :value="timePart(messageForm.endTime)" type="time" step="1" class="dt-native" @input="updateDateTime('endTime', 'time', $event)" /></span></div><div class="datetime-actions"><button class="ghost" @click="setDateTimeNow('endTime')">{{ t('now') }}</button><button class="ghost" @click="messageForm.endTime = ''">{{ t('clear') }}</button><button class="primary" @click="activeDateTimePicker = ''">{{ t('confirm') }}</button></div></div></div>
                 <div class="field"><label>Key</label><input v-model="messageForm.keySearch" :placeholder="t('optionalContains')" /></div>
@@ -191,7 +191,7 @@
                         <button v-if="editingConfigName !== cfg.name" class="ghost mini" @click="editTopicConfig(cfg)">Edit</button>
                         <button v-if="editingConfigName === cfg.name" class="primary mini" @click="saveTopicConfig(cfg.name)">Save</button>
                         <button v-if="editingConfigName === cfg.name" class="ghost mini" @click="cancelTopicConfigEdit">Cancel</button>
-                        <button class="danger mini" @click="deleteTopicConfig(cfg.name)">{{ tr('¿¿', 'Default') }}</button>
+                        <button class="danger mini" @click="deleteTopicConfig(cfg.name)">{{ tr('é»˜è®¤', 'Default') }}</button>
                       </template>
                       <em v-else>-</em>
                     </span>
@@ -203,13 +203,13 @@
 
         <section v-if="activeTab === 'groups' && !selectedGroup" class="panel">
           <div>
-            <div class="panel-title compact"><h2>{{ tr('Consumer Group ¿¿', 'Consumer Groups') }}</h2><div class="title-side"><span class="cluster-inline-pill">{{ currentClusterLabel }}</span><span>{{ groupSummariesLoading ? tr('¿¿¿¿¿...', 'Loading details...') : tr(`${filteredGroups.length} ¿`, `${filteredGroups.length}`) }}</span><button v-if="can('group_create')" class="primary small" @click="openGroupModal">{{ tr('¿¿ Group', 'Create Group') }}</button></div></div>
+            <div class="panel-title compact"><h2>{{ tr('Consumer Group åˆ—è¡¨', 'Consumer Groups') }}</h2><div class="title-side"><span class="cluster-inline-pill">{{ currentClusterLabel }}</span><span>{{ groupSummariesLoading ? tr('åŠ è½½è¯¦æƒ…ä¸­...', 'Loading details...') : tr(`${filteredGroups.length} ä¸ª`, `${filteredGroups.length}`) }}</span><button v-if="can('group_create')" class="primary small" @click="openGroupModal">{{ tr('åˆ›å»º Group', 'Create Group') }}</button></div></div>
             <div class="group-search-bar">
               <select v-model="groupSearchMode" class="group-search-mode">
-                <option value="group">{{ tr('¿ Group ¿¿', 'Search by Group') }}</option>
-                <option value="topic">{{ tr('¿ Topic ¿¿', 'Search by Topic') }}</option>
+                <option value="group">{{ tr('æŒ‰ Group æœç´¢', 'Search by Group') }}</option>
+                <option value="topic">{{ tr('æŒ‰ Topic æœç´¢', 'Search by Topic') }}</option>
               </select>
-              <input v-model="groupKeyword" class="search-input" :placeholder="groupSearchMode === 'topic' ? tr('¿¿ Topic¿¿¿¿¿¿ Topic ¿ Group', 'Search topic and list groups bound to it') : tr('¿¿ Group', 'Search Group')" />
+              <input v-model="groupKeyword" class="search-input" :placeholder="groupSearchMode === 'topic' ? tr('æœç´¢ Topicï¼Œåˆ—å‡ºç»‘å®šè¯¥ Topic çš„ Group', 'Search topic and list groups bound to it') : tr('æœç´¢ Group', 'Search Group')" />
             </div>
             <div class="group-list-box">
               <div v-for="group in filteredGroups" :key="group" :class="['group-card', { active: selectedGroup === group }]" @click="selectGroup(group)">
@@ -221,29 +221,29 @@
                     <span class="group-pill warn">Lag {{ formatNumber(groupSummary(group).totalLag) }}</span>
                   </div>
                   <div class="group-topic-line">
-                    <span v-if="groupSummary(group).topics.length === 0" class="muted">{{ tr('¿¿¿¿¿ offset ¿ Topic', 'No topics with committed offsets') }}</span>
+                    <span v-if="groupSummary(group).topics.length === 0" class="muted">{{ tr('æš‚æ— å·²æäº¤ offset çš„ Topic', 'No topics with committed offsets') }}</span>
                     <span v-for="topic in groupSummary(group).topics.slice(0, 6)" :key="topic" :class="['topic-chip', { matched: groupSearchMode === 'topic' && topicMatchesGroupSearch(topic) }]">{{ topic }}</span>
                     <span v-if="groupSummary(group).topics.length > 6" class="muted">+{{ groupSummary(group).topics.length - 6 }}</span>
                   </div>
                   <div class="group-member-line">
-                    <span v-if="groupSummary(group).members.length === 0" class="muted">{{ tr('¿¿¿¿¿ member', 'No online members') }}</span>
+                    <span v-if="groupSummary(group).members.length === 0" class="muted">{{ tr('å½“å‰æ— åœ¨çº¿ member', 'No online members') }}</span>
                     <span v-for="member in groupSummary(group).members.slice(0, 3)" :key="member.member_id || member.client_id" class="member-chip">{{ member.client_id || member.member_id || '-' }} {{ member.client_host || '' }}</span>
                     <span v-if="groupSummary(group).members.length > 3" class="muted">+{{ groupSummary(group).members.length - 3 }}</span>
                   </div>
                 </div>
                 <div class="group-card-side">
-                  <span>{{ tr(`${groupSummary(group).partitionCount} ¿¿`, `${groupSummary(group).partitionCount} partitions`) }}</span>
-                  <button v-if="can('group_delete')" class="danger mini" @click.stop="removeGroup(group)">{{ tr('¿¿', 'Delete') }}</button>
+                  <span>{{ tr(`${groupSummary(group).partitionCount} åˆ†åŒº`, `${groupSummary(group).partitionCount} partitions`) }}</span>
+                  <button v-if="can('group_delete')" class="danger mini" @click.stop="removeGroup(group)">{{ tr('åˆ é™¤', 'Delete') }}</button>
                 </div>
               </div>
-              <div v-if="filteredGroups.length === 0" class="empty compact">{{ tr('¿¿ Group', 'No groups') }}</div>
+              <div v-if="filteredGroups.length === 0" class="empty compact">{{ tr('æš‚æ—  Group', 'No groups') }}</div>
             </div>
           </div>
         </section>
 
         <section v-if="activeTab === 'groups' && selectedGroup" class="panel">
           <div>
-            <div class="panel-title compact"><h2>{{ selectedGroup }}</h2><div class="actions"><span class="cluster-inline-pill">{{ currentClusterLabel }}</span><span v-if="groupDetail.group">Lag {{ formatNumber(groupDetail.total_lag || 0) }}</span><button class="ghost small" @click="backToGroupList">{{ tr('¿¿ Group ¿¿', 'Back to Groups') }}</button></div></div>
+            <div class="panel-title compact"><h2>{{ selectedGroup }}</h2><div class="actions"><span class="cluster-inline-pill">{{ currentClusterLabel }}</span><span v-if="groupDetail.group">Lag {{ formatNumber(groupDetail.total_lag || 0) }}</span><button class="ghost small" @click="backToGroupList">{{ tr('è¿”å› Group åˆ—è¡¨', 'Back to Groups') }}</button></div></div>
             <div class="group-stat-grid">
               <div><label>Total Lag</label><strong>{{ formatNumber(groupDetail.total_lag || 0) }}</strong></div>
               <div><label>Topic</label><strong>{{ (groupDetail.active_topics?.length || groupDetail.topics?.length || 0) }}</strong></div>
@@ -251,20 +251,20 @@
               <div><label>Partition</label><strong>{{ (groupDetail.partitions || []).length }}</strong></div>
             </div>
             <div class="group-detail-block">
-              <div class="panel-title compact"><h2>{{ tr('¿¿¿¿¿ Topic', 'Consuming Topics') }}</h2><span>{{ tr(`${groupTopicRows.length} ¿`, `${groupTopicRows.length}`) }}</span></div>
+              <div class="panel-title compact"><h2>{{ tr('æ­£åœ¨æ¶ˆè´¹çš„ Topic', 'Consuming Topics') }}</h2><span>{{ tr(`${groupTopicRows.length} ä¸ª`, `${groupTopicRows.length}`) }}</span></div>
               <div class="group-topic-detail-table">
-                <div class="group-topic-detail-head"><span>Topic</span><span>Host</span><span>{{ tr('¿¿', 'Actions') }}</span></div>
+                <div class="group-topic-detail-head"><span>Topic</span><span>Host</span><span>{{ tr('æ“ä½œ', 'Actions') }}</span></div>
                 <div v-for="row in groupTopicRows" :key="row.topic" class="group-topic-detail-row">
                   <button class="offset-topic-link" @click="openTopicFromGroup(row.topic)">{{ row.topic }}</button>
                   <span class="offset-host" :title="row.host || '-'">{{ row.host || '-' }}</span>
-                  <button v-if="can('group_delete')" class="unlink-topic-btn" @click="unlinkGroupTopic(row.topic)">{{ tr('¿¿¿¿', 'Unsubscribe') }}</button>
+                  <button v-if="can('group_delete')" class="unlink-topic-btn" @click="unlinkGroupTopic(row.topic)">{{ tr('è§£é™¤è®¢é˜…', 'Unsubscribe') }}</button>
                   <span v-else>-</span>
                 </div>
-                <div v-if="!groupTopicRows.length" class="empty compact">{{ tr('¿¿¿¿¿¿¿ Topic', 'No consuming topics') }}</div>
+                <div v-if="!groupTopicRows.length" class="empty compact">{{ tr('æš‚æ— æ­£åœ¨æ¶ˆè´¹çš„ Topic', 'No consuming topics') }}</div>
               </div>
             </div>
             <div class="group-detail-block">
-              <div class="panel-title compact"><h2>Member</h2><span>{{ tr(`${(groupDetail.members || []).length} ¿`, `${(groupDetail.members || []).length}`) }}</span></div>
+              <div class="panel-title compact"><h2>Member</h2><span>{{ tr(`${(groupDetail.members || []).length} ä¸ª`, `${(groupDetail.members || []).length}`) }}</span></div>
               <div class="member-table">
                 <div class="member-head"><span>Client ID</span><span>Host</span><span>Assignments</span></div>
                 <div v-for="member in groupDetail.members || []" :key="member.member_id || member.client_id" class="member-row">
@@ -275,15 +275,15 @@
                     <button v-for="item in member.assignments || []" :key="`${item.topic}-${item.partition}`" class="assignment-chip" @click="openTopicFromGroup(item.topic)">{{ item.topic }}-{{ item.partition }}</button>
                   </span>
                 </div>
-                <div v-if="!(groupDetail.members || []).length" class="empty compact">{{ tr('¿¿¿¿¿ member', 'No online members') }}</div>
+                <div v-if="!(groupDetail.members || []).length" class="empty compact">{{ tr('å½“å‰æ— åœ¨çº¿ member', 'No online members') }}</div>
               </div>
             </div>
             <div class="group-offset-table">
-              <div class="offset-head"><span>Topic</span><span>Host</span><span>{{ tr('¿¿', 'Partition') }}</span><span>{{ tr('¿¿', 'Committed') }}</span><span>{{ tr('¿¿', 'End') }}</span><span>{{ tr('¿¿', 'Lag') }}</span></div>
+              <div class="offset-head"><span>Topic</span><span>Host</span><span>{{ tr('åˆ†åŒº', 'Partition') }}</span><span>{{ tr('æäº¤', 'Committed') }}</span><span>{{ tr('æœ«å°¾', 'End') }}</span><span>{{ tr('ç§¯å‹', 'Lag') }}</span></div>
               <div v-for="row in groupDetail.partitions || []" :key="`${row.topic}-${row.partition}`" class="offset-row">
                 <button class="offset-topic-link" @click="openTopicFromGroup(row.topic)">{{ row.topic }}</button><span class="offset-host" :title="row.host || '-'">{{ row.host || '-' }}</span><span>{{ row.partition }}</span><span>{{ row.committed_offset ?? '-' }}</span><span>{{ row.end_offset }}</span><strong>{{ row.lag }}</strong>
               </div>
-              <div v-if="!(groupDetail.partitions || []).length" class="empty compact">{{ tr('¿¿ offset ¿¿¿¿¿', 'No offset or lag information') }}</div>
+              <div v-if="!(groupDetail.partitions || []).length" class="empty compact">{{ tr('æš‚æ—  offset å’Œç§¯å‹ä¿¡æ¯', 'No offset or lag information') }}</div>
             </div>
           </div>
         </section>
@@ -293,18 +293,18 @@
 
     <div v-if="showClusterModal" class="modal-mask" @click.self="showClusterModal = false">
       <div class="modal">
-        <h3>{{ editingCluster?.id ? tr('¿¿¿¿', 'Edit Cluster') : tr('¿¿¿¿', 'Add Cluster') }}</h3>
+        <h3>{{ editingCluster?.id ? tr('ç¼–è¾‘é›†ç¾¤', 'Edit Cluster') : tr('æ–°å¢é›†ç¾¤', 'Add Cluster') }}</h3>
         <div class="form">
-          <input v-model="clusterForm.name" :placeholder="tr('¿¿¿¿', 'Cluster name')" />
-          <select v-model="clusterForm.cluster_type"><option value="single">{{ tr('¿¿', 'Standalone') }}</option><option value="cluster">{{ tr('¿¿', 'Cluster') }}</option></select>
-          <input v-model="clusterForm.bootstrap_servers" :placeholder="clusterForm.cluster_type === 'single' ? tr('¿¿¿¿¿¿ 10.0.0.1:9092', 'Standalone address, e.g. 10.0.0.1:9092') : tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ host1:9092,host2:9092', 'Cluster addresses, comma-separated, e.g. host1:9092,host2:9092')" />
+          <input v-model="clusterForm.name" :placeholder="tr('é›†ç¾¤åç§°', 'Cluster name')" />
+          <select v-model="clusterForm.cluster_type"><option value="single">{{ tr('å•æœº', 'Standalone') }}</option><option value="cluster">{{ tr('é›†ç¾¤', 'Cluster') }}</option></select>
+          <input v-model="clusterForm.bootstrap_servers" :placeholder="clusterForm.cluster_type === 'single' ? tr('å•æœºåœ°å€ï¼Œå¦‚ 10.0.0.1:9092', 'Standalone address, e.g. 10.0.0.1:9092') : tr('é›†ç¾¤åœ°å€ï¼Œå¤šä¸ªç”¨è‹±æ–‡é€—å·åˆ†éš”ï¼Œå¦‚ host1:9092,host2:9092', 'Cluster addresses, comma-separated, e.g. host1:9092,host2:9092')" />
           <select v-model="clusterForm.security_protocol"><option>PLAINTEXT</option><option>SASL_PLAINTEXT</option><option>SASL_SSL</option><option>SSL</option></select>
-          <input v-model="clusterForm.sasl_mechanism" :placeholder="tr('SASL ¿¿¿¿¿', 'SASL mechanism, optional')" />
-          <input v-model="clusterForm.sasl_username" :placeholder="tr('SASL ¿¿¿¿¿¿', 'SASL username, optional')" />
-          <input v-model="clusterForm.sasl_password" type="password" :placeholder="tr('SASL ¿¿¿¿¿', 'SASL password, optional')" />
-          <textarea v-model="clusterForm.description" :placeholder="tr('¿¿', 'Description')"></textarea>
+          <input v-model="clusterForm.sasl_mechanism" :placeholder="tr('SASL æœºåˆ¶ï¼Œå¯é€‰', 'SASL mechanism, optional')" />
+          <input v-model="clusterForm.sasl_username" :placeholder="tr('SASL ç”¨æˆ·åï¼Œå¯é€‰', 'SASL username, optional')" />
+          <input v-model="clusterForm.sasl_password" type="password" :placeholder="tr('SASL å¯†ç ï¼Œå¯é€‰', 'SASL password, optional')" />
+          <textarea v-model="clusterForm.description" :placeholder="tr('æè¿°', 'Description')"></textarea>
         </div>
-        <div class="modal-actions"><button class="ghost" @click="showClusterModal = false">{{ tr('¿¿', 'Cancel') }}</button><button class="primary" @click="saveCluster">{{ tr('¿¿', 'Save') }}</button></div>
+        <div class="modal-actions"><button class="ghost" @click="showClusterModal = false">{{ tr('å–æ¶ˆ', 'Cancel') }}</button><button class="primary" @click="saveCluster">{{ tr('ä¿å­˜', 'Save') }}</button></div>
       </div>
     </div>
 
@@ -314,16 +314,16 @@
           <div class="modal-icon topic-icon">T</div>
           <div>
             <p class="modal-eyebrow">Topic Provisioning</p>
-            <h3>{{ tr('¿¿ Topic', 'Add Topic') }}</h3>
+            <h3>{{ tr('æ–°å¢ Topic', 'Add Topic') }}</h3>
           </div>
         </div>
-        <p class="muted modal-desc">{{ tr('¿¿¿¿¿¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'The topic will be created immediately in the current Kafka instance. Confirm partitions and replication factor before submitting.') }}</p>
+        <p class="muted modal-desc">{{ tr('åˆ›å»ºåä¼šç«‹å³å†™å…¥å½“å‰ Kafka å®ä¾‹ï¼Œè¯·ç¡®è®¤åˆ†åŒºæ•°å’Œå‰¯æœ¬æ•°ç¬¦åˆç”Ÿäº§è§„åˆ’ã€‚', 'The topic will be created immediately in the current Kafka instance. Confirm partitions and replication factor before submitting.') }}</p>
         <div class="form">
-          <div class="field"><label>Name</label><input v-model="topicForm.topic" :placeholder="tr('Topic ¿¿¿¿ order-events', 'Topic name, e.g. order-events')" /></div>
-          <div class="field"><label>Partitions Num</label><input v-model.number="topicForm.partitions" type="number" min="1" :placeholder="tr('¿¿¿¿¿ 3', 'Partitions, e.g. 3')" /></div>
-          <div class="field"><label>Replication Factor</label><input v-model.number="topicForm.replication_factor" type="number" min="1" :placeholder="tr('¿¿¿¿¿ 1', 'Replication factor, e.g. 1')" /></div>
+          <div class="field"><label>Name</label><input v-model="topicForm.topic" :placeholder="tr('Topic åç§°ï¼Œå¦‚ order-events', 'Topic name, e.g. order-events')" /></div>
+          <div class="field"><label>Partitions Num</label><input v-model.number="topicForm.partitions" type="number" min="1" :placeholder="tr('åˆ†åŒºæ•°ï¼Œå¦‚ 3', 'Partitions, e.g. 3')" /></div>
+          <div class="field"><label>Replication Factor</label><input v-model.number="topicForm.replication_factor" type="number" min="1" :placeholder="tr('å‰¯æœ¬æ•°ï¼Œå¦‚ 1', 'Replication factor, e.g. 1')" /></div>
         </div>
-        <div class="modal-actions"><button class="ghost" @click="showTopicModal = false">{{ tr('¿¿', 'Cancel') }}</button><button class="primary" @click="createTopic">{{ tr('¿¿', 'Create') }}</button></div>
+        <div class="modal-actions"><button class="ghost" @click="showTopicModal = false">{{ tr('å–æ¶ˆ', 'Cancel') }}</button><button class="primary" @click="createTopic">{{ tr('åˆ›å»º', 'Create') }}</button></div>
       </div>
     </div>
 
@@ -333,15 +333,15 @@
           <div class="modal-icon topic-icon">P</div>
           <div>
             <p class="modal-eyebrow">Topic Partition</p>
-            <h3>{{ tr('¿¿¿¿¿', 'Edit Partitions') }}</h3>
+            <h3>{{ tr('ä¿®æ”¹åˆ†åŒºæ•°', 'Edit Partitions') }}</h3>
           </div>
         </div>
-        <p class="muted modal-desc">{{ tr('Kafka ¿¿¿¿¿ Topic ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Kafka only supports increasing topic partitions, not decreasing them. Confirm the partitioning strategy before submitting.') }}</p>
+        <p class="muted modal-desc">{{ tr('Kafka åªæ”¯æŒå¢åŠ  Topic åˆ†åŒºæ•°ï¼Œä¸æ”¯æŒå‡å°‘ã€‚è¯·ç¡®è®¤ä¸šåŠ¡åˆ†åŒºç­–ç•¥åå†æäº¤ã€‚', 'Kafka only supports increasing topic partitions, not decreasing them. Confirm the partitioning strategy before submitting.') }}</p>
         <div class="form">
-          <div class="field"><label>{{ tr('¿¿¿¿¿', 'Current Partitions') }}</label><input :value="topicPartitions.length" disabled /></div>
-          <div class="field"><label>{{ tr('¿¿¿¿¿', 'Target Partitions') }}</label><input v-model.number="partitionForm.partitions" type="number" :min="topicPartitions.length + 1" :placeholder="tr('¿¿ 3', 'e.g. 3')" /></div>
+          <div class="field"><label>{{ tr('å½“å‰åˆ†åŒºæ•°', 'Current Partitions') }}</label><input :value="topicPartitions.length" disabled /></div>
+          <div class="field"><label>{{ tr('ç›®æ ‡åˆ†åŒºæ•°', 'Target Partitions') }}</label><input v-model.number="partitionForm.partitions" type="number" :min="topicPartitions.length + 1" :placeholder="tr('ä¾‹å¦‚ 3', 'e.g. 3')" /></div>
         </div>
-        <div class="modal-actions"><button class="ghost" @click="showPartitionModal = false">{{ tr('¿¿', 'Cancel') }}</button><button class="primary" :disabled="partitionForm.partitions <= topicPartitions.length" @click="updateTopicPartitions">{{ tr('¿¿¿¿', 'Update') }}</button></div>
+        <div class="modal-actions"><button class="ghost" @click="showPartitionModal = false">{{ tr('å–æ¶ˆ', 'Cancel') }}</button><button class="primary" :disabled="partitionForm.partitions <= topicPartitions.length" @click="updateTopicPartitions">{{ tr('ç¡®è®¤ä¿®æ”¹', 'Update') }}</button></div>
       </div>
     </div>
 
@@ -351,18 +351,18 @@
           <div class="modal-icon group-icon">G</div>
           <div>
             <p class="modal-eyebrow">Consumer Group</p>
-            <h3>{{ tr('¿¿ Consumer Group', 'Create Consumer Group') }}</h3>
+            <h3>{{ tr('åˆ›å»º Consumer Group', 'Create Consumer Group') }}</h3>
           </div>
         </div>
-        <p class="muted modal-desc">{{ tr('¿¿¿¿¿¿¿¿ KafkaVista ¿ Group ¿¿¿¿¿¿¿¿¿¿ Group ID ¿¿¿ offset ¿¿¿¿¿¿¿ Topic¿¿¿¿ Lag ¿¿¿', 'The group appears in KafkaVista first. After consumers use this Group ID and commit offsets, real topic, partition, and lag details will be populated.') }}</p>
+        <p class="muted modal-desc">{{ tr('åˆ›å»ºåä¼šå…ˆæ˜¾ç¤ºåœ¨ KafkaVista çš„ Group åˆ—è¡¨ä¸­ï¼›æ¶ˆè´¹è€…ä½¿ç”¨è¯¥ Group ID å¹¶æäº¤ offset åï¼Œä¼šè¡¥é½çœŸå® Topicã€åˆ†åŒºå’Œ Lag ä¿¡æ¯ã€‚', 'The group appears in KafkaVista first. After consumers use this Group ID and commit offsets, real topic, partition, and lag details will be populated.') }}</p>
         <div class="form group-create-form" @keydown.enter.prevent="createGroup">
-          <div class="field"><label>Group ID</label><input v-model="groupForm.group_id" autofocus :placeholder="tr('¿¿ order-service-consumer', 'e.g. order-service-consumer')" /></div>
+          <div class="field"><label>Group ID</label><input v-model="groupForm.group_id" autofocus :placeholder="tr('ä¾‹å¦‚ order-service-consumer', 'e.g. order-service-consumer')" /></div>
           <div class="group-create-hint">
-            <strong>{{ tr('¿¿¿¿', 'Creation Note') }}</strong>
-            <span>{{ tr('¿¿¿¿ Topic ¿ offset¿¿¿¿¿¿ offset ¿¿¿¿¿¿¿¿¿¿¿', 'No topics or offsets are changed; the real relation is created after consumers commit offsets.') }}</span>
+            <strong>{{ tr('åˆ›å»ºè¯´æ˜', 'Creation Note') }}</strong>
+            <span>{{ tr('ä¸ä¼šä¿®æ”¹ Topic æˆ– offsetï¼›æ¶ˆè´¹è€…æäº¤ offset åä¼šè‡ªåŠ¨å»ºç«‹çœŸå®å…³ç³»ã€‚', 'No topics or offsets are changed; the real relation is created after consumers commit offsets.') }}</span>
           </div>
         </div>
-        <div class="modal-actions"><button class="ghost" @click="showGroupModal = false">{{ tr('¿¿', 'Cancel') }}</button><button class="primary" :disabled="!groupForm.group_id.trim()" @click="createGroup">{{ tr('¿¿', 'Create') }}</button></div>
+        <div class="modal-actions"><button class="ghost" @click="showGroupModal = false">{{ tr('å–æ¶ˆ', 'Cancel') }}</button><button class="primary" :disabled="!groupForm.group_id.trim()" @click="createGroup">{{ tr('åˆ›å»º', 'Create') }}</button></div>
       </div>
     </div>
 
@@ -376,7 +376,7 @@
           </div>
         </div>
         <p class="confirm-message">{{ confirmDialog.message }}</p>
-        <div v-if="confirmDialog.target" class="confirm-target"><span>{{ tr('¿¿¿¿', 'Target') }}</span><strong>{{ confirmDialog.target }}</strong></div>
+        <div v-if="confirmDialog.target" class="confirm-target"><span>{{ tr('æ“ä½œå¯¹è±¡', 'Target') }}</span><strong>{{ confirmDialog.target }}</strong></div>
         <div class="modal-actions"><button class="ghost" @click="resolveConfirm(false)">{{ confirmDialog.cancelText }}</button><button :class="confirmDialog.tone === 'danger' ? 'danger' : 'primary'" @click="resolveConfirm(true)">{{ confirmDialog.confirmText }}</button></div>
       </div>
     </div>
@@ -396,10 +396,10 @@
         </div>
         <p class="success-desc">{{ noticeDialog.message }}</p>
         <div v-if="noticeDialog.target" class="success-summary notice-summary">
-          <div><span>{{ tr('¿¿¿¿', 'Target') }}</span><strong>{{ noticeDialog.target }}</strong></div>
-          <div><span>{{ tr('¿¿', 'Result') }}</span><strong>{{ tr('¿¿¿', 'Completed') }}</strong></div>
+          <div><span>{{ tr('æ“ä½œå¯¹è±¡', 'Target') }}</span><strong>{{ noticeDialog.target }}</strong></div>
+          <div><span>{{ tr('ç»“æœ', 'Result') }}</span><strong>{{ tr('å·²å®Œæˆ', 'Completed') }}</strong></div>
         </div>
-        <div class="modal-actions success-actions"><button class="primary success-confirm" @click="noticeDialog.visible = false">{{ tr('¿¿', 'Done') }}</button></div>
+        <div class="modal-actions success-actions"><button class="primary success-confirm" @click="noticeDialog.visible = false">{{ tr('å®Œæˆ', 'Done') }}</button></div>
       </div>
     </div>
 
@@ -414,47 +414,47 @@
         </div>
         <p class="success-desc">{{ errorDialog.message }}</p>
         <div v-if="errorDialog.target" class="success-summary notice-summary error-summary">
-          <div><span>{{ tr('¿¿¿¿', 'Target') }}</span><strong>{{ errorDialog.target }}</strong></div>
-          <div><span>{{ tr('¿¿', 'Result') }}</span><strong>{{ tr('¿¿¿', 'Not Completed') }}</strong></div>
+          <div><span>{{ tr('æ“ä½œå¯¹è±¡', 'Target') }}</span><strong>{{ errorDialog.target }}</strong></div>
+          <div><span>{{ tr('ç»“æœ', 'Result') }}</span><strong>{{ tr('æœªå®Œæˆ', 'Not Completed') }}</strong></div>
         </div>
-        <div class="modal-actions success-actions"><button class="primary error-confirm" @click="errorDialog.visible = false">{{ tr('¿¿¿', 'OK') }}</button></div>
+        <div class="modal-actions success-actions"><button class="primary error-confirm" @click="errorDialog.visible = false">{{ tr('çŸ¥é“äº†', 'OK') }}</button></div>
       </div>
     </div>
 
     <div v-if="showProduceModal" class="modal-mask" @click.self="showProduceModal = false">
       <div class="modal produce-modal">
         <h3>Produce Message</h3>
-        <p class="muted modal-desc">{{ tr(`Topic: ${selectedTopic}¿¿¿¿¿ JSON ¿¿¿JSON ¿¿¿JSON Lines¿¿¿¿¿ JSON¿¿¿¿¿¿¿¿¿JSON ¿¿¿¿¿ key¿value¿partition¿`, `Topic: ${selectedTopic}. Supports JSON files, JSON arrays, JSON Lines, semicolon-separated JSON, or plain multiline text. JSON objects may include key, value, and partition.`) }}</p>
+        <p class="muted modal-desc">{{ tr(`Topic: ${selectedTopic}ã€‚æ”¯æŒä¸Šä¼  JSON æ–‡ä»¶ã€JSON æ•°ç»„ã€JSON Linesã€åˆ†å·åˆ†éš” JSONï¼Œæˆ–æ™®é€šå¤šè¡Œæ–‡æœ¬ã€‚JSON å¯¹è±¡å¯åŒ…å« keyã€valueã€partitionã€‚`, `Topic: ${selectedTopic}. Supports JSON files, JSON arrays, JSON Lines, semicolon-separated JSON, or plain multiline text. JSON objects may include key, value, and partition.`) }}</p>
         <div class="produce-tabs">
-          <button :class="['ghost', 'small', { selected: produceMode === 'single' }]" @click="produceMode = 'single'">{{ tr('¿¿¿¿', 'Single') }}</button>
-          <button :class="['ghost', 'small', { selected: produceMode === 'batch' }]" :disabled="!enterpriseEnabled" @click="produceMode = 'batch'">{{ tr('¿¿¿¿', 'Batch Import') }}</button>
+          <button :class="['ghost', 'small', { selected: produceMode === 'single' }]" @click="produceMode = 'single'">{{ tr('å•æ¡å†™å…¥', 'Single') }}</button>
+          <button :class="['ghost', 'small', { selected: produceMode === 'batch' }]" :disabled="!enterpriseEnabled" @click="produceMode = 'batch'">{{ tr('æ‰¹é‡å¯¼å…¥', 'Batch Import') }}</button>
         </div>
-        <p v-if="!enterpriseEnabled" class="muted modal-desc">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Batch import is a Full Edition feature and is unavailable when the Full Edition license expires.') }}</p>
+        <p v-if="!enterpriseEnabled" class="muted modal-desc">{{ tr('æ‰¹é‡å¯¼å…¥æ¶ˆæ¯å±äºå®Œæ•´ç‰ˆåŠŸèƒ½ï¼Œå®Œæ•´ç‰ˆå¯†é’¥è¿‡æœŸåä¸å¯ç”¨ã€‚', 'Batch import is a Full Edition feature and is unavailable when the Full Edition license expires.') }}</p>
         <div class="form">
           <template v-if="produceMode === 'single'">
             <div class="field"><label>Partition</label><select v-model="sendForm.partition"><option v-for="p in topicPartitions" :key="p.partition" :value="String(p.partition)">Partition {{ p.partition }}</option></select></div>
-            <div class="field"><label>Key</label><input v-model="sendForm.key" :placeholder="tr('¿¿', 'Optional')" /></div>
+            <div class="field"><label>Key</label><input v-model="sendForm.key" :placeholder="tr('å¯é€‰', 'Optional')" /></div>
             <div class="field"><label>Value</label><textarea v-model="sendForm.value" placeholder="Message Value"></textarea></div>
           </template>
           <template v-else>
             <div class="batch-toolbar">
-              <div class="field"><label>{{ tr('¿¿ Partition', 'Default Partition') }}</label><select v-model="batchDefaultPartition"><option value="">{{ tr('¿ Kafka ¿¿', 'Assigned by Kafka') }}</option><option v-for="p in topicPartitions" :key="p.partition" :value="String(p.partition)">Partition {{ p.partition }}</option></select></div>
-              <div class="field"><label>{{ tr('¿¿¿¿', 'Import File') }}</label><input type="file" accept=".json,.jsonl,.txt,application/json,text/plain" @change="importBatchFile" /></div>
+              <div class="field"><label>{{ tr('é»˜è®¤ Partition', 'Default Partition') }}</label><select v-model="batchDefaultPartition"><option value="">{{ tr('ç”± Kafka åˆ†é…', 'Assigned by Kafka') }}</option><option v-for="p in topicPartitions" :key="p.partition" :value="String(p.partition)">Partition {{ p.partition }}</option></select></div>
+              <div class="field"><label>{{ tr('å¯¼å…¥æ–‡ä»¶', 'Import File') }}</label><input type="file" accept=".json,.jsonl,.txt,application/json,text/plain" @change="importBatchFile" /></div>
             </div>
-            <div class="field"><label>{{ tr('¿¿¿¿', 'Batch Content') }}</label><textarea v-model="batchImportText" class="batch-textarea" :placeholder="tr('¿¿¿JSON ¿¿¿JSON ¿¿¿JSON Lines¿¿¿¿¿ JSON¿¿¿¿¿¿¿¿¿¿ Topic: xxx ¿¿¿', 'Supports JSON files, JSON arrays, JSON Lines, semicolon-separated JSON, plain multiline text. Topic: xxx header is allowed.')"></textarea></div>
+            <div class="field"><label>{{ tr('æ‰¹é‡å†…å®¹', 'Batch Content') }}</label><textarea v-model="batchImportText" class="batch-textarea" :placeholder="tr('æ”¯æŒï¼šJSON æ–‡ä»¶ã€JSON æ•°ç»„ã€JSON Linesã€åˆ†å·åˆ†éš” JSONã€æ™®é€šå¤šè¡Œæ–‡æœ¬ã€‚å¯å¸¦ Topic: xxx å¤´éƒ¨ã€‚', 'Supports JSON files, JSON arrays, JSON Lines, semicolon-separated JSON, plain multiline text. Topic: xxx header is allowed.')"></textarea></div>
             <div :class="['batch-status', batchParseResult.error ? 'error' : '']">
-              <span>{{ batchParseResult.error || tr(`¿¿¿ ${batchParseResult.items.length} ¿¿¿`, `Parsed ${batchParseResult.items.length} messages`) }}</span>
-              <button class="ghost mini" type="button" @click="loadBatchExample">{{ tr('¿¿¿¿', 'Load Example') }}</button>
+              <span>{{ batchParseResult.error || tr(`å·²è§£æ ${batchParseResult.items.length} æ¡æ¶ˆæ¯`, `Parsed ${batchParseResult.items.length} messages`) }}</span>
+              <button class="ghost mini" type="button" @click="loadBatchExample">{{ tr('å¡«å…¥ç¤ºä¾‹', 'Load Example') }}</button>
             </div>
             <div v-if="batchParseResult.items.length" class="batch-preview">
               <div v-for="(item, index) in batchParseResult.items.slice(0, 5)" :key="index" class="batch-preview-row">
                 <span>#{{ index + 1 }}</span><span>partition {{ item.partition ?? 'auto' }}</span><span>key {{ item.key || '-' }}</span><strong>{{ item.value.slice(0, 120) }}</strong>
               </div>
-              <p v-if="batchParseResult.items.length > 5" class="muted">{{ tr(`¿¿¿¿ 5 ¿¿¿¿ ${batchParseResult.items.length - 5} ¿¿¿¿¿¿¿`, `Only the first 5 are previewed; the remaining ${batchParseResult.items.length - 5} will be written together.`) }}</p>
+              <p v-if="batchParseResult.items.length > 5" class="muted">{{ tr(`ä»…é¢„è§ˆå‰ 5 æ¡ï¼Œå…¶ä½™ ${batchParseResult.items.length - 5} æ¡ä¼šä¸€èµ·å†™å…¥ã€‚`, `Only the first 5 are previewed; the remaining ${batchParseResult.items.length - 5} will be written together.`) }}</p>
             </div>
           </template>
         </div>
-        <div class="modal-actions"><button class="ghost" @click="showProduceModal = false">{{ tr('¿¿', 'Cancel') }}</button><button class="primary" :disabled="produceSubmitDisabled" @click="sendMessage">{{ sending ? 'Producing...' : (produceMode === 'batch' ? tr(`¿¿¿¿ ${batchParseResult.items.length} ¿`, `Batch Write ${batchParseResult.items.length}`) : 'Produce Message') }}</button></div>
+        <div class="modal-actions"><button class="ghost" @click="showProduceModal = false">{{ tr('å–æ¶ˆ', 'Cancel') }}</button><button class="primary" :disabled="produceSubmitDisabled" @click="sendMessage">{{ sending ? 'Producing...' : (produceMode === 'batch' ? tr(`æ‰¹é‡å†™å…¥ ${batchParseResult.items.length} æ¡`, `Batch Write ${batchParseResult.items.length}`) : 'Produce Message') }}</button></div>
       </div>
     </div>
 
@@ -468,18 +468,18 @@
           </div>
           <div>
             <p class="success-eyebrow">Permission Updated</p>
-            <h3>{{ tr('¿¿¿¿¿', 'Saved Successfully') }}</h3>
+            <h3>{{ tr('å·²æˆåŠŸä¿å­˜', 'Saved Successfully') }}</h3>
           </div>
         </div>
-        <p class="success-desc">{{ tr('Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿', 'Kafka permissions have been saved. Users can refresh or re-enter Kafka Management to see the latest permissions.') }}</p>
+        <p class="success-desc">{{ tr('Kafka æˆæƒé…ç½®å·²ä¿å­˜ï¼Œç”¨æˆ·åˆ·æ–°é¡µé¢æˆ–é‡æ–°è¿›å…¥ Kafka ç®¡ç†åå³å¯çœ‹åˆ°æœ€æ–°æƒé™ã€‚', 'Kafka permissions have been saved. Users can refresh or re-enter Kafka Management to see the latest permissions.') }}</p>
         <div class="success-summary">
-          <div><span>{{ tr('¿¿¿¿', 'Authorized User') }}</span><strong>{{ lastSavedPermission.username || '-' }}</strong></div>
-          <div><span>{{ tr('Kafka ¿¿', 'Kafka Instance') }}</span><strong>{{ currentCluster?.name || '-' }}</strong></div>
+          <div><span>{{ tr('æˆæƒç”¨æˆ·', 'Authorized User') }}</span><strong>{{ lastSavedPermission.username || '-' }}</strong></div>
+          <div><span>{{ tr('Kafka å®ä¾‹', 'Kafka Instance') }}</span><strong>{{ currentCluster?.name || '-' }}</strong></div>
         </div>
         <div class="success-permissions">
           <span v-for="action in savedPermissionActions" :key="action" class="permission-chip">{{ action }}</span>
         </div>
-        <div class="modal-actions success-actions"><button class="primary success-confirm" @click="showPermissionSavedModal = false">{{ tr('¿¿', 'Done') }}</button></div>
+        <div class="modal-actions success-actions"><button class="primary success-confirm" @click="showPermissionSavedModal = false">{{ tr('å®Œæˆ', 'Done') }}</button></div>
       </div>
     </div>
   </div>
@@ -528,16 +528,16 @@ const KAFKA_WORKSPACE_KEY = 'kafka_active_workspace'
 const kafkaTabs = ['topics', 'brokers', 'groups']
 
 const actionOptions = computed(() => [
-  { value: 'cluster_view', label: tr('¿¿¿¿', 'View Cluster'), desc: tr('¿¿¿¿¿¿¿¿ Kafka ¿¿', 'Allows viewing and entering this Kafka cluster') },
-  { value: 'topic_create', label: tr('¿¿ Topic', 'Create Topic'), desc: tr('¿¿¿¿ Topic', 'Allows creating new topics') },
-  { value: 'topic_delete', label: tr('¿¿ Topic', 'Delete Topic'), desc: tr('¿¿¿¿ Topic', 'Allows deleting topics') },
-  { value: 'topic_config_manage', label: tr('¿¿ Topic ¿¿', 'Manage Topic Config'), desc: tr('¿¿¿¿ retention¿cleanup.policy ¿¿¿', 'Allows modifying retention, cleanup.policy, etc.') },
-  { value: 'message_read', label: tr('¿¿¿¿', 'Read Messages'), desc: tr('¿¿¿¿¿¿¿ Topic ¿¿', 'Allows consuming and querying topic messages') },
-  { value: 'message_send', label: tr('¿¿¿¿', 'Write Messages'), desc: tr('¿¿¿¿¿¿¿ Produce Message', 'Allows single or batch produce messages') },
-  { value: 'message_delete', label: tr('¿¿¿¿', 'Delete Messages'), desc: tr('¿¿¿ offset ¿¿¿¿', 'Allows deleting records by offset') },
-  { value: 'group_create', label: tr('¿¿ Group', 'Create Group'), desc: tr('¿¿¿¿ Consumer Group ¿¿', 'Registers create consumer group operation') },
-  { value: 'group_delete', label: tr('¿¿ Group', 'Delete Group'), desc: tr('¿¿¿¿ Consumer Group', 'Allows deleting consumer groups') },
-  { value: 'permission_manage', label: tr('Kafka ¿¿', 'Kafka Auth'), desc: tr('¿¿¿¿¿¿¿¿ Kafka ¿¿', 'Allows managing Kafka permissions for this cluster') },
+  { value: 'cluster_view', label: tr('æŸ¥çœ‹é›†ç¾¤', 'View Cluster'), desc: tr('å…è®¸çœ‹åˆ°å¹¶è¿›å…¥è¯¥ Kafka é›†ç¾¤', 'Allows viewing and entering this Kafka cluster') },
+  { value: 'topic_create', label: tr('åˆ›å»º Topic', 'Create Topic'), desc: tr('å…è®¸æ–°å¢ Topic', 'Allows creating new topics') },
+  { value: 'topic_delete', label: tr('åˆ é™¤ Topic', 'Delete Topic'), desc: tr('å…è®¸åˆ é™¤ Topic', 'Allows deleting topics') },
+  { value: 'topic_config_manage', label: tr('ç®¡ç† Topic é…ç½®', 'Manage Topic Config'), desc: tr('å…è®¸ä¿®æ”¹ retentionã€cleanup.policy ç­‰é…ç½®', 'Allows modifying retention, cleanup.policy, etc.') },
+  { value: 'message_read', label: tr('è¯»å–æ¶ˆæ¯', 'Read Messages'), desc: tr('å…è®¸æ¶ˆè´¹å’ŒæŸ¥è¯¢ Topic æ¶ˆæ¯', 'Allows consuming and querying topic messages') },
+  { value: 'message_send', label: tr('å†™å…¥æ¶ˆæ¯', 'Write Messages'), desc: tr('å…è®¸å•æ¡æˆ–æ‰¹é‡ Produce Message', 'Allows single or batch produce messages') },
+  { value: 'message_delete', label: tr('åˆ é™¤æ¶ˆæ¯', 'Delete Messages'), desc: tr('å…è®¸æŒ‰ offset åˆ é™¤è®°å½•', 'Allows deleting records by offset') },
+  { value: 'group_create', label: tr('åˆ›å»º Group', 'Create Group'), desc: tr('ç™»è®°åˆ›å»º Consumer Group æ“ä½œ', 'Registers create consumer group operation') },
+  { value: 'group_delete', label: tr('åˆ é™¤ Group', 'Delete Group'), desc: tr('å…è®¸åˆ é™¤ Consumer Group', 'Allows deleting consumer groups') },
+  { value: 'permission_manage', label: tr('Kafka æˆæƒ', 'Kafka Auth'), desc: tr('å…è®¸ç®¡ç†è¯¥é›†ç¾¤çš„ Kafka æˆæƒ', 'Allows managing Kafka permissions for this cluster') },
 ])
 const isAdminUser = computed(() => isAdmin())
 const loading = ref(false)
@@ -625,13 +625,13 @@ let liveStreamReader: ReadableStreamDefaultReader<Uint8Array> | undefined
 const currentCluster = computed(() => clusters.value.find(c => c.id === selectedClusterId.value))
 const currentClusterLabel = computed(() => currentCluster.value ? `${currentCluster.value.name} / ${currentCluster.value.bootstrap_servers}` : '-')
 const activeTabLabel = computed(() => {
-  if (activeTab.value === 'topics' && selectedTopic.value && topicSubTab.value === 'messages') return tr('Topic ¿¿', 'Topic Messages')
-  if (activeTab.value === 'topics' && selectedTopic.value) return tr('Topic ¿¿', 'Topic Detail')
-  if (activeTab.value === 'topics') return tr('Topic ¿¿', 'Topic List')
-  if (activeTab.value === 'groups' && selectedGroup.value) return tr('Group ¿¿', 'Group Detail')
-  if (activeTab.value === 'groups') return tr('Group ¿¿', 'Group List')
-  if (activeTab.value === 'brokers') return tr('Broker ¿¿', 'Broker Nodes')
-  return tr('Kafka ¿¿¿', 'Kafka Workspace')
+  if (activeTab.value === 'topics' && selectedTopic.value && topicSubTab.value === 'messages') return tr('Topic æ¶ˆæ¯', 'Topic Messages')
+  if (activeTab.value === 'topics' && selectedTopic.value) return tr('Topic è¯¦æƒ…', 'Topic Detail')
+  if (activeTab.value === 'topics') return tr('Topic åˆ—è¡¨', 'Topic List')
+  if (activeTab.value === 'groups' && selectedGroup.value) return tr('Group è¯¦æƒ…', 'Group Detail')
+  if (activeTab.value === 'groups') return tr('Group åˆ—è¡¨', 'Group List')
+  if (activeTab.value === 'brokers') return tr('Broker èŠ‚ç‚¹', 'Broker Nodes')
+  return tr('Kafka å·¥ä½œå°', 'Kafka Workspace')
 })
 const groups = computed(() => overview.value.groups || [])
 const topicTotalPages = computed(() => Math.max(1, Math.ceil(topicTotal.value / topicPageSize.value)))
@@ -670,9 +670,9 @@ const openConfirm = (options: { title: string; message: string; target?: string;
     title: options.title,
     message: options.message,
     target: options.target || '',
-    eyebrow: options.eyebrow || tr('¿¿¿¿', 'Confirm Action'),
-    confirmText: options.confirmText || tr('¿¿', 'Confirm'),
-    cancelText: options.cancelText || tr('¿¿', 'Cancel'),
+    eyebrow: options.eyebrow || tr('ç¡®è®¤æ“ä½œ', 'Confirm Action'),
+    confirmText: options.confirmText || tr('ç¡®è®¤', 'Confirm'),
+    cancelText: options.cancelText || tr('å–æ¶ˆ', 'Cancel'),
     tone: options.tone || 'danger',
   }
 })
@@ -775,7 +775,7 @@ const handleKafkaHomeSelect = () => {
 const loadOverview = async () => {
   if (!selectedClusterId.value) return
   overview.value = await getKafkaOverview(selectedClusterId.value).catch((err) => {
-    alert(err.response?.data?.detail || err.message || tr('Kafka ¿¿¿¿¿¿', 'Kafka cluster connection failed'))
+    alert(err.response?.data?.detail || err.message || tr('Kafka é›†ç¾¤è¿æ¥å¤±è´¥', 'Kafka cluster connection failed'))
     return {}
   })
   if (activeTab.value === 'brokers') {
@@ -855,8 +855,8 @@ const loadTopicPage = async () => {
 }
 
 const logSizeSortLabel = computed(() => {
-  if (topicSortBy.value !== 'log_size') return '¿'
-  return topicSortOrder.value === 'desc' ? '¿' : '¿'
+  if (topicSortBy.value !== 'log_size') return 'â†•'
+  return topicSortOrder.value === 'desc' ? 'â†“' : 'â†‘'
 })
 
 const toggleLogSizeSort = () => {
@@ -883,7 +883,7 @@ const selectTopic = async (topic: string, options: { loadConfigs?: boolean } = {
   selectedMessageKeys.value = []
   router.replace({ path: '/kafka', query: { ...route.query, cluster: selectedClusterId.value, tab: activeTab.value, topic } })
   topicDetail.value = await getKafkaTopic(selectedClusterId.value, topic).catch((err) => {
-    alert(err.response?.data?.detail || err.message || tr('Topic ¿¿ offset ¿¿¿¿', 'Failed to load topic partition offsets'))
+    alert(err.response?.data?.detail || err.message || tr('Topic åˆ†åŒº offset åŠ è½½å¤±è´¥', 'Failed to load topic partition offsets'))
     return {}
   })
   const first = topicDetail.value.partitions?.[0]
@@ -1001,7 +1001,7 @@ const selectGroup = async (group: string) => {
   selectedGroup.value = group
   router.replace({ path: '/kafka', query: { cluster: selectedClusterId.value, tab: activeTab.value, group } })
   groupDetail.value = await getKafkaGroupDetail(selectedClusterId.value, group).catch((err) => {
-    alert(err.response?.data?.detail || err.message || tr('¿¿¿¿¿¿¿¿¿', 'Failed to load consumer group details'))
+    alert(err.response?.data?.detail || err.message || tr('æ¶ˆè´¹ç»„è¯¦æƒ…åŠ è½½å¤±è´¥', 'Failed to load consumer group details'))
     return { partitions: [] }
   })
   groupSummaries.value = { ...groupSummaries.value, [group]: groupDetail.value }
@@ -1025,43 +1025,43 @@ const loadMessages = async () => {
   const timeMode = messageForm.value.timeMode === 'from' || messageForm.value.timeMode === 'range'
   const offsetRangeMode = messageForm.value.timeMode === 'offsetRange'
   if (timeMode && !messageForm.value.startTime) {
-    alert(tr('¿¿¿¿¿¿¿', 'Please select start time'))
+    alert(tr('è¯·é€‰æ‹©å¼€å§‹æ—¶é—´', 'Please select start time'))
     return
   }
   if (messageForm.value.timeMode === 'range' && !messageForm.value.endTime) {
-    alert(tr('¿¿¿¿¿¿¿', 'Please select end time'))
+    alert(tr('è¯·é€‰æ‹©ç»“æŸæ—¶é—´', 'Please select end time'))
     return
   }
   if (offsetRangeMode && messageForm.value.offset === '' && messageForm.value.endOffset === '') {
-    alert(tr('¿¿¿¿¿ offset ¿¿¿ offset', 'Please enter start offset or end offset'))
+    alert(tr('è¯·å¡«å†™å¼€å§‹ offset æˆ–ç»“æŸ offset', 'Please enter start offset or end offset'))
     return
   }
   const startTimeMs = timeMode ? dateTimeLocalToMs(messageForm.value.startTime) : undefined
   const endTimeMs = messageForm.value.timeMode === 'range' ? dateTimeLocalToMs(messageForm.value.endTime) : undefined
   if (timeMode && startTimeMs === undefined) {
-    alert(tr('¿¿¿¿¿¿¿¿¿', 'Invalid start time format'))
+    alert(tr('å¼€å§‹æ—¶é—´æ ¼å¼ä¸æ­£ç¡®', 'Invalid start time format'))
     return
   }
   if (messageForm.value.timeMode === 'range' && endTimeMs === undefined) {
-    alert(tr('¿¿¿¿¿¿¿¿¿', 'Invalid end time format'))
+    alert(tr('ç»“æŸæ—¶é—´æ ¼å¼ä¸æ­£ç¡®', 'Invalid end time format'))
     return
   }
   if (startTimeMs !== undefined && endTimeMs !== undefined && endTimeMs < startTimeMs) {
-    alert(tr('¿¿¿¿¿¿¿¿¿¿¿¿', 'End time cannot be earlier than start time'))
+    alert(tr('ç»“æŸæ—¶é—´ä¸èƒ½æ—©äºå¼€å§‹æ—¶é—´', 'End time cannot be earlier than start time'))
     return
   }
   const startOffset = (messageForm.value.timeMode === 'none' || offsetRangeMode) && messageForm.value.offset !== '' ? Number(messageForm.value.offset) : undefined
   const endOffset = offsetRangeMode && messageForm.value.endOffset !== '' ? Number(messageForm.value.endOffset) : undefined
   if (startOffset !== undefined && (!Number.isInteger(startOffset) || startOffset < 0)) {
-    alert(tr('¿¿ offset ¿¿¿¿¿¿¿', 'Start offset must be a non-negative integer'))
+    alert(tr('å¼€å§‹ offset å¿…é¡»æ˜¯éè´Ÿæ•´æ•°', 'Start offset must be a non-negative integer'))
     return
   }
   if (endOffset !== undefined && (!Number.isInteger(endOffset) || endOffset < 0)) {
-    alert(tr('¿¿ offset ¿¿¿¿¿¿¿', 'End offset must be a non-negative integer'))
+    alert(tr('ç»“æŸ offset å¿…é¡»æ˜¯éè´Ÿæ•´æ•°', 'End offset must be a non-negative integer'))
     return
   }
   if (startOffset !== undefined && endOffset !== undefined && endOffset < startOffset) {
-    alert(tr('¿¿ offset ¿¿¿¿¿¿ offset', 'End offset cannot be less than start offset'))
+    alert(tr('ç»“æŸ offset ä¸èƒ½å°äºå¼€å§‹ offset', 'End offset cannot be less than start offset'))
     return
   }
   messagesLoading.value = true
@@ -1146,13 +1146,13 @@ const stopLiveStream = () => {
   liveStreamAbort = undefined
   liveStreamReader = undefined
   liveStreaming.value = false
-  if (liveStreamStatus.value) liveStreamStatus.value = '¿¿¿¿¿¿¿'
+  if (liveStreamStatus.value) liveStreamStatus.value = 'å®æ—¶æ‹‰å–å·²åœæ­¢'
 }
 
 const startLiveStream = async () => {
   if (!selectedClusterId.value || !selectedTopic.value) return
   if (messageForm.value.partition === 'all') {
-    liveStreamStatus.value = 'All Partitions ¿¿¿¿¿¿¿¿¿¿¿¿¿¿ Partition¿'
+    liveStreamStatus.value = 'All Partitions æš‚ä¸æ”¯æŒå®æ—¶æ‹‰å–ï¼Œè¯·é€‰æ‹©å…·ä½“ Partitionã€‚'
     return
   }
   stopLiveStream()
@@ -1164,7 +1164,7 @@ const startLiveStream = async () => {
   const url = `/kafka-api/clusters/${encodeURIComponent(selectedClusterId.value)}/topics/${encodeURIComponent(selectedTopic.value)}/stream?${params.toString()}`
   liveStreamAbort = new AbortController()
   liveStreaming.value = true
-  liveStreamStatus.value = '¿¿¿¿¿¿¿¿¿¿¿¿¿...'
+  liveStreamStatus.value = 'å®æ—¶æ‹‰å–å·²å¼€å¯ï¼Œç­‰å¾…æ–°æ¶ˆæ¯...'
   try {
     const resp = await fetch(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -1184,7 +1184,7 @@ const startLiveStream = async () => {
       for (const event of events) handleStreamEvent(event)
     }
   } catch (err: any) {
-    if (err?.name !== 'AbortError') liveStreamStatus.value = `¿¿¿¿¿¿¿${err?.message || err}`
+    if (err?.name !== 'AbortError') liveStreamStatus.value = `å®æ—¶æ‹‰å–å¼‚å¸¸ï¼š${err?.message || err}`
   } finally {
     liveStreamReader = undefined
     if (liveStreamAbort && !liveStreamAbort.signal.aborted) {
@@ -1205,14 +1205,14 @@ const handleStreamEvent = (event: string) => {
     return
   }
   if (eventType === 'ready') {
-    liveStreamStatus.value = `¿¿¿¿¿¿¿¿¿ offset ${payload.offset ?? '-'} ¿¿`
+    liveStreamStatus.value = `å®æ—¶æ‹‰å–å·²è¿æ¥ï¼Œä» offset ${payload.offset ?? '-'} å¼€å§‹`
     return
   }
   const key = messageKey(payload)
   if (messages.value.some(item => messageKey(item) === key)) return
   messages.value = [payload, ...messages.value].slice(0, 500)
   selectedMessageKeys.value = selectedMessageKeys.value.filter(key => messages.value.some(item => messageKey(item) === key))
-  liveStreamStatus.value = `¿¿¿¿¿¿¿¿ offset ${payload.offset}`
+  liveStreamStatus.value = `å®æ—¶æ‹‰å–ä¸­ï¼Œæœ€æ–° offset ${payload.offset}`
   if (selectedPartitionInfo.value?.end_offset !== undefined && payload.offset >= selectedPartitionInfo.value.end_offset) {
     setPartitionOffsets(payload.partition, selectedPartitionInfo.value.beginning_offset ?? 0, payload.offset + 1)
   }
@@ -1224,12 +1224,12 @@ const formatMessageSearchHint = (data: any) => {
   if (data.end_offset_filter !== undefined && data.end_offset_filter !== null) parts.push(`end offset ${data.end_offset_filter}`)
   if (data.start_time_ms) parts.push(`start ${formatTime(data.start_time_ms)}`)
   if (data.end_time_ms) parts.push(`end ${formatTime(data.end_time_ms)}`)
-  if (data.key_search) parts.push(`key ¿¿ "${data.key_search}"`)
-  if (data.value_search) parts.push(`value ¿¿ "${data.value_search}"`)
-  const orderText = data.order_by === 'timestamp_desc' ? '¿ Kafka ¿¿¿¿¿¿' : data.order_by === 'event_time' ? '¿¿¿¿¿¿¿¿¿' : '¿ Kafka offset ¿¿¿¿'
+  if (data.key_search) parts.push(`key åŒ…å« "${data.key_search}"`)
+  if (data.value_search) parts.push(`value åŒ…å« "${data.value_search}"`)
+  const orderText = data.order_by === 'timestamp_desc' ? 'æŒ‰ Kafka æ—¶é—´æœ€æ–°åœ¨ä¸Š' : data.order_by === 'event_time' ? 'æŒ‰ä¸šåŠ¡æ—¶é—´æœ€æ–°åœ¨ä¸Š' : 'æŒ‰ Kafka offset æœ€æ–°åœ¨ä¸Š'
   if (Array.isArray(data.searched_partitions) && data.searched_partitions.length > 1) parts.push(`Partition ${data.searched_partitions.join(',')}`)
-  parts.push(`¿¿ ${data.scanned ?? messages.value.length} ¿¿¿¿ ${messages.value.length} ¿¿${orderText}`)
-  if (!data.start_time_ms && !data.end_time_ms && (data.end_offset_filter === undefined || data.end_offset_filter === null)) parts.push(`¿¿¿¿ count=${data.count ?? messageForm.value.count} ¿¿¿¿¿¿¿`)
+  parts.push(`æ‰«æ ${data.scanned ?? messages.value.length} æ¡ï¼Œè¿”å› ${messages.value.length} æ¡ï¼Œ${orderText}`)
+  if (!data.start_time_ms && !data.end_time_ms && (data.end_offset_filter === undefined || data.end_offset_filter === null)) parts.push(`é»˜è®¤åŸºäº count=${data.count ?? messageForm.value.count} æ¡æœ€æ–°æ¶ˆæ¯æœç´¢`)
   return parts.join(' / ')
 }
 
@@ -1432,7 +1432,7 @@ const normalizeProduceItem = (item: any) => {
 }
 
 const normalizeBatchExportLine = (line: string) => {
-  let value = line.trim().replace(/^P\s*\[?\s*(?=\{)/, '').replace(/[;¿\s]+$/, '').trim()
+  let value = line.trim().replace(/^P\s*\[?\s*(?=\{)/, '').replace(/[;ï¼›\s]+$/, '').trim()
   if (value.endsWith(']') && value.startsWith('{')) value = value.slice(0, -1).trim()
   if (value === ']' || value === '[') return ''
   return value
@@ -1440,18 +1440,18 @@ const normalizeBatchExportLine = (line: string) => {
 
 const normalizeBatchText = (text: string) => text
   .trim()
-  .replace(/^¿¿\s*/g, '')
+  .replace(/^å¯¼å‡º\s*/g, '')
   .replace(/^export\s*/i, '')
   .split(/\r?\n/)
   .map(line => line.trim())
-  .filter(line => line && !/^Topic\s*[:¿]/i.test(line))
+  .filter(line => line && !/^Topic\s*[:ï¼š]/i.test(line))
   .join('\n')
   .trim()
 
 const normalizeBatchItems = (source: any[]) => {
   const items = source.map(normalizeProduceItem).filter((item) => item.value !== '')
-  if (items.length > 1000) return { items: [], error: '¿¿¿¿¿¿ 1000 ¿¿¿' }
-  return { items, error: items.length ? '' : '¿¿¿¿¿¿¿¿¿¿¿¿' }
+  if (items.length > 1000) return { items: [], error: 'å•æ¬¡æœ€å¤šå†™å…¥ 1000 æ¡æ¶ˆæ¯' }
+  return { items, error: items.length ? '' : 'æœªè§£æåˆ°å¯å†™å…¥çš„æ¶ˆæ¯å†…å®¹' }
 }
 
 const parseBatchMessages = (text: string): { items: Array<{ partition?: number; key: string; value: string }>; error: string } => {
@@ -1462,8 +1462,8 @@ const parseBatchMessages = (text: string): { items: Array<{ partition?: number; 
     const source: any[] = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.messages) ? parsed.messages : [parsed]
     return normalizeBatchItems(source)
   } catch {
-    const chunks = trimmed.includes(';') || trimmed.includes('¿')
-      ? trimmed.split(/[;¿]+/).map(normalizeBatchExportLine).filter(Boolean)
+    const chunks = trimmed.includes(';') || trimmed.includes('ï¼›')
+      ? trimmed.split(/[;ï¼›]+/).map(normalizeBatchExportLine).filter(Boolean)
       : trimmed.split(/\r?\n/).map(line => line.trim()).filter(Boolean)
     const parsedItems = chunks.map((line) => {
       try {
@@ -1484,7 +1484,7 @@ const importBatchFile = async (event: Event) => {
 
 const loadBatchExample = () => {
   produceMode.value = 'batch'
-  batchImportText.value = '¿¿¿¿¿¿¿¿\n¿¿¿¿¿¿¿¿\n¿¿¿¿¿¿¿'
+  batchImportText.value = 'ç¬¬ä¸€æ¡æµ‹è¯•æ¶ˆæ¯ï¼›\nç¬¬äºŒæ¡æµ‹è¯•æ¶ˆæ¯ï¼›\nç¬¬ä¸‰æ¡æµ‹è¯•æ¶ˆæ¯'
 }
 
 const loadTopicConfigs = async () => {
@@ -1506,7 +1506,7 @@ const cancelTopicConfigEdit = () => {
 
 const saveTopicConfig = async (name: string) => {
   if (!selectedTopic.value || !name) return
-  const ok = await openConfirm({ title: tr('¿¿ Topic ¿¿', 'Update Topic Config'), message: tr('¿¿¿¿¿¿¿¿ Kafka¿¿¿¿¿¿¿¿¿¿¿¿', 'This config will be applied to Kafka immediately. Confirm the new value is correct.'), target: `${selectedTopic.value} / ${name}`, confirmText: tr('¿¿¿¿', 'Update'), tone: 'primary' })
+  const ok = await openConfirm({ title: tr('ä¿®æ”¹ Topic é…ç½®', 'Update Topic Config'), message: tr('è¯¥é…ç½®ä¼šç«‹å³å†™å…¥ Kafkaï¼Œè¯·ç¡®è®¤æ–°å€¼å·²æ£€æŸ¥æ— è¯¯ã€‚', 'This config will be applied to Kafka immediately. Confirm the new value is correct.'), target: `${selectedTopic.value} / ${name}`, confirmText: tr('ç¡®è®¤ä¿®æ”¹', 'Update'), tone: 'primary' })
   if (!ok) return
   await updateKafkaTopicConfigs(selectedClusterId.value, selectedTopic.value, { [name]: editingConfigValue.value })
   cancelTopicConfigEdit()
@@ -1515,7 +1515,7 @@ const saveTopicConfig = async (name: string) => {
 
 const deleteTopicConfig = async (name: string) => {
   if (!selectedTopic.value) return
-  const ok = await openConfirm({ title: tr('¿¿¿¿¿¿', 'Restore Default Config'), message: tr('¿¿¿¿ Topic ¿¿¿¿¿¿¿ Kafka ¿¿¿¿', 'This removes the topic-level override and restores the Kafka default value.'), target: `${selectedTopic.value} / ${name}`, confirmText: tr('¿¿¿¿', 'Restore'), tone: 'danger' })
+  const ok = await openConfirm({ title: tr('æ¢å¤é»˜è®¤é…ç½®', 'Restore Default Config'), message: tr('å°†åˆ é™¤è¯¥ Topic è¦†ç›–é…ç½®å¹¶æ¢å¤ Kafka é»˜è®¤å€¼ã€‚', 'This removes the topic-level override and restores the Kafka default value.'), target: `${selectedTopic.value} / ${name}`, confirmText: tr('æ¢å¤é»˜è®¤', 'Restore'), tone: 'danger' })
   if (!ok) return
   await deleteKafkaTopicConfig(selectedClusterId.value, selectedTopic.value, name)
   await loadTopicConfigs()
@@ -1526,7 +1526,7 @@ const sendMessage = async () => {
   try {
     if (produceMode.value === 'batch') {
       if (!enterpriseEnabled.value) {
-        alert(tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Batch import is a Full Edition feature and unavailable when the Full Edition license expires'))
+        alert(tr('æ‰¹é‡å¯¼å…¥æ¶ˆæ¯å±äºå®Œæ•´ç‰ˆåŠŸèƒ½ï¼Œå®Œæ•´ç‰ˆå¯†é’¥è¿‡æœŸåä¸å¯ç”¨', 'Batch import is a Full Edition feature and unavailable when the Full Edition license expires'))
         return
       }
       if (batchParseResult.value.error || batchParseResult.value.items.length === 0) return
@@ -1544,7 +1544,7 @@ const sendMessage = async () => {
 }
 
 const deleteRecords = async () => {
-  const ok = await openConfirm({ title: tr('¿¿¿¿¿¿', 'Delete Partition Records'), message: tr('¿¿¿¿¿¿¿¿ offset ¿¿¿¿¿¿¿¿¿¿¿¿ KafkaVista ¿¿¿', 'This deletes records before the specified offset and cannot be restored from KafkaVista.'), target: `${selectedTopic.value} / partition ${deleteForm.value.partition} / offset < ${deleteForm.value.before_offset}`, confirmText: tr('¿¿¿¿', 'Delete'), tone: 'danger' })
+  const ok = await openConfirm({ title: tr('åˆ é™¤åˆ†åŒºè®°å½•', 'Delete Partition Records'), message: tr('è¯¥æ“ä½œä¼šåˆ é™¤æŒ‡å®š offset ä¹‹å‰çš„è®°å½•ï¼Œæ‰§è¡Œåæ— æ³•ä» KafkaVista æ¢å¤ã€‚', 'This deletes records before the specified offset and cannot be restored from KafkaVista.'), target: `${selectedTopic.value} / partition ${deleteForm.value.partition} / offset < ${deleteForm.value.before_offset}`, confirmText: tr('ç¡®è®¤åˆ é™¤', 'Delete'), tone: 'danger' })
   if (!ok) return
   await deleteKafkaRecords(selectedClusterId.value, { topic: selectedTopic.value, ...deleteForm.value })
   await selectTopic(selectedTopic.value)
@@ -1558,9 +1558,9 @@ const createTopic = async () => {
     topicForm.value = { topic: '', partitions: 1, replication_factor: 1 }
     await loadOverview()
     await loadTopicPage()
-    showSuccessNotice({ title: tr('Topic ¿¿¿¿', 'Topic Created'), message: tr('Topic ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'The topic has been created. Lists and statistics have been refreshed.'), target: topicName, eyebrow: 'Topic Ready' })
+    showSuccessNotice({ title: tr('Topic åˆ›å»ºæˆåŠŸ', 'Topic Created'), message: tr('Topic å·²åˆ›å»ºå®Œæˆï¼Œåˆ—è¡¨å’Œç»Ÿè®¡ä¿¡æ¯å·²åˆ·æ–°ã€‚', 'The topic has been created. Lists and statistics have been refreshed.'), target: topicName, eyebrow: 'Topic Ready' })
   } catch (err: any) {
-    alert(err.response?.data?.detail || err.message || tr('Topic ¿¿¿¿', 'Failed to create topic'))
+    alert(err.response?.data?.detail || err.message || tr('Topic åˆ›å»ºå¤±è´¥', 'Failed to create topic'))
   }
 }
 
@@ -1573,7 +1573,7 @@ const updateTopicPartitions = async () => {
   const currentPartitions = topicPartitions.value.length
   const targetPartitions = Number(partitionForm.value.partitions)
   if (!selectedTopic.value || targetPartitions <= currentPartitions) return
-  const ok = await openConfirm({ title: tr('¿¿ Topic ¿¿¿', 'Update Topic Partitions'), message: tr('¿¿¿¿¿¿¿¿¿¿¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿', 'Partitions can only be increased. Kafka does not support reverting to fewer partitions.'), target: `${selectedTopic.value}: ${currentPartitions} -> ${targetPartitions}`, confirmText: tr('¿¿¿¿', 'Update'), tone: 'primary', eyebrow: 'Topic Partition' })
+  const ok = await openConfirm({ title: tr('ä¿®æ”¹ Topic åˆ†åŒºæ•°', 'Update Topic Partitions'), message: tr('åˆ†åŒºæ•°åªèƒ½å¢åŠ ï¼Œä¿®æ”¹å Kafka ä¸æ”¯æŒå›é€€åˆ°æ›´å°‘åˆ†åŒºã€‚', 'Partitions can only be increased. Kafka does not support reverting to fewer partitions.'), target: `${selectedTopic.value}: ${currentPartitions} -> ${targetPartitions}`, confirmText: tr('ç¡®è®¤ä¿®æ”¹', 'Update'), tone: 'primary', eyebrow: 'Topic Partition' })
   if (!ok) return
   try {
     await updateKafkaTopicPartitions(selectedClusterId.value, selectedTopic.value, targetPartitions)
@@ -1581,29 +1581,29 @@ const updateTopicPartitions = async () => {
     await selectTopic(selectedTopic.value)
     await loadOverview()
     await loadTopicPage()
-    showSuccessNotice({ title: tr('¿¿¿¿¿¿¿', 'Partitions Updated'), message: tr('Topic ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Topic partitions have been increased. Details and lists have been refreshed.'), target: `${selectedTopic.value}: ${targetPartitions}`, eyebrow: 'Topic Partition' })
+    showSuccessNotice({ title: tr('åˆ†åŒºæ•°ä¿®æ”¹æˆåŠŸ', 'Partitions Updated'), message: tr('Topic åˆ†åŒºæ•°å·²å¢åŠ ï¼Œè¯¦æƒ…å’Œåˆ—è¡¨å·²åˆ·æ–°ã€‚', 'Topic partitions have been increased. Details and lists have been refreshed.'), target: `${selectedTopic.value}: ${targetPartitions}`, eyebrow: 'Topic Partition' })
   } catch (err: any) {
-    showErrorNotice({ title: tr('¿¿¿¿¿¿¿', 'Failed to Update Partitions'), message: err.response?.data?.detail || err.message || tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Failed to update partitions. Please try again later.'), target: selectedTopic.value, eyebrow: 'Topic Partition' })
+    showErrorNotice({ title: tr('åˆ†åŒºæ•°ä¿®æ”¹å¤±è´¥', 'Failed to Update Partitions'), message: err.response?.data?.detail || err.message || tr('åˆ†åŒºæ•°ä¿®æ”¹å¤±è´¥ï¼Œè¯·ç¨åé‡è¯•ã€‚', 'Failed to update partitions. Please try again later.'), target: selectedTopic.value, eyebrow: 'Topic Partition' })
   }
 }
 
 const removeTopic = async () => {
   const topicName = selectedTopic.value
-  const ok = await openConfirm({ title: tr('¿¿ Topic', 'Delete Topic'), message: tr('¿¿ Topic ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Deleting a topic removes its partitions and message data. Confirm there are no producer or consumer dependencies.'), target: selectedTopic.value, confirmText: tr('¿¿¿¿ Topic', 'Delete Topic'), tone: 'danger', eyebrow: 'Danger Zone' })
+  const ok = await openConfirm({ title: tr('åˆ é™¤ Topic', 'Delete Topic'), message: tr('åˆ é™¤ Topic ä¼šç§»é™¤å…¶ä¸­çš„åˆ†åŒºå’Œæ¶ˆæ¯æ•°æ®ï¼Œè¯·ç¡®è®¤æ²¡æœ‰ç”Ÿäº§æˆ–æ¶ˆè´¹ä¾èµ–ã€‚', 'Deleting a topic removes its partitions and message data. Confirm there are no producer or consumer dependencies.'), target: selectedTopic.value, confirmText: tr('ç¡®è®¤åˆ é™¤ Topic', 'Delete Topic'), tone: 'danger', eyebrow: 'Danger Zone' })
   if (!ok) return
   try {
     await deleteKafkaTopic(selectedClusterId.value, topicName)
     backToTopicList()
     await loadOverview()
     await loadTopicPage()
-    showSuccessNotice({ title: tr('Topic ¿¿¿¿', 'Topic Deleted'), message: tr('¿ Topic ¿¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'The topic has been deleted from the Kafka cluster. Lists and statistics have been refreshed.'), target: topicName, eyebrow: 'Topic Removed' })
+    showSuccessNotice({ title: tr('Topic åˆ é™¤æˆåŠŸ', 'Topic Deleted'), message: tr('è¯¥ Topic å·²ä» Kafka é›†ç¾¤åˆ é™¤ï¼Œåˆ—è¡¨å’Œç»Ÿè®¡ä¿¡æ¯å·²åˆ·æ–°ã€‚', 'The topic has been deleted from the Kafka cluster. Lists and statistics have been refreshed.'), target: topicName, eyebrow: 'Topic Removed' })
   } catch (err: any) {
-    alert(err.response?.data?.detail || err.message || tr('Topic ¿¿¿¿', 'Failed to delete topic'))
+    alert(err.response?.data?.detail || err.message || tr('Topic åˆ é™¤å¤±è´¥', 'Failed to delete topic'))
   }
 }
 
 const removeGroup = async (groupId: string) => {
-  const ok = await openConfirm({ title: tr('¿¿ Consumer Group', 'Delete Consumer Group'), message: tr('¿¿¿¿ Consumer Group ¿ Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'This deletes Kafka metadata for the consumer group. Confirm the workload no longer uses it.'), target: groupId, confirmText: tr('¿¿¿¿', 'Delete'), tone: 'danger' })
+  const ok = await openConfirm({ title: tr('åˆ é™¤ Consumer Group', 'Delete Consumer Group'), message: tr('å°†åˆ é™¤è¯¥ Consumer Group çš„ Kafka å…ƒæ•°æ®ï¼Œè¯·ç¡®è®¤ä¸šåŠ¡å·²åœæ­¢ä½¿ç”¨ã€‚', 'This deletes Kafka metadata for the consumer group. Confirm the workload no longer uses it.'), target: groupId, confirmText: tr('ç¡®è®¤åˆ é™¤', 'Delete'), tone: 'danger' })
   if (!ok) return
   await deleteKafkaGroup(selectedClusterId.value, groupId)
   await loadOverview()
@@ -1616,16 +1616,16 @@ const openGroupModal = () => {
 
 const unlinkGroupTopic = async (topic: string) => {
   if (!selectedGroup.value || !topic) return
-  const ok = await openConfirm({ title: tr('¿¿ Group ¿ Topic ¿¿¿¿', 'Unsubscribe Group from Topic'), message: tr('¿¿¿¿¿¿¿ Group ¿¿ Topic ¿¿¿¿¿¿¿¿¿ offset¿¿¿¿¿¿¿¿¿¿¿¿ Topic¿Kafka ¿¿¿¿¿¿¿¿', 'This deletes all committed offsets for this group on the topic. Kafka may reject it if active consumers are still subscribed.'), target: `${selectedGroup.value} / ${topic}`, confirmText: tr('¿¿¿¿', 'Unsubscribe'), tone: 'danger', eyebrow: 'Consumer Offset' })
+  const ok = await openConfirm({ title: tr('è§£é™¤ Group ä¸ Topic è®¢é˜…å…³ç³»', 'Unsubscribe Group from Topic'), message: tr('è¯¥æ“ä½œä¼šåˆ é™¤è¯¥ Group åœ¨è¯¥ Topic ä¸‹æ‰€æœ‰åˆ†åŒºçš„å·²æäº¤ offsetã€‚è‹¥ä»æœ‰æ¶ˆè´¹è€…æ­£åœ¨è®¢é˜…è¯¥ Topicï¼ŒKafka å¯èƒ½ä¼šæ‹’ç»æ“ä½œã€‚', 'This deletes all committed offsets for this group on the topic. Kafka may reject it if active consumers are still subscribed.'), target: `${selectedGroup.value} / ${topic}`, confirmText: tr('ç¡®è®¤è§£é™¤', 'Unsubscribe'), tone: 'danger', eyebrow: 'Consumer Offset' })
   if (!ok) return
   try {
     await deleteKafkaGroupTopic(selectedClusterId.value, selectedGroup.value, topic)
     groupSummaries.value = { ...groupSummaries.value, [selectedGroup.value]: undefined }
     await selectGroup(selectedGroup.value)
     await loadOverview()
-    showSuccessNotice({ title: tr('¿¿¿¿¿¿¿', 'Subscription Removed'), message: tr('¿¿¿¿ Group ¿¿ Topic ¿¿¿¿¿ offset¿Group ¿¿¿¿¿¿', 'Committed offsets for this group and topic were deleted. Group details have been refreshed.'), target: `${selectedGroup.value} / ${topic}`, eyebrow: 'Offset Removed' })
+    showSuccessNotice({ title: tr('è®¢é˜…å…³ç³»å·²è§£é™¤', 'Subscription Removed'), message: tr('å·²åˆ é™¤è¯¥ Group åœ¨è¯¥ Topic ä¸‹çš„å·²æäº¤ offsetï¼ŒGroup è¯¦æƒ…å·²åˆ·æ–°ã€‚', 'Committed offsets for this group and topic were deleted. Group details have been refreshed.'), target: `${selectedGroup.value} / ${topic}`, eyebrow: 'Offset Removed' })
   } catch (err: any) {
-    showErrorNotice({ title: tr('¿¿¿¿¿¿¿¿', 'Failed to Remove Subscription'), message: err.response?.data?.detail || err.message || tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Failed to remove subscription. Please try again later.'), target: `${selectedGroup.value} / ${topic}`, eyebrow: 'Kafka Offset' })
+    showErrorNotice({ title: tr('è§£é™¤è®¢é˜…å…³ç³»å¤±è´¥', 'Failed to Remove Subscription'), message: err.response?.data?.detail || err.message || tr('è§£é™¤è®¢é˜…å…³ç³»å¤±è´¥ï¼Œè¯·ç¨åé‡è¯•ã€‚', 'Failed to remove subscription. Please try again later.'), target: `${selectedGroup.value} / ${topic}`, eyebrow: 'Kafka Offset' })
   }
 }
 
@@ -1637,9 +1637,9 @@ const createGroup = async () => {
     showGroupModal.value = false
     groupForm.value.group_id = ''
     await loadOverview()
-    showSuccessNotice({ title: tr('Group ¿¿¿¿', 'Group Created'), message: tr('¿¿¿ Consumer Group ¿¿¿¿¿¿¿¿¿ Group ID ¿¿¿ offset ¿¿¿¿¿¿¿¿¿¿¿¿', 'The group has been added to the Consumer Group list. Real consumer relations appear after consumers use this Group ID and commit offsets.'), target: groupId, eyebrow: 'Group Ready' })
+    showSuccessNotice({ title: tr('Group åˆ›å»ºæˆåŠŸ', 'Group Created'), message: tr('å·²åŠ å…¥ Consumer Group åˆ—è¡¨ã€‚æ¶ˆè´¹è€…ä½¿ç”¨è¯¥ Group ID å¹¶æäº¤ offset åï¼Œä¼šæ˜¾ç¤ºçœŸå®æ¶ˆè´¹å…³ç³»ã€‚', 'The group has been added to the Consumer Group list. Real consumer relations appear after consumers use this Group ID and commit offsets.'), target: groupId, eyebrow: 'Group Ready' })
   } catch (err: any) {
-    showErrorNotice({ title: tr('Group ¿¿¿¿', 'Failed to Create Group'), message: err.response?.data?.detail || err.message || tr('Group ¿¿¿¿¿¿¿¿¿¿¿', 'Failed to create group. Please try again later.'), target: groupId, eyebrow: 'Consumer Group' })
+    showErrorNotice({ title: tr('Group åˆ›å»ºå¤±è´¥', 'Failed to Create Group'), message: err.response?.data?.detail || err.message || tr('Group åˆ›å»ºå¤±è´¥ï¼Œè¯·ç¨åé‡è¯•ã€‚', 'Failed to create group. Please try again later.'), target: groupId, eyebrow: 'Consumer Group' })
   }
 }
 
@@ -1658,7 +1658,7 @@ const saveCluster = async () => {
 
 const removeCluster = async () => {
   if (!currentCluster.value) return
-  const ok = await openConfirm({ title: tr('¿¿¿¿¿¿', 'Delete Cluster Config'), message: tr('¿¿¿ KafkaVista ¿¿¿¿¿¿¿¿¿¿¿¿¿ Kafka ¿¿¿', 'Only the cluster config in KafkaVista is removed. The real Kafka cluster is not deleted.'), target: currentCluster.value.name, confirmText: tr('¿¿¿¿', 'Delete'), tone: 'danger' })
+  const ok = await openConfirm({ title: tr('åˆ é™¤é›†ç¾¤é…ç½®', 'Delete Cluster Config'), message: tr('åªåˆ é™¤ KafkaVista ä¸­çš„é›†ç¾¤é…ç½®ï¼Œä¸ä¼šåˆ é™¤çœŸå® Kafka é›†ç¾¤ã€‚', 'Only the cluster config in KafkaVista is removed. The real Kafka cluster is not deleted.'), target: currentCluster.value.name, confirmText: tr('ç¡®è®¤åˆ é™¤', 'Delete'), tone: 'danger' })
   if (!ok) return
   await deleteKafkaCluster(currentCluster.value.id)
   selectedClusterId.value = ''
@@ -1667,15 +1667,15 @@ const removeCluster = async () => {
 
 const deleteClusterFromList = async (cluster: any) => {
   if (!cluster?.id) return
-  const ok = await openConfirm({ title: tr('¿¿¿¿¿¿', 'Delete Cluster Config'), message: tr('¿¿¿ KafkaVista ¿¿¿¿¿¿¿¿¿¿¿¿¿ Kafka ¿¿¿', 'Only the cluster config in KafkaVista is removed. The real Kafka cluster is not deleted.'), target: cluster.name, confirmText: tr('¿¿¿¿', 'Delete'), tone: 'danger' })
+  const ok = await openConfirm({ title: tr('åˆ é™¤é›†ç¾¤é…ç½®', 'Delete Cluster Config'), message: tr('åªåˆ é™¤ KafkaVista ä¸­çš„é›†ç¾¤é…ç½®ï¼Œä¸ä¼šåˆ é™¤çœŸå® Kafka é›†ç¾¤ã€‚', 'Only the cluster config in KafkaVista is removed. The real Kafka cluster is not deleted.'), target: cluster.name, confirmText: tr('ç¡®è®¤åˆ é™¤', 'Delete'), tone: 'danger' })
   if (!ok) return
   try {
     await deleteKafkaCluster(cluster.id)
     if (selectedClusterId.value === cluster.id) selectedClusterId.value = ''
     await refreshAll()
-    alert(tr('¿¿¿¿¿', 'Cluster deleted'))
+    alert(tr('é›†ç¾¤å·²åˆ é™¤', 'Cluster deleted'))
   } catch (err: any) {
-    alert(err.response?.data?.detail || err.message || tr('¿¿¿¿¿¿', 'Failed to delete cluster'))
+    alert(err.response?.data?.detail || err.message || tr('é›†ç¾¤åˆ é™¤å¤±è´¥', 'Failed to delete cluster'))
   }
 }
 
@@ -1743,8 +1743,8 @@ const configValueHint = (cfg: any) => {
   const ms = Number(cfg.value)
   if (!Number.isFinite(ms) || ms < 0) return ''
   const hours = ms / 1000 / 60 / 60
-  if (hours >= 24) return `¿ ${hours.toFixed(1)} ¿¿ / ${(hours / 24).toFixed(2)} ¿`
-  return `¿ ${hours.toFixed(2)} ¿¿`
+  if (hours >= 24) return `çº¦ ${hours.toFixed(1)} å°æ—¶ / ${(hours / 24).toFixed(2)} å¤©`
+  return `çº¦ ${hours.toFixed(2)} å°æ—¶`
 }
 
 onMounted(async () => {
@@ -2098,4 +2098,3 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 @media (max-width: 900px) { .kafka-page { padding: 16px; } .hero { flex-direction: column; align-items: flex-start; } .title-side { justify-content: flex-start; } .cluster-inline-pill { max-width: 100%; } .split-panel, .group-card, .group-search-bar, .batch-toolbar, .batch-preview-row, .permission-toolbar, .permission-grid, .grafana-grid { grid-template-columns: 1fr; } .message-tools, .offset-head, .offset-row, .group-topic-detail-head, .group-topic-detail-row, .config-head, .config-row { grid-template-columns: 1fr; } .message-action-buttons { justify-content: stretch; } .message-action-buttons button { flex: 1; min-width: 0; } .summary-grid { grid-template-columns: 1fr; } .permission-row { grid-template-columns: 1fr; } .group-card-side { justify-items: start; } }
 @media (max-width: 520px) { .message-action-buttons { flex-direction: column; } .message-action-buttons button { width: 100%; } }
 </style>
-

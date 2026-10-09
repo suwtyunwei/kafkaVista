@@ -5,7 +5,7 @@
         <img :src="logoUrl" :alt="platformName" />
         <span v-show="!sidebarCollapsed">{{ platformName }}</span>
       </div>
-      <button class="sidebar-toggle" @click="toggleCollapse" :title="sidebarCollapsed ? '¿¿' : '¿¿'">
+      <button class="sidebar-toggle" @click="toggleCollapse" :title="sidebarCollapsed ? 'å±•å¼€' : 'æ”¶èµ·'">
         <svg v-if="sidebarCollapsed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 18 15 12 9 6" />
         </svg>
@@ -23,7 +23,7 @@
           <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" />
         </svg>
         <span>{{ t('kafkaManage') }}</span>
-        <span v-if="showKafkaSubnav" class="nav-caret">{{ kafkaExpanded ? '¿' : '¿' }}</span>
+        <span v-if="showKafkaSubnav" class="nav-caret">{{ kafkaExpanded ? 'â–¾' : 'â–¸' }}</span>
       </button>
 
       <div v-if="isKafkaSubnavExpanded" class="kafka-subnav">
@@ -40,7 +40,7 @@
           <line x1="8" y1="17" x2="14" y2="17" />
           <polyline points="8 9 10 11 13 7" />
         </svg>
-        <span>{{ tr('¿¿¿¿', 'Audit Logs') }}</span>
+        <span>{{ tr('æ“ä½œå®¡è®¡', 'Audit Logs') }}</span>
       </button>
 
       <button v-if="isAdminUser && appStatus.enterprise" class="nav-item" :class="{ active: route.name === 'migration' }" @click="emit('navigate', '/migration')">
@@ -50,16 +50,12 @@
           <path d="M20 17H8" />
           <path d="M12 13l-4 4 4 4" />
         </svg>
-        <span>{{ tr('¿¿¿¿', 'Migration') }}</span>
+        <span>{{ tr('å¹³æ»‘è¿ç§»', 'Migration') }}</span>
       </button>
 
     </div>
 
     <div class="sidebar-footer">
-      <div v-if="!sidebarCollapsed" class="edition-badge" :class="{ enterprise: appStatus.enterprise, expired: appStatus.edition === 'community' }">
-        <strong>{{ editionLabel }}</strong>
-        <span v-if="appStatus.expires_at">{{ formatDate(appStatus.expires_at) }}</span>
-      </div>
       <button v-if="isAdminUser" class="nav-item" :class="{ active: route.name === 'docs' }" @click="emit('navigate', '/docs')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -102,7 +98,7 @@
             <span class="user-login">{{ username }}</span>
           </div>
         </div>
-        <button class="logout-btn" @click="$emit('logout')" title="¿¿¿¿">
+        <button class="logout-btn" @click="$emit('logout')" title="é€€å‡ºç™»å½•">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
@@ -154,8 +150,6 @@ const themeMode = ref<ThemeMode>(getTheme())
 const appStatus = ref<any>({ edition: 'enterprise', enterprise: true })
 const platformName = computed(() => appStatus.value.platform_name || 'kafkaVista')
 const logoUrl = computed(() => appStatus.value.logo_url || '/favicon.png?v=2026052102')
-const editionLabel = computed(() => `${appStatus.value.enterprise ? t('enterprise') : t('community')} 1.0.0${!appStatus.value.enterprise && appStatus.value.expires_at ? ` (${t('expired')})` : ''}`)
-const formatDate = (value: string) => value ? new Date(value).toLocaleDateString() : ''
 
 const loadKafkaWorkspace = () => {
   const raw = localStorage.getItem(KAFKA_WORKSPACE_KEY)
@@ -252,4 +246,3 @@ onUnmounted(() => {
 .logout-btn { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; background: transparent; color: var(--text-muted, #64748b); cursor: pointer; border-radius: 6px; flex-shrink: 0; transition: all 0.2s; }
 .logout-btn:hover { background: rgba(248, 113, 113, 0.15); color: var(--accent-danger, #f87171); }
 </style>
-

@@ -820,7 +820,7 @@ func (s *Service) CreateTopic(cluster model.KafkaCluster, topic string, partitio
 	defer admin.Close()
 	if err := admin.CreateTopic(topic, &sarama.TopicDetail{NumPartitions: partitions, ReplicationFactor: int16(replicationFactor)}, false); err != nil {
 		if err == sarama.ErrTopicAlreadyExists {
-			return fmt.Errorf("Topic ¿¿¿")
+			return fmt.Errorf("Topic å·²å­˜åœ¨")
 		}
 		return err
 	}
@@ -830,7 +830,7 @@ func (s *Service) CreateTopic(cluster model.KafkaCluster, topic string, partitio
 
 func (s *Service) AlterTopicPartitions(cluster model.KafkaCluster, topic string, partitions int32) error {
 	if partitions < 1 {
-		return fmt.Errorf("¿¿¿¿¿¿¿ 0")
+		return fmt.Errorf("åˆ†åŒºæ•°å¿…é¡»å¤§äºŽ 0")
 	}
 	admin, err := s.admin(cluster)
 	if err != nil {
@@ -845,13 +845,13 @@ func (s *Service) AlterTopicPartitions(cluster model.KafkaCluster, topic string,
 	if err != nil {
 		return err
 	}
-	// Kafka ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿
+	// Kafka åªæ”¯æŒå¢žåŠ åˆ†åŒºæ•°ï¼Œæå‰æ‹¦æˆªä¸å¯å›žé€€çš„ç¼©å®¹æˆ–æ— æ•ˆä¿®æ”¹ã€‚
 	if partitions <= int32(len(current)) {
-		return fmt.Errorf("¿¿¿¿¿¿¿¿¿¿¿¿¿ %d", len(current))
+		return fmt.Errorf("æ–°åˆ†åŒºæ•°å¿…é¡»å¤§äºŽå½“å‰åˆ†åŒºæ•° %d", len(current))
 	}
 	if err := admin.CreatePartitions(topic, partitions, nil, false); err != nil {
 		if err == sarama.ErrUnknownTopicOrPartition {
-			return fmt.Errorf("Topic ¿¿¿")
+			return fmt.Errorf("Topic ä¸å­˜åœ¨")
 		}
 		return err
 	}
@@ -881,7 +881,7 @@ func (s *Service) DeleteTopic(cluster model.KafkaCluster, topic string) error {
 	defer admin.Close()
 	if err := admin.DeleteTopic(topic); err != nil {
 		if err == sarama.ErrUnknownTopicOrPartition {
-			return fmt.Errorf("Topic ¿¿¿")
+			return fmt.Errorf("Topic ä¸å­˜åœ¨")
 		}
 		return err
 	}
@@ -1080,16 +1080,16 @@ func (s *Service) DeleteGroupTopicOffsets(cluster model.KafkaCluster, group stri
 	}
 	partitions := offsets.Blocks[topic]
 	if len(partitions) == 0 {
-		return 0, fmt.Errorf("Consumer Group ¿ Topic ¿¿¿¿¿ offset ¿¿")
+		return 0, fmt.Errorf("Consumer Group ä¸Ž Topic æ²¡æœ‰å·²æäº¤ offset å…³ç³»")
 	}
 	deleted := 0
 	for partition := range partitions {
 		if err := admin.DeleteConsumerGroupOffset(group, topic, partition); err != nil {
 			if errors.Is(err, sarama.ErrUnsupportedVersion) {
-				return deleted, fmt.Errorf("¿¿ Kafka Broker ¿¿¿¿¿¿ Topic ¿¿ Consumer Group ¿¿¿¿¿¿¿¿¿¿ Kafka DeleteOffsets API¿¿¿¿ Kafka¿¿¿¿¿¿¿¿¿¿¿¿ Consumer Group")
+				return deleted, fmt.Errorf("å½“å‰ Kafka Broker ç‰ˆæœ¬ä¸æ”¯æŒæŒ‰ Topic è§£é™¤ Consumer Group è®¢é˜…å…³ç³»ã€‚è¯¥èƒ½åŠ›ä¾èµ– Kafka DeleteOffsets APIï¼›è¯·å‡çº§ Kafkaï¼Œæˆ–åœæ­¢æ¶ˆè´¹è€…åŽåˆ é™¤æ•´ä¸ª Consumer Group")
 			}
 			if errors.Is(err, sarama.ErrGroupSubscribedToTopic) {
-				return deleted, fmt.Errorf("¿ Consumer Group ¿¿¿¿¿¿¿¿¿¿ Topic¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿")
+				return deleted, fmt.Errorf("è¯¥ Consumer Group ä»æœ‰æ¶ˆè´¹è€…æ­£åœ¨è®¢é˜…æ­¤ Topicï¼Œè¯·å…ˆåœæ­¢ç›¸å…³æ¶ˆè´¹è€…å®žä¾‹åŽå†è§£é™¤è®¢é˜…å…³ç³»")
 			}
 			return deleted, err
 		}

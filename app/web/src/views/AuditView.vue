@@ -3,47 +3,47 @@
     <section class="audit-hero">
       <div>
         <p class="eyebrow">Audit Trail</p>
-        <h1>{{ tr('¿¿¿¿', 'Audit Logs') }}</h1>
-        <p>{{ auditLimited ? tr('¿¿¿¿¿¿¿¿ 1 ¿¿¿¿¿¿', 'Community edition keeps only the last 1 day.') : tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'View platform operation records with time range filters and pagination.') }}</p>
+        <h1>{{ tr('æ“ä½œå®¡è®¡', 'Audit Logs') }}</h1>
+        <p>{{ auditLimited ? tr('ç¤¾åŒºç‰ˆä»…ä¿ç•™æœ€è¿‘ 1 å¤©å®¡è®¡æ—¥å¿—ã€‚', 'Community edition keeps only the last 1 day.') : tr('æŸ¥çœ‹å¹³å°æ“ä½œè®°å½•ï¼Œæ”¯æŒæŒ‰æ—¶é—´èŒƒå›´ç­›é€‰å’Œåˆ†é¡µæŸ¥çœ‹ã€‚', 'View platform operation records with time range filters and pagination.') }}</p>
       </div>
-      <button class="primary" :disabled="loading" @click="reloadFirstPage">{{ loading ? tr('¿¿¿...', 'Refreshing...') : tr('¿¿', 'Search') }}</button>
+      <button class="primary" :disabled="loading" @click="reloadFirstPage">{{ loading ? tr('åˆ·æ–°ä¸­...', 'Refreshing...') : tr('æŸ¥è¯¢', 'Search') }}</button>
     </section>
 
     <section class="filter-bar">
-      <div class="field"><label>{{ tr('¿¿¿¿', 'Start Time') }}</label><input v-model="filters.start_time" type="datetime-local" /></div>
-      <div class="field"><label>{{ tr('¿¿¿¿', 'End Time') }}</label><input v-model="filters.end_time" type="datetime-local" /></div>
-      <div class="field"><label>{{ tr('¿¿¿¿', 'Page Size') }}</label><select v-model.number="pageSize" @change="reloadFirstPage"><option :value="10">10</option><option :value="20">20</option><option :value="50">50</option><option :value="100">100</option></select></div>
-      <div class="filter-actions"><button class="ghost" @click="resetFilters">{{ tr('¿¿', 'Reset') }}</button><button class="primary" :disabled="loading" @click="reloadFirstPage">{{ tr('¿¿¿¿', 'Apply') }}</button></div>
+      <div class="field"><label>{{ tr('å¼€å§‹æ—¶é—´', 'Start Time') }}</label><input v-model="filters.start_time" type="datetime-local" /></div>
+      <div class="field"><label>{{ tr('ç»“æŸæ—¶é—´', 'End Time') }}</label><input v-model="filters.end_time" type="datetime-local" /></div>
+      <div class="field"><label>{{ tr('æ¯é¡µæ¡æ•°', 'Page Size') }}</label><select v-model.number="pageSize" @change="reloadFirstPage"><option :value="10">10</option><option :value="20">20</option><option :value="50">50</option><option :value="100">100</option></select></div>
+      <div class="filter-actions"><button class="ghost" @click="resetFilters">{{ tr('é‡ç½®', 'Reset') }}</button><button class="primary" :disabled="loading" @click="reloadFirstPage">{{ tr('åº”ç”¨ç­›é€‰', 'Apply') }}</button></div>
     </section>
 
     <section class="audit-summary">
-      <div><span>{{ tr('¿¿¿', 'Total') }}</span><strong>{{ total }}</strong></div>
-      <div><span>{{ tr('¿¿¿', 'Page') }}</span><strong>{{ page }} / {{ totalPages }}</strong></div>
-      <div><span>{{ tr('¿¿¿¿', 'Retention') }}</span><strong>{{ auditLimited ? tr('1 ¿', '1 day') : tr('¿¿', 'Permanent') }}</strong></div>
+      <div><span>{{ tr('æ€»è®°å½•', 'Total') }}</span><strong>{{ total }}</strong></div>
+      <div><span>{{ tr('å½“å‰é¡µ', 'Page') }}</span><strong>{{ page }} / {{ totalPages }}</strong></div>
+      <div><span>{{ tr('ä¿ç•™ç­–ç•¥', 'Retention') }}</span><strong>{{ auditLimited ? tr('1 å¤©', '1 day') : tr('æ°¸ä¹…', 'Permanent') }}</strong></div>
     </section>
 
     <section class="audit-panel">
       <div class="panel-title">
         <div>
-          <h2>{{ tr('¿¿¿¿', 'Audit Records') }}</h2>
-          <p class="hint">{{ tr('¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿', 'Only key information is shown; expand raw detail when troubleshooting.') }}</p>
+          <h2>{{ tr('å®¡è®¡è®°å½•', 'Audit Records') }}</h2>
+          <p class="hint">{{ tr('æ¯æ¡åªæ˜¾ç¤ºå…³é”®ä¿¡æ¯ï¼›éœ€è¦æ’æŸ¥æ—¶å¯å±•å¼€åŸå§‹è¯¦æƒ…ã€‚', 'Only key information is shown; expand raw detail when troubleshooting.') }}</p>
         </div>
       </div>
 
-      <div v-if="loading" class="empty">{{ tr('¿¿¿¿¿¿¿¿...', 'Loading audit logs...') }}</div>
-      <div v-else-if="auditLogs.length === 0" class="empty">{{ tr('¿¿¿¿¿¿', 'No audit logs') }}</div>
+      <div v-if="loading" class="empty">{{ tr('æ­£åœ¨åŠ è½½å®¡è®¡æ—¥å¿—...', 'Loading audit logs...') }}</div>
+      <div v-else-if="auditLogs.length === 0" class="empty">{{ tr('æš‚æ— å®¡è®¡æ—¥å¿—', 'No audit logs') }}</div>
       <div v-else class="audit-list">
         <article v-for="row in auditLogs" :key="row.id" class="audit-row">
           <div class="audit-severity" :class="actionTone(row.action)"></div>
           <div class="audit-main">
             <div class="audit-line">
               <strong>{{ actionLabel(row) }}</strong>
-              <span>{{ tr('¿¿¿', 'Operator') }}¿{{ row.username || '-' }}</span>
+              <span>{{ tr('æ“ä½œäºº', 'Operator') }}ï¼š{{ row.username || '-' }}</span>
               <time>{{ formatDateTime(row.created_at) }}</time>
             </div>
-            <div class="audit-target"><span>{{ tr('¿¿', 'Target') }}</span>{{ conciseTarget(row) }}</div>
+            <div class="audit-target"><span>{{ tr('å¯¹è±¡', 'Target') }}</span>{{ conciseTarget(row) }}</div>
             <details v-if="row.detail" class="audit-detail">
-              <summary>{{ tr('¿¿', 'Detail') }}</summary>
+              <summary>{{ tr('è¯¦æƒ…', 'Detail') }}</summary>
               <pre>{{ prettyDetail(row.detail) }}</pre>
             </details>
           </div>
@@ -51,10 +51,10 @@
       </div>
 
       <div class="pagination-bar">
-        <span>{{ tr(`¿ ${total} ¿`, `${total} total`) }}</span>
-        <button class="ghost small" :disabled="page <= 1 || loading" @click="goPage(page - 1)">{{ tr('¿¿¿', 'Previous') }}</button>
+        <span>{{ tr(`å…± ${total} æ¡`, `${total} total`) }}</span>
+        <button class="ghost small" :disabled="page <= 1 || loading" @click="goPage(page - 1)">{{ tr('ä¸Šä¸€é¡µ', 'Previous') }}</button>
         <span>{{ page }} / {{ totalPages }}</span>
-        <button class="ghost small" :disabled="page >= totalPages || loading" @click="goPage(page + 1)">{{ tr('¿¿¿', 'Next') }}</button>
+        <button class="ghost small" :disabled="page >= totalPages || loading" @click="goPage(page + 1)">{{ tr('ä¸‹ä¸€é¡µ', 'Next') }}</button>
       </div>
     </section>
   </div>
@@ -102,47 +102,47 @@ const formatDateTime = (value?: string) => value ? new Date(value).toLocaleStrin
 const prettyDetail = (value: string) => JSON.stringify(parseDetail(value), null, 2)
 
 const actionMap: Record<string, [string, string]> = {
-  cluster_create: ['¿¿¿¿', 'Created cluster'],
-  cluster_update: ['¿¿¿¿', 'Updated cluster'],
-  cluster_delete: ['¿¿¿¿¿¿', 'Deleted cluster config'],
-  topic_create: ['¿¿ Topic', 'Created topic'],
-  topic_delete: ['¿¿ Topic', 'Deleted topic'],
-  topic_config_update: ['¿¿ Topic ¿¿', 'Updated topic config'],
-  message_send: ['¿¿¿¿', 'Produced messages'],
-  message_delete: ['¿¿¿¿', 'Deleted records'],
-  group_create: ['¿¿ Group', 'Created group'],
-  group_delete: ['¿¿ Group', 'Deleted group'],
-  permission_update: ['¿¿¿¿', 'Updated permissions'],
-  migration_start: ['¿¿¿¿¿¿', 'Started migration'],
-  migration_stop: ['¿¿¿¿¿¿', 'Stopped migration sync'],
-  settings_update: ['¿¿¿¿¿¿', 'Updated settings'],
-  notification_test: ['¿¿¿¿¿¿', 'Tested notification channel'],
-  alerting_test: ['¿¿¿¿¿¿', 'Tested alerting'],
-  ldap_test: ['¿¿ LDAP ¿¿', 'Tested LDAP connection'],
-  ldap_sync_users: ['¿¿ LDAP ¿¿', 'Synced LDAP users'],
-  user_create: ['¿¿¿¿', 'Created user'],
-  user_update: ['¿¿¿¿', 'Updated user'],
-  user_delete: ['¿¿¿¿', 'Deleted user'],
-  role_create: ['¿¿¿¿', 'Created role'],
-  role_delete: ['¿¿¿¿', 'Deleted role'],
-  topic_config_delete: ['¿¿ Topic ¿¿', 'Deleted topic config'],
+  cluster_create: ['åˆ›å»ºé›†ç¾¤', 'Created cluster'],
+  cluster_update: ['æ›´æ–°é›†ç¾¤', 'Updated cluster'],
+  cluster_delete: ['åˆ é™¤é›†ç¾¤é…ç½®', 'Deleted cluster config'],
+  topic_create: ['åˆ›å»º Topic', 'Created topic'],
+  topic_delete: ['åˆ é™¤ Topic', 'Deleted topic'],
+  topic_config_update: ['ä¿®æ”¹ Topic é…ç½®', 'Updated topic config'],
+  message_send: ['å‘é€æ¶ˆæ¯', 'Produced messages'],
+  message_delete: ['åˆ é™¤æ¶ˆæ¯', 'Deleted records'],
+  group_create: ['åˆ›å»º Group', 'Created group'],
+  group_delete: ['åˆ é™¤ Group', 'Deleted group'],
+  permission_update: ['æ›´æ–°æˆæƒ', 'Updated permissions'],
+  migration_start: ['å¯åŠ¨å¹³æ»‘è¿ç§»', 'Started migration'],
+  migration_stop: ['å–æ¶ˆè¿ç§»åŒæ­¥', 'Stopped migration sync'],
+  settings_update: ['æ›´æ–°ç³»ç»Ÿè®¾ç½®', 'Updated settings'],
+  notification_test: ['æµ‹è¯•é€šçŸ¥æ¸ é“', 'Tested notification channel'],
+  alerting_test: ['æµ‹è¯•ç›‘æ§å‘Šè­¦', 'Tested alerting'],
+  ldap_test: ['æµ‹è¯• LDAP è¿æ¥', 'Tested LDAP connection'],
+  ldap_sync_users: ['åŒæ­¥ LDAP ç”¨æˆ·', 'Synced LDAP users'],
+  user_create: ['åˆ›å»ºç”¨æˆ·', 'Created user'],
+  user_update: ['æ›´æ–°ç”¨æˆ·', 'Updated user'],
+  user_delete: ['åˆ é™¤ç”¨æˆ·', 'Deleted user'],
+  role_create: ['åˆ›å»ºè§’è‰²', 'Created role'],
+  role_delete: ['åˆ é™¤è§’è‰²', 'Deleted role'],
+  topic_config_delete: ['åˆ é™¤ Topic é…ç½®', 'Deleted topic config'],
 }
 
 const legacyOperationLabel = (row: any) => {
   const path = String(detail(row).path || row.target || '')
-  if (path.includes('/migrations')) return tr('¿¿¿¿', 'Migration')
-  if (path.includes('/topics')) return tr('Topic ¿¿', 'Topic operation')
-  if (path.includes('/messages')) return tr('¿¿¿¿', 'Message operation')
-  if (path.includes('/groups')) return tr('Consumer Group ¿¿', 'Consumer Group operation')
-  if (path.includes('/permissions')) return tr('¿¿¿¿', 'Permission operation')
-  if (path.includes('/settings')) return tr('¿¿¿¿', 'Settings')
-  if (path.includes('/users')) return tr('¿¿¿¿', 'User operation')
-  if (path.includes('/roles')) return tr('¿¿¿¿', 'Role operation')
-  return tr('¿¿¿¿', 'Platform operation')
+  if (path.includes('/migrations')) return tr('å¹³æ»‘è¿ç§»', 'Migration')
+  if (path.includes('/topics')) return tr('Topic æ“ä½œ', 'Topic operation')
+  if (path.includes('/messages')) return tr('æ¶ˆæ¯æ“ä½œ', 'Message operation')
+  if (path.includes('/groups')) return tr('Consumer Group æ“ä½œ', 'Consumer Group operation')
+  if (path.includes('/permissions')) return tr('æˆæƒæ“ä½œ', 'Permission operation')
+  if (path.includes('/settings')) return tr('ç³»ç»Ÿè®¾ç½®', 'Settings')
+  if (path.includes('/users')) return tr('ç”¨æˆ·æ“ä½œ', 'User operation')
+  if (path.includes('/roles')) return tr('è§’è‰²æ“ä½œ', 'Role operation')
+  return tr('å¹³å°æ“ä½œ', 'Platform operation')
 }
 const actionLabel = (row: any) => row.action === 'operation' ? legacyOperationLabel(row) : (actionMap[row.action] ? tr(actionMap[row.action][0], actionMap[row.action][1]) : row.action)
 const actionTone = (action: string) => action.includes('delete') ? 'danger' : action.includes('create') || action.includes('send') ? 'success' : action.includes('update') || action.includes('permission') ? 'warning' : 'info'
-const conciseTarget = (row: any) => row.target || detail(row).path || row.cluster_id || tr('¿¿¿¿', 'System resource')
+const conciseTarget = (row: any) => row.target || detail(row).path || row.cluster_id || tr('ç³»ç»Ÿå¯¹è±¡', 'System resource')
 
 onMounted(loadAuditLogs)
 </script>
@@ -189,4 +189,3 @@ input, select { width: 100%; padding: 9px 11px; border: 1px solid var(--border-l
 .pagination-bar { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 12px; color: var(--text-muted); font-size: 12px; }
 @media (max-width: 900px) { .audit-page { padding: 16px; } .audit-hero, .filter-bar { grid-template-columns: 1fr; flex-direction: column; } .filter-bar, .audit-summary { grid-template-columns: 1fr; } .filter-actions { justify-content: flex-end; } }
 </style>
-
