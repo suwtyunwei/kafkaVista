@@ -351,3 +351,11 @@ npm run dev
 
 前端开发服务默认监听 `http://localhost:3000`，接口通过 Vite 代理到 `http://localhost:8080`。
 
+---
+
+## 关注公众号
+
+扫码关注公众号，获取项目更新与使用交流。
+
+<img src="docs/images/wechat-qrcode.jpg" alt="关注公众号" width="220" />
+
