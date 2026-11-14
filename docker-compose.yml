@@ -27,7 +27,7 @@ services:
     volumes:
       - /data/local/kafkaVista/data:/app/data
     ports:
-      - "8080:8080"
+      - "8082:8080"
 
   kafkavista-web:
     image: crpi-y1il03c3mx8rejur.cn-hangzhou.personal.cr.aliyuncs.com/aisoftkit/kafkavista-web:latest

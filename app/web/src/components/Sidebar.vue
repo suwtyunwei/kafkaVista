@@ -53,6 +53,17 @@
         <span>{{ tr('平滑迁移', 'Migration') }}</span>
       </button>
 
+      <button v-if="isAdminUser" class="nav-item" :class="{ active: route.name === 'mcp' }" @click="emit('navigate', '/settings/mcp')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="16" rx="3" />
+          <path d="M8 9h8" />
+          <path d="M8 13h5" />
+          <circle cx="17" cy="15" r="2" />
+          <path d="M17 13v-2" />
+        </svg>
+        <span>{{ tr('MCP 服务', 'MCP Server') }}</span>
+      </button>
+
     </div>
 
     <div class="sidebar-footer">

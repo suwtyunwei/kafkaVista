@@ -817,6 +817,19 @@ func (a *API) updateUser(c *gin.Context) {
 		errorJSON(c, http.StatusNotFound, "用户不存在")
 		return
 	}
+	if username == a.cfg.DefaultUser {
+		if req.Role != "" && req.Role != "admin" {
+			errorJSON(c, http.StatusBadRequest, "默认管理员角色不能修改")
+			return
+		}
+		if req.IsActive != nil && !*req.IsActive {
+			errorJSON(c, http.StatusBadRequest, "默认管理员不能停用")
+			return
+		}
+		req.Role = "admin"
+		active := true
+		req.IsActive = &active
+	}
 	if req.DisplayName != "" {
 		user.DisplayName = req.DisplayName
 	}

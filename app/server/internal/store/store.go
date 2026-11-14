@@ -28,6 +28,11 @@ func Init(db *gorm.DB, cfg config.Config) error {
 	db.Where(model.AppRole{Name: "user"}).FirstOrCreate(&model.AppRole{Name: "user", Description: "普通用户"})
 	nowUser := model.AppUser{Username: cfg.DefaultUser, DisplayName: cfg.DefaultUser, Role: "admin", Source: "local", IsActive: true}
 	db.Where(model.AppUser{Username: cfg.DefaultUser}).FirstOrCreate(&nowUser)
+	if err := db.Model(&model.AppUser{}).Where("username = ?", cfg.DefaultUser).Updates(map[string]interface{}{"role": "admin", "is_active": true}).Error; err != nil {
+		return err
+	}
+	db.Where("username = ?", cfg.DefaultUser).Delete(&model.KafkaPermission{})
+	db.Where("role = ?", "admin").Delete(&model.KafkaRolePermission{})
 	var dbUser model.AppUser
 	if db.Where(model.AppUser{Username: cfg.DefaultUser}).First(&dbUser).Error == nil && dbUser.PasswordHash == "" {
 		if hash, err := HashPassword(cfg.DefaultPassword); err == nil {
@@ -49,9 +54,6 @@ func Init(db *gorm.DB, cfg config.Config) error {
 	}
 	if err := db.Create(&cluster).Error; err != nil {
 		return err
-	}
-	for _, action := range model.AllActions {
-		db.Create(&model.KafkaPermission{ClusterID: cluster.ID, Username: cfg.DefaultUser, Action: action, CreatedBy: "system"})
 	}
 	return nil
 }

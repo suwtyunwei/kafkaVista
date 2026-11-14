@@ -184,8 +184,8 @@
         <div class="user-head"><span>{{ tr('用户名', 'Username') }}</span><span>{{ tr('显示名', 'Display Name') }}</span><span>{{ tr('来源', 'Source') }}</span><span>{{ tr('角色', 'Role') }}</span><span>{{ tr('状态', 'Status') }}</span><span>{{ tr('操作', 'Actions') }}</span></div>
         <div v-for="u in users" :key="u.username" class="user-row">
           <span>{{ u.username }}</span><span>{{ u.display_name || '-' }}</span><span :class="{ 'source-external': u.source === 'ldap' || u.source === 'oidc' }">{{ u.source || 'local' }}</span>
-          <select v-model="u.role" @change="saveUser(u)"><option v-for="role in roles" :key="role.name" :value="role.name">{{ role.name }}</option></select>
-          <label class="check"><input v-model="u.is_active" type="checkbox" @change="saveUser(u)" /> {{ tr('启用', 'Active') }}</label>
+          <select v-model="u.role" :disabled="u.username === 'admin'" :title="u.username === 'admin' ? tr('默认管理员角色不可修改', 'Default admin role cannot be changed') : ''" @change="saveUser(u)"><option v-for="role in roles" :key="role.name" :value="role.name">{{ role.name }}</option></select>
+          <label class="check"><input v-model="u.is_active" type="checkbox" :disabled="u.username === 'admin'" @change="saveUser(u)" /> {{ tr('启用', 'Active') }}</label>
           <div class="user-actions">
             <button class="ghost small" :disabled="isExternalAuth && u.source !== 'local'" @click="resetPassword(u)">{{ tr('重置密码', 'Reset Password') }}</button>
             <button v-if="u.source === 'local' && u.username !== 'admin'" class="ghost small danger" :disabled="isExternalAuth" @click="removeUser(u)">{{ tr('删除', 'Delete') }}</button>
@@ -225,10 +225,11 @@
       </div>
       <div class="auth-toolbar">
         <select v-model="authSubjectType" @change="loadClusterPermission"><option value="user">{{ tr('授权用户', 'Authorize User') }}</option><option value="role">{{ tr('授权角色', 'Authorize Role') }}</option></select>
-        <select v-if="authSubjectType === 'user'" v-model="authUsername" @change="loadClusterPermission"><option value="">{{ tr('选择用户', 'Select User') }}</option><option v-for="u in users" :key="u.username" :value="u.username">{{ u.username }} / {{ u.display_name || '-' }}</option></select>
-        <select v-else v-model="authRole" @change="loadClusterPermission"><option value="">{{ tr('选择角色', 'Select Role') }}</option><option v-for="r in roles" :key="r.name" :value="r.name">{{ r.name }} / {{ r.description || '-' }}</option></select>
+        <select v-if="authSubjectType === 'user'" v-model="authUsername" @change="loadClusterPermission"><option value="">{{ tr('选择用户', 'Select User') }}</option><option v-for="u in authUsers" :key="u.username" :value="u.username">{{ u.username }} / {{ u.display_name || '-' }}</option></select>
+        <select v-else v-model="authRole" @change="loadClusterPermission"><option value="">{{ tr('选择角色', 'Select Role') }}</option><option v-for="r in authRoles" :key="r.name" :value="r.name">{{ r.name }} / {{ r.description || '-' }}</option></select>
         <select v-model="authClusterId" @change="loadClusterPermission"><option value="">{{ tr('选择 Kafka 集群', 'Select Kafka Cluster') }}</option><option v-for="c in clusters" :key="c.id" :value="c.id">{{ c.name }} / {{ c.bootstrap_servers }}</option></select>
       </div>
+      <p class="hint">{{ tr('admin 用户和 admin 角色默认拥有全部 Kafka 权限，不支持单独配置。', 'The admin user and admin role always have all Kafka permissions and cannot be configured.') }}</p>
       <div class="permission-grid">
         <label v-for="action in actionOptions" :key="action.value" class="permission-card">
           <input v-model="authActions" type="checkbox" :value="action.value" />
@@ -299,6 +300,8 @@ const showRoleDialog = ref(false)
 const noticeDialog = ref({ visible: false, type: 'success', eyebrow: 'Success', title: '', message: '' })
 const isExternalAuth = computed(() => ssoStatus.value.ldap_enabled === true || ssoStatus.value.oidc_enabled === true)
 const currentAuthSubject = computed(() => authSubjectType.value === 'role' ? authRole.value : authUsername.value)
+const authUsers = computed(() => users.value.filter((u: any) => u.role !== 'admin'))
+const authRoles = computed(() => roles.value.filter((r: any) => r.name !== 'admin'))
 const emailSmtpReady = computed(() => !!settings.value.monitoring?.alerting?.email_smtp_host && !!settings.value.monitoring?.alerting?.email_from && !!settings.value.monitoring?.alerting?.email_to)
 const noticeMessageLines = computed(() => String(noticeDialog.value.message || '').split('\n').filter(Boolean))
 
@@ -643,8 +646,8 @@ const removeRole = async (role: string) => {
 
 const loadKafkaAuth = async () => {
   await Promise.all([loadUsersAndRoles(), loadClusters()])
-  if (!authUsername.value && users.value.length) authUsername.value = users.value[0].username
-  if (!authRole.value && roles.value.length) authRole.value = roles.value[0].name
+  if (!authUsers.value.some((u: any) => u.username === authUsername.value)) authUsername.value = authUsers.value[0]?.username || ''
+  if (!authRoles.value.some((r: any) => r.name === authRole.value)) authRole.value = authRoles.value[0]?.name || ''
   if (!authClusterId.value && clusters.value.length) authClusterId.value = clusters.value[0].id
   await loadClusterPermission()
 }

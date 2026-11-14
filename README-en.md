@@ -45,6 +45,31 @@ As Kafka clusters grow, teams need safer production changes, clearer access boun
 
 > Migration note: Kafka producers cannot specify target offsets, so target offset values are not guaranteed to match source offsets after migration.
 
+### MCP Server
+
+- **Built-in MCP Server**: Exposes the Model Context Protocol (MCP) over Streamable HTTP, so external agents and IDEs can call KafkaVista capabilities through standard JSON-RPC.
+- **35 MCP tools**: Covers clusters, brokers, topics, message read/write, consumer groups, permissions, audit, and cluster migration; tool arguments mirror the REST API.
+- **Unified auth & audit**: Connect with a Bearer token generated in the console and rotate it at any time; all mutating operations are recorded in the audit log under the configured audit identity.
+- **Visual configuration**: Admins can enable/disable the service, view the endpoint, rotate the token, and copy Agent/curl examples from the "MCP Server" page.
+
+Endpoint: `http://<host>:3004/mcp` (Nginx-exposed path; `/api/mcp` also works). Requests must include `Authorization: Bearer <token>`.
+
+Agent configuration example:
+
+```json
+{
+  "mcpServers": {
+    "kafkavista": {
+      "type": "streamableHttp",
+      "url": "http://<host>:3004/mcp",
+      "headers": { "Authorization": "Bearer <token>" }
+    }
+  }
+}
+```
+
+> The admin MCP page is served at `/settings/mcp` and is independent from the public `/mcp` endpoint.
+
 ## Quick Start
 
 One-click install scripts are provided at the project root, auto-detecting the environment and selecting the best deployment method:
@@ -352,4 +377,14 @@ npm run dev
 ```
 
 The frontend dev server listens on `http://localhost:3000` and proxies API requests to `http://localhost:8080` via Vite.
+
+---
+
+## Release Notes
+
+- **Added MCP Server**: 35 built-in MCP tools let agents manage clusters, topics, messages, consumer groups, permissions, audit, and migration over the standard MCP protocol. The console now includes an MCP Server page for enabling/disabling the service, rotating the token, and copying client configuration.
+- **Fixed admin account permissions**:
+  - The default admin (`AUTH_DEFAULT_USER`) can no longer be demoted, disabled, or deleted; its `admin` role and active state are restored on startup.
+  - Admin Kafka permissions are always the full set and read-only; they no longer need to be configured per cluster and cannot be overwritten.
+- **Fixed MCP tools on newer Kafka versions**: Improved Kafka client protocol version negotiation to support deleting topic configs (Kafka >= 2.3) and removing per-topic consumer group offsets (Kafka >= 2.4).
 

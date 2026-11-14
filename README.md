@@ -43,6 +43,31 @@ KafkaVista 是面向企业级 Kafka 运维场景的统一管理平台，聚焦�
 
 > 迁移说明：Kafka 不允许生产端指定目标 offset，因此迁移后目标 offset 不保证与源端完全一致。
 
+### MCP 服务
+
+- **内置 MCP Server**：以 Streamable HTTP 方式提供模型上下文协议（MCP）服务，Agent、IDE 等外部智能体可通过标准 JSON-RPC 调用 KafkaVista 的 Kafka 运维能力。
+- **35 个 MCP 工具**：覆盖集群、Broker、Topic、消息读写、消费组、权限、审计与集群迁移，工具参数与 REST API 保持一致。
+- **统一鉴权与审计**：使用后台生成的 Bearer Token 接入，支持一键重置；所有变更类操作以配置的审计身份写入审计日志。
+- **可视化配置**：管理员可在控制台「MCP 服务」页面启用/关闭服务、查看接入地址、重置 Token，并复制 Agent 配置与 curl 示例。
+
+接入地址：`http://<host>:3004/mcp`（Nginx 对外路径，`/api/mcp` 同样可用），请求头需携带 `Authorization: Bearer <token>`。
+
+Agent 配置示例：
+
+```json
+{
+  "mcpServers": {
+    "kafkavista": {
+      "type": "streamableHttp",
+      "url": "http://<host>:3004/mcp",
+      "headers": { "Authorization": "Bearer <token>" }
+    }
+  }
+}
+```
+
+> 管理端 MCP 页面路径为 `/settings/mcp`，与对外的 `/mcp` 接口互不影响。
+
 ## 快速开始
 
 项目根目录提供一键安装脚本，自动检测环境并选择最佳部署方式：
@@ -350,6 +375,16 @@ npm run dev
 ```
 
 前端开发服务默认监听 `http://localhost:3000`，接口通过 Vite 代理到 `http://localhost:8080`。
+
+---
+
+## 更新说明
+
+- **新增 MCP 服务**：内置 35 个 MCP 工具，Agent 可通过标准 MCP 协议完成集群、Topic、消息、消费组、权限、审计与迁移操作；管理端新增「MCP 服务」页面，可启停服务、重置 Token、复制接入配置。
+- **修复 admin 账号权限问题**：
+  - 默认管理员（`AUTH_DEFAULT_USER`）不可被降级、停用或删除，服务启动时会自动恢复其 `admin` 角色与启用状态。
+  - 管理员账号的 Kafka 权限固定为全部权限且只读，不再需要在集群权限中单独配置，也不允许被覆盖。
+- **修复部分新版 Kafka 上的 MCP 工具失败**：提升 Kafka 客户端协议版本协商，支持删除 Topic 配置（需 Kafka ≥ 2.3）与按 Topic 解除消费组订阅（需 Kafka ≥ 2.4）。
 
 ---
 

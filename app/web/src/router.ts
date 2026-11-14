@@ -40,6 +40,12 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresAdmin: true },
     },
     {
+      path: '/settings/mcp',
+      name: 'mcp',
+      component: () => import('./views/MCPView.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
       path: '/migration',
       name: 'migration',
       component: () => import('./views/MigrationView.vue'),
@@ -71,6 +77,7 @@ router.beforeEach((to) => {
   if (to.meta.requiresAdmin && !isAdmin()) return { name: 'kafka' }
   if (to.name === 'login' && isAuthenticated()) {
     const lastRoute = localStorage.getItem(LAST_ROUTE_KEY)
+    if (lastRoute === '/mcp' || lastRoute === '/mcp-settings') return '/settings/mcp'
     if (lastRoute && lastRoute !== '/login') return lastRoute
     return { name: 'kafka' }
   }

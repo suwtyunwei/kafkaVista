@@ -64,6 +64,12 @@ func NewRouter(cfg config.Config, db *gorm.DB) *gin.Engine {
 	r.POST("/api/auth/login", a.loginRateLimit(), a.login)
 	r.GET("/metrics", a.exporterMetrics)
 	r.GET("/metrics/:cluster", a.exporterMetrics)
+	r.POST("/mcp", a.mcpHandler())
+	r.GET("/mcp", a.mcpNotAllowed)
+	r.DELETE("/mcp", a.mcpNotAllowed)
+	r.POST("/api/mcp", a.mcpHandler())
+	r.GET("/api/mcp", a.mcpNotAllowed)
+	r.DELETE("/api/mcp", a.mcpNotAllowed)
 
 	adminAPI := r.Group("/api/admin", a.authRequired(), a.adminOnly())
 	adminAPI.Use(a.auditMutations())
@@ -81,6 +87,9 @@ func NewRouter(cfg config.Config, db *gorm.DB) *gin.Engine {
 	adminAPI.GET("/roles", a.listRoles)
 	adminAPI.POST("/roles", a.createRole)
 	adminAPI.DELETE("/roles/:role", a.deleteRole)
+	adminAPI.GET("/mcp", a.getMCPConfig)
+	adminAPI.PUT("/mcp", a.saveMCPConfig)
+	adminAPI.POST("/mcp/token", a.rotateMCPToken)
 
 	kafkaAPI := r.Group("/kafka-api", a.authRequired())
 	kafkaAPI.Use(a.auditMutations())
@@ -362,7 +371,9 @@ func (a *API) updateCluster(c *gin.Context) {
 	cluster.SecurityProtocol = req.SecurityProtocol
 	cluster.SASLMechanism = req.SASLMechanism
 	cluster.SASLUsername = req.SASLUsername
-	cluster.SASLPassword = req.SASLPassword
+	if req.SASLPassword != "" {
+		cluster.SASLPassword = req.SASLPassword
+	}
 	cluster.Description = req.Description
 	a.db.Save(&cluster)
 	a.audit(current(c).Username, cluster.ID, "cluster_update", cluster.Name, req)
@@ -953,17 +964,29 @@ func (a *API) listPermissions(c *gin.Context) {
 		for _, row := range rows {
 			users[row.Username] = append(users[row.Username], row.Action)
 		}
+		adminUsers := map[string]bool{}
+		var admins []model.AppUser
+		a.db.Where("role = ?", "admin").Find(&admins)
+		for _, admin := range admins {
+			adminUsers[admin.Username] = true
+			users[admin.Username] = append([]string{}, model.AllActions...)
+		}
 		items := []gin.H{}
 		for username, actions := range users {
-			items = append(items, gin.H{"subject_type": "user", "username": username, "subject": username, "actions": actions})
+			items = append(items, gin.H{"subject_type": "user", "username": username, "subject": username, "actions": actions, "read_only": adminUsers[username]})
 		}
 		roles := map[string][]string{}
 		for _, row := range roleRows {
 			roles[row.Role] = append(roles[row.Role], row.Action)
 		}
+		roles["admin"] = append([]string{}, model.AllActions...)
 		for role, actions := range roles {
-			items = append(items, gin.H{"subject_type": "role", "role": role, "subject": role, "actions": actions})
+			items = append(items, gin.H{"subject_type": "role", "role": role, "subject": role, "actions": actions, "read_only": role == "admin"})
 		}
+		sort.Slice(items, func(i, j int) bool {
+			left, right := fmt.Sprint(items[i]["subject_type"], items[i]["subject"]), fmt.Sprint(items[j]["subject_type"], items[j]["subject"])
+			return left < right
+		})
 		c.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{"items": items}})
 	})
 }
@@ -989,6 +1012,10 @@ func (a *API) savePermissions(c *gin.Context) {
 		}
 		if target == "" {
 			errorJSON(c, http.StatusBadRequest, "授权对象不能为空")
+			return
+		}
+		if a.adminPermissionSubject(req.SubjectType, target) {
+			errorJSON(c, http.StatusBadRequest, "admin 默认拥有全部 Kafka 权限，无需配置")
 			return
 		}
 		if req.SubjectType == "role" {
@@ -1188,6 +1215,17 @@ func (a *API) hasPermission(u user, clusterID, action string) bool {
 		return true
 	}
 	return (action == "topic_create" || action == "topic_delete" || action == "topic_config_manage") && contains(a.allowedActions(u, clusterID), "topic_manage")
+}
+
+func (a *API) adminPermissionSubject(subjectType, target string) bool {
+	if subjectType == "role" {
+		return target == "admin"
+	}
+	var user model.AppUser
+	if err := a.db.Where("username = ?", target).First(&user).Error; err != nil {
+		return false
+	}
+	return user.Role == "admin"
 }
 
 func (a *API) audit(username, clusterID, action, target string, detail interface{}) {

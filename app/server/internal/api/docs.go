@@ -15,7 +15,7 @@ func apiDocs(router *gin.Engine, a *API) gin.HandlerFunc {
 		paths := gin.H{}
 		enterprise := a.enterpriseEnabled()
 		for _, route := range routes {
-			if route.Path == "/api/docs" || route.Path == "/metrics" || strings.HasPrefix(route.Path, "/metrics/") {
+			if route.Path == "/api/docs" || route.Path == "/mcp" || route.Path == "/api/mcp" || route.Path == "/metrics" || strings.HasPrefix(route.Path, "/metrics/") {
 				continue
 			}
 			if !enterprise && apiDocEnterpriseOnly(route.Path) {

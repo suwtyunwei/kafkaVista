@@ -87,6 +87,21 @@ export async function getSystemSettings() {
   return resp.data.data?.settings || resp.data.data
 }
 
+export async function getMcpConfig() {
+  const resp = await api.get('/admin/mcp')
+  return resp.data.data
+}
+
+export async function saveMcpConfig(data: { enabled?: boolean; username?: string }) {
+  const resp = await api.put('/admin/mcp', data)
+  return resp.data.data
+}
+
+export async function rotateMcpToken() {
+  const resp = await api.post('/admin/mcp/token')
+  return resp.data.data
+}
+
 export async function saveSystemSettings(data: any) {
   const resp = await api.put('/admin/settings', data)
   return resp.data

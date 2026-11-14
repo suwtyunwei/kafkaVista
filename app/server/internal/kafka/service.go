@@ -94,7 +94,10 @@ func New(cfg config.Config) *Service {
 func (s *Service) saramaConfig(cluster model.KafkaCluster) *sarama.Config {
 	cfg := sarama.NewConfig()
 	cfg.ClientID = "kafkavista"
-	cfg.Version = sarama.V2_1_0_0
+	// V2_8_0_0 enables IncrementalAlterConfigs (>= 2.3) and DeleteOffsets (>= 2.4),
+	// which are required by topic-config deletion and per-topic consumer group
+	// offset removal.
+	cfg.Version = sarama.V2_8_0_0
 	cfg.Admin.Timeout = time.Duration(s.cfg.KafkaRequestTimeoutMS) * time.Millisecond
 	cfg.Net.DialTimeout = time.Duration(s.cfg.KafkaRequestTimeoutMS) * time.Millisecond
 	cfg.Net.ReadTimeout = time.Duration(s.cfg.KafkaRequestTimeoutMS) * time.Millisecond
@@ -1123,6 +1126,24 @@ func (s *Service) AlterTopicConfigs(cluster model.KafkaCluster, topic string, co
 		return err
 	}
 	defer admin.Close()
+	hasDelete := false
+	for _, value := range configs {
+		if value == nil {
+			hasDelete = true
+			break
+		}
+	}
+	if hasDelete {
+		entries := make(map[string]sarama.IncrementalAlterConfigsEntry, len(configs))
+		for key, value := range configs {
+			if value == nil {
+				entries[key] = sarama.IncrementalAlterConfigsEntry{Operation: sarama.IncrementalAlterConfigsOperationDelete}
+			} else {
+				entries[key] = sarama.IncrementalAlterConfigsEntry{Operation: sarama.IncrementalAlterConfigsOperationSet, Value: value}
+			}
+		}
+		return admin.IncrementalAlterConfig(sarama.TopicResource, topic, entries, false)
+	}
 	return admin.AlterConfig(sarama.TopicResource, topic, configs, false)
 }
 
