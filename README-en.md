@@ -386,5 +386,5 @@ The frontend dev server listens on `http://localhost:3000` and proxies API reque
 - **Fixed admin account permissions**:
   - The default admin (`AUTH_DEFAULT_USER`) can no longer be demoted, disabled, or deleted; its `admin` role and active state are restored on startup.
   - Admin Kafka permissions are always the full set and read-only; they no longer need to be configured per cluster and cannot be overwritten.
-- **Fixed MCP tools on newer Kafka versions**: Improved Kafka client protocol version negotiation to support deleting topic configs (Kafka >= 2.3) and removing per-topic consumer group offsets (Kafka >= 2.4).
+- **Fixed MCP tools on newer Kafka versions**: Operations such as deleting topic configs and removing per-topic consumer group offsets now negotiate a higher Kafka protocol version on demand (requiring Kafka >= 2.3 / >= 2.4 respectively), while the default stays on a lower version for compatibility with older clusters.
 

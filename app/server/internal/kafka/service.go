@@ -92,12 +92,17 @@ func New(cfg config.Config) *Service {
 }
 
 func (s *Service) saramaConfig(cluster model.KafkaCluster) *sarama.Config {
+	return s.saramaConfigVersion(cluster, sarama.V2_1_0_0)
+}
+
+func (s *Service) saramaConfigVersion(cluster model.KafkaCluster, version sarama.KafkaVersion) *sarama.Config {
 	cfg := sarama.NewConfig()
 	cfg.ClientID = "kafkavista"
-	// V2_8_0_0 enables IncrementalAlterConfigs (>= 2.3) and DeleteOffsets (>= 2.4),
-	// which are required by topic-config deletion and per-topic consumer group
-	// offset removal.
-	cfg.Version = sarama.V2_8_0_0
+	// Keep the default protocol version low (V2_1_0_0) for broad broker
+	// compatibility. Sarama sends newer request versions when Version is raised,
+	// and some brokers close the connection on versions they do not know.
+	// Operations that require newer APIs opt into a higher version explicitly.
+	cfg.Version = version
 	cfg.Admin.Timeout = time.Duration(s.cfg.KafkaRequestTimeoutMS) * time.Millisecond
 	cfg.Net.DialTimeout = time.Duration(s.cfg.KafkaRequestTimeoutMS) * time.Millisecond
 	cfg.Net.ReadTimeout = time.Duration(s.cfg.KafkaRequestTimeoutMS) * time.Millisecond
@@ -137,7 +142,11 @@ func brokers(cluster model.KafkaCluster) []string {
 }
 
 func (s *Service) admin(cluster model.KafkaCluster) (sarama.ClusterAdmin, error) {
-	return sarama.NewClusterAdmin(brokers(cluster), s.saramaConfig(cluster))
+	return s.adminVersion(cluster, sarama.V2_1_0_0)
+}
+
+func (s *Service) adminVersion(cluster model.KafkaCluster, version sarama.KafkaVersion) (sarama.ClusterAdmin, error) {
+	return sarama.NewClusterAdmin(brokers(cluster), s.saramaConfigVersion(cluster, version))
 }
 
 func (s *Service) consumer(cluster model.KafkaCluster) (sarama.Consumer, error) {
@@ -1072,9 +1081,10 @@ func (s *Service) DeleteGroup(cluster model.KafkaCluster, group string) error {
 }
 
 func (s *Service) DeleteGroupTopicOffsets(cluster model.KafkaCluster, group string, topic string) (int, error) {
-	admin, err := s.admin(cluster)
+	// DeleteOffsets was introduced in Kafka 2.4, so negotiate at least V2_4_0_0.
+	admin, err := s.adminVersion(cluster, sarama.V2_4_0_0)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("按 Topic 解除消费组订阅需要 Kafka ≥ 2.4: %w", err)
 	}
 	defer admin.Close()
 	offsets, err := admin.ListConsumerGroupOffsets(group, nil)
@@ -1121,11 +1131,6 @@ func (s *Service) TopicConfigs(cluster model.KafkaCluster, topic string) (map[st
 }
 
 func (s *Service) AlterTopicConfigs(cluster model.KafkaCluster, topic string, configs map[string]*string) error {
-	admin, err := s.admin(cluster)
-	if err != nil {
-		return err
-	}
-	defer admin.Close()
 	hasDelete := false
 	for _, value := range configs {
 		if value == nil {
@@ -1133,6 +1138,19 @@ func (s *Service) AlterTopicConfigs(cluster model.KafkaCluster, topic string, co
 			break
 		}
 	}
+	// IncrementalAlterConfigs (used to delete configs) was introduced in Kafka 2.3.
+	version := sarama.V2_1_0_0
+	if hasDelete {
+		version = sarama.V2_4_0_0
+	}
+	admin, err := s.adminVersion(cluster, version)
+	if err != nil {
+		if hasDelete {
+			return fmt.Errorf("删除 Topic 配置需要 Kafka ≥ 2.3: %w", err)
+		}
+		return err
+	}
+	defer admin.Close()
 	if hasDelete {
 		entries := make(map[string]sarama.IncrementalAlterConfigsEntry, len(configs))
 		for key, value := range configs {
